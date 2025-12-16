@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "seed": "npx tsx scripts/seed.ts"
   },
   "dependencies": {
     "@nuxt/eslint": "1.12.1",
@@ -17,8 +18,17 @@
     "@tailwindcss/vite": "^4.1.18",
     "eslint": "^9.39.2",
     "nuxt": "^4.2.2",
+    "octokit": "^5.0.5",
+    "openai": "^6.13.0",
     "tailwindcss": "^4.1.18",
     "vue": "^3.5.25",
-    "vue-router": "^4.6.4"
+    "vue-router": "^4.6.4",
+    "zod": "^4.2.1",
+    "zod-to-json-schema": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.2",
+    "dotenv": "^17.2.3",
+    "tsx": "^4.21.0"
   }
 }

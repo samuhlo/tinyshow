@@ -1,0 +1,268 @@
+[
+  {
+    "id": "samuhlo-training",
+    "title": "Training Ground",
+    "tagline": "Sandbox for coding drills and experimental learning",
+    "description": "A brutalist sandbox environment designed for continuous learning iterations, coding drills, and experimental feature development. This repository serves as a training ground where challenges are met with execution-driven learning.",
+    "tech_stack": [],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/samuhlo-training/main/banner4.webp",
+    "repo_url": "https://github.com/samuhlo-training/samuhlo-training",
+    "demo_url": null
+  },
+  {
+    "id": "vueflet-map-app",
+    "title": "MapApp",
+    "tagline": "Educational mapping app for Vue 3 and Pinia practice",
+    "description": "A personal learning project to master Vue 3 Composition API, Pinia state management, and modern web development by building a functional interactive map application with real-time search, route calculation, and geolocation features.",
+    "tech_stack": [
+      "Vue 3",
+      "TypeScript",
+      "Vite",
+      "Pinia",
+      "Tailwind CSS",
+      "Leaflet",
+      "OpenStreetMap",
+      "Nominatim",
+      "OSRM"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/vueflet-map-app/main/assets/images/map-app-preview.webp",
+    "repo_url": "https://github.com/samuhlo-training/vueflet-map-app",
+    "demo_url": null
+  },
+  {
+    "id": "camino-galeria-interactiva",
+    "title": "Camino de Santiago Interactive Map",
+    "tagline": "Interactive photo map documenting a personal pilgrimage journey",
+    "description": "A technical showcase mapping 64 photographic points along the Camino de Santiago from Sarria to Palas de Rei, featuring GPS coordinates, AI-generated reflections, and a responsive interface for immersive exploration.",
+    "tech_stack": [
+      "Vite",
+      "Preact",
+      "Tailwind CSS",
+      "Leaflet",
+      "PostCSS"
+    ],
+    "img_url": null,
+    "repo_url": "https://github.com/samuhlo-training/camino-galeria-interactiva",
+    "demo_url": null
+  },
+  {
+    "id": "samenufit",
+    "title": "SaMenufit",
+    "tagline": "Intelligent meal planning and nutrition assistant",
+    "description": "A Vue-based web application that simplifies daily menu management by following Doctor Mike Diamonds' recipes, helping users create shopping lists and track calories. Built as a practice project to apply Vue skills with a screaming architecture and domain-driven design principles.",
+    "tech_stack": [
+      "Vue 3",
+      "TypeScript",
+      "Vite",
+      "Tailwind CSS",
+      "Pinia",
+      "Vue Router",
+      "Bun"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/samenufit/main/portada-readme.webp",
+    "repo_url": "https://github.com/samuhlo-training/samenufit",
+    "demo_url": null
+  },
+  {
+    "id": "not-a-zara-product-frontend",
+    "title": "Category Editor",
+    "tagline": "Visual e-commerce category editor with drag-and-drop",
+    "description": "A React-based visual editor for organizing e-commerce products into rows with customizable alignment templates, featuring advanced drag-and-drop functionality and responsive design.",
+    "tech_stack": [
+      "React",
+      "TypeScript",
+      "Vite",
+      "Zustand",
+      "TailwindCSS",
+      "@dnd-kit/core",
+      "@dnd-kit/sortable"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/not-a-zara-product-frontend/main/public/portada_editorcategorias.webp",
+    "repo_url": "https://github.com/samuhlo-training/not-a-zara-product-frontend",
+    "demo_url": null
+  },
+  {
+    "id": "movies-react-native",
+    "title": "Movies App",
+    "tagline": "Modern movie discovery app built with React Native and Expo",
+    "description": "A sleek, feature-rich mobile application for discovering and exploring movies, featuring real-time data, multilingual support, and user authentication. Built as part of a JM Mastery course, it combines modern UI design with robust backend integration for a seamless movie browsing experience.",
+    "tech_stack": [
+      "React Native",
+      "Expo",
+      "TypeScript",
+      "Tailwind CSS",
+      "Appwrite",
+      "TMDB API",
+      "Expo Router",
+      "NativeWind"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/movies-react-native/main/assets/icons/logo.png",
+    "repo_url": "https://github.com/samuhlo-training/movies-react-native",
+    "demo_url": null
+  },
+  {
+    "id": "ai-interview-nextjs",
+    "title": "PrepWise",
+    "tagline": "AI-powered job interview practice app",
+    "description": "A Next.js application that lets users create custom job interviews, practice with a voice AI assistant via Vapi, and receive detailed feedback powered by Google Gemini to improve interview skills.",
+    "tech_stack": [
+      "Next.js",
+      "React",
+      "TailwindCSS",
+      "Shadcn/ui",
+      "Firebase",
+      "Vapi",
+      "Google Gemini"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/ai-interview-nextjs/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/ai-interview-nextjs",
+    "demo_url": "https://ai-interview-nextjs-six.vercel.app/"
+  },
+  {
+    "id": "awwwards-web",
+    "title": "Awwwards Web Style",
+    "tagline": "React + GSAP animation showcase",
+    "description": "A web application built with React and GSAP to master high-performance animations in a modern frontend stack, following JS Mastery's course.",
+    "tech_stack": [
+      "React",
+      "Vite",
+      "Tailwind CSS",
+      "GSAP"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/awwwards-web/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/awwwards-web",
+    "demo_url": "https://awwwards-web.onrender.com"
+  },
+  {
+    "id": "xora-app",
+    "title": "Xora App",
+    "tagline": "React + Vite static page refresher",
+    "description": "A web application built with React and Vite, serving as a review of Tailwind and React for creating static pages, following the JS Mastery course.",
+    "tech_stack": [
+      "React",
+      "Vite",
+      "Tailwind CSS"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/xora-app/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/xora-app",
+    "demo_url": "https://xora-app-liard.vercel.app/"
+  },
+  {
+    "id": "movies-react",
+    "title": "Movies React App",
+    "tagline": "React-powered movie explorer with TMDB API",
+    "description": "A sleek movie discovery app built with React and Vite, featuring real-time search, detailed movie info, multi-language support, and trending films—all wrapped in a responsive Tailwind CSS interface.",
+    "tech_stack": [
+      "React",
+      "Vite",
+      "Tailwind CSS",
+      "Appwrite"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/movies-react/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/movies-react",
+    "demo_url": "https://movies-react-repaso.onrender.com"
+  },
+  {
+    "id": "fastpizza-cursoreact",
+    "title": "Fast Pizza",
+    "tagline": "Real-time pizza ordering app built with React",
+    "description": "A React-based application for managing pizza orders quickly and efficiently, featuring dynamic components and state management for an interactive and smooth user experience.",
+    "tech_stack": [
+      "React",
+      "Tailwind CSS",
+      "Redux",
+      "Vite"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/fastpizza-cursoreact/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/fastpizza-cursoreact",
+    "demo_url": "https://fastpizza-cursoreact.onrender.com/"
+  },
+  {
+    "id": "DOM-Bankist",
+    "title": "Bankist",
+    "tagline": "Modern banking UI with smooth animations and lazy loading",
+    "description": "A sleek, interactive banking interface featuring smooth scrolling, modal forms, tabbed components, and performance-optimized lazy image loading, built as a DOM manipulation exercise.",
+    "tech_stack": [
+      "JavaScript"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/DOM-Bankist/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/DOM-Bankist",
+    "demo_url": "https://curriculum-astro-curse.vercel.app/"
+  },
+  {
+    "id": "course-portofolio",
+    "title": "Curriculum Minimalista",
+    "tagline": "CV web imprimible basado en JSON Resume",
+    "description": "Un portafolio minimalista y funcional para crear currículums web listos para imprimir, utilizando el esquema JSON Resume. Diseñado con Astro para un rendimiento óptimo y una experiencia de desarrollo moderna.",
+    "tech_stack": [
+      "Astro",
+      "Typescript",
+      "HotKeyPad"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/course-portofolio/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/course-portofolio",
+    "demo_url": "https://curriculum-astro-curse.vercel.app/"
+  },
+  {
+    "id": "wildoasis-cursoreact",
+    "title": "Wild Oasis",
+    "tagline": "Interactive React app for cabin management",
+    "description": "A dynamic React application built as part of a course, focusing on component creation and state management for a modern cabin booking system.",
+    "tech_stack": [
+      "React",
+      "Styled-Components",
+      "Supabase",
+      "Vite",
+      "Vercel"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/wildoasis-cursoreact/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/wildoasis-cursoreact",
+    "demo_url": null
+  },
+  {
+    "id": "natours-update-cursenode",
+    "title": "Natours",
+    "tagline": "API para gestionar tours y reservas",
+    "description": "Proyecto backend desarrollado con Node.js como parte de un curso avanzado. Incluye autenticación, autorización, manejo de datos y API RESTful. Basado en las mejores prácticas de desarrollo backend con Node.js, Express, y MongoDB.",
+    "tech_stack": [
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Mongoose",
+      "JWT",
+      "Parcel",
+      "Pug"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/natours-update-cursenode/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/natours-update-cursenode",
+    "demo_url": "https://natours-update-cursenode.onrender.com"
+  },
+  {
+    "id": "the-tomorrow-list",
+    "title": "The Tomorrow List",
+    "tagline": "React-based task management application",
+    "description": "A minimalist task management tool built with Create React App, focusing on clean UI and efficient development workflows for organizing daily priorities.",
+    "tech_stack": [
+      "React",
+      "Create React App"
+    ],
+    "img_url": null,
+    "repo_url": "https://github.com/samuhlo-training/the-tomorrow-list",
+    "demo_url": null
+  },
+  {
+    "id": "dlnl-resumenes-ia",
+    "title": "DLNL",
+    "tagline": "AI-powered article summarizer and translator",
+    "description": "A React-based tool leveraging AI to summarize and translate articles, featuring robust state management with Redux and a sleek TailwindCSS design.",
+    "tech_stack": [
+      "React",
+      "Redux Toolkit",
+      "TailwindCSS",
+      "Vite"
+    ],
+    "img_url": "https://raw.githubusercontent.com/samuhlo-training/dlnl-resumenes-ia/main/portada.webp",
+    "repo_url": "https://github.com/samuhlo-training/dlnl-resumenes-ia",
+    "demo_url": null
+  }
+]
