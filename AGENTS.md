@@ -53,7 +53,7 @@ tinyshow/
 ├── app/                              # srcDir: Tu código fuente Vue
 │   ├── assets/
 │   │   └── css/
-│   │       └── global.css            # Tailwind @tailwind base + Fuentes Custom
+│   │       └──main.css            # Tailwind @tailwind base + Fuentes Custom
 │   ├── components/
 │   │   ├── ui/                       # Elementos básicos (Botones brutales, inputs)
 │   │   ├── motion/                   # Visuales puros (Identity Spinner, Matrix Text)
