@@ -119,7 +119,10 @@ async function main() {
         // Ensure ID is unique? Repo name is usually unique per user.
 
         projects.push(projectData);
-        console.log(`  ✅ Extracted: "${projectData.title}"`);
+        const courseInfo = projectData.origin?.is_course
+          ? ` 🎓 [Course: ${projectData.origin.name || "Unknown"}]`
+          : "";
+        console.log(`  ✅ Extracted: "${projectData.title}"${courseInfo}`);
       } catch (err: any) {
         console.error(`  ❌ Failed: ${err.message}`);
         errors.push({ repo: repo.name, error: err.message });
