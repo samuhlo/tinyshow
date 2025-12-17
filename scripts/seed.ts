@@ -1,12 +1,8 @@
+import "dotenv/config";
 import { Octokit } from "octokit";
 import { extractProjectData } from "../server/utils/deepseek";
-import { config } from "dotenv";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { type Project } from "../shared/types";
-
-// Load environment variables
-config();
+import { prisma } from "../server/utils/prisma";
 
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 // Get username from args or env, default to 'samuhlo' (user's ID in test) or error
@@ -17,18 +13,12 @@ if (!GITHUB_TOKEN) {
   process.exit(1);
 }
 
-if (!GITHUB_USERNAME) {
-  console.error(
-    "❌ Error: Please provide a GitHub username as an argument or GITHUB_USERNAME env var."
-  );
-  process.exit(1);
-}
+// User check removed as we have a default now
 
 // Safe cast because we validated earlier
 const username = GITHUB_USERNAME as string;
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
-const DATA_PATH = path.resolve(process.cwd(), "server/data/projects.json");
 
 async function main() {
   console.log(`\n🌱 Seeding projects for user: @${username}...\n`);
@@ -129,20 +119,46 @@ async function main() {
       }
     }
 
-    // 3. Save Data
-    await fs.mkdir(path.dirname(DATA_PATH), { recursive: true });
-    await fs.writeFile(DATA_PATH, JSON.stringify(projects, null, 2));
+    // 3. Save Data (Prisma)
+
+    // Transform data for Prisma (if needed) or direct insert.
+    // The Zod types match well, but JSON fields might strictly require InputJsonValue.
+    // Prisma's createMany is efficient.
+
+    console.log(`\n> 🧹 Clearing existing projects...`);
+    await prisma.project.deleteMany({});
+
+    console.log(`> 💾 Saving ${projects.length} projects to Neon DB...`);
+
+    // We map explicitly to ensure type compatibility with Prisma's auto-generated types
+    const projectsToInsert = projects.map((p) => ({
+      id: p.id,
+      title: p.title,
+      tagline: p.tagline as any, // Cast to any to satisfy InputJsonValue (it's valid JSON)
+      description: p.description as any,
+      tech_stack: p.tech_stack,
+      img_url: p.img_url,
+      repo_url: p.repo_url,
+      demo_url: p.demo_url,
+      origin: p.origin as any,
+    }));
+
+    await prisma.project.createMany({
+      data: projectsToInsert,
+      skipDuplicates: true, // Just in case
+    });
 
     console.log(`\n===================================================`);
-    console.log(`🌱 Seed Compile: ${projects.length} projects saved.`);
+    console.log(`🌱 Seed Complete: DB sync done.`);
     if (errors.length > 0) {
       console.log(`⚠️  ${errors.length} failures:`);
       errors.forEach((e) => console.log(`   - ${e.repo}: ${e.error}`));
     }
-    console.log(`data: ${DATA_PATH}`);
   } catch (error) {
     console.error("Fatal Seed Error:", error);
     process.exit(1);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
