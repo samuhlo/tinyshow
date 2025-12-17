@@ -14,7 +14,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`\n🤖 The Brutalist Automaton is analyzing: ${repoUrl} ...\n`);
+  console.log(`\n[AI]    >> ANALYZING     :: target: ${repoUrl}\n`);
 
   try {
     // 1. Convert GitHub URL to Raw README URL
@@ -33,13 +33,15 @@ async function main() {
       }
     }
 
-    console.log(`> Fetching README from: ${rawUrl}`);
+    console.log(`[HTTP]  >> FETCHING      :: url: ${rawUrl}`);
     const res = await fetch(rawUrl);
 
     if (!res.ok) {
       // Try master branch if main failed
       if (rawUrl.includes("/main/")) {
-        console.log("> 'main' branch not found, trying 'master'...");
+        console.warn(
+          "[WARN]  :: BRANCH_404    :: 'main' not found. Retrying with 'master'..."
+        );
         rawUrl = rawUrl.replace("/main/", "/master/");
         const res2 = await fetch(rawUrl);
         if (!res2.ok)
@@ -54,19 +56,21 @@ async function main() {
     const text = await res.text();
     await processContent(text, repoUrl);
   } catch (err) {
-    console.error("❌ Error:", err);
+    console.error("[ERR]   :: FETCH_FAIL    ::", err);
   }
 }
 
 async function processContent(content: string, repoUrl: string) {
-  console.log(`> README Size: ${content.length} chars`);
-  console.log("> Sending to DeepSeek Agent...");
+  console.log(`[INFO]  :: README_SIZE   :: ${content.length} chars`);
+  console.log("[AI]    >> SENDING       :: Processing with DeepSeek...");
 
   const startTime = Date.now();
   const data = await extractProjectData(content, repoUrl);
   const duration = Date.now() - startTime;
 
-  console.log(`\n✅ Analysis Complete in ${(duration / 1000).toFixed(2)}s`);
+  console.log(
+    `\n[AI]    ++ COMPLETE      :: time: ${(duration / 1000).toFixed(2)}s`
+  );
   console.log("---------------------------------------------------");
   console.dir(data, { depth: null, colors: true });
   console.log("---------------------------------------------------");

@@ -16,7 +16,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`\n🌱 Seeding SINGLE project: ${repoUrl} ...\n`);
+  console.log(`\n[SEED]  >> START         :: target: ${repoUrl}\n`);
 
   try {
     // 1. Parse Owner/Repo from URL
@@ -46,14 +46,14 @@ async function main() {
     const project = await ingestProject(owner, repo, octokit);
 
     if (!project) {
-      console.error("❌ Failed to ingest project (see logs above).");
+      console.error("[ERR]   :: INGEST_FAIL   :: See logs above.");
       process.exit(1);
     }
 
     // 3. Save
     await saveProject(project);
   } catch (err) {
-    console.error("❌ Fatal Error:", err);
+    console.error("[ERR]   :: FATAL         ::", err);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

@@ -21,7 +21,9 @@ export async function ingestProject(
   octokit: Octokit,
   branch: string = "main"
 ): Promise<Project | null> {
-  console.log(`> 📥 Ingesting: ${owner}/${repo} (${branch})`);
+  console.log(
+    `[INGEST] >> START        :: project: ${owner}/${repo} | branch: ${branch}`
+  );
 
   try {
     // 1. Fetch README
@@ -42,20 +44,22 @@ export async function ingestProject(
     } catch (e: any) {
       // Fallback: Try 'master' if 'main' failed and we haven't tried it yet
       if (branch === "main" && e.status === 404) {
-        console.log(`  ⚠️  'main' not found, trying 'master'...`);
+        console.warn(
+          `[WARN]  :: BRANCH_404    :: 'main' not found. Retrying with 'master'`
+        );
         return ingestProject(owner, repo, octokit, "master");
       }
 
       if (e.status === 404) {
-        console.log(`  ⚠️  No README found. Skipping.`);
+        console.warn(`[WARN]  :: NO_README     :: Skipping ingestion.`);
         return null;
       }
       throw e;
     }
 
     if (!readmeContent || readmeContent.length < 50) {
-      console.log(
-        `  ⚠️  README too short (${readmeContent.length} chars). Skipping.`
+      console.warn(
+        `[WARN]  :: SHORT_README  :: size: ${readmeContent.length} chars (min: 50). Skipping.`
       );
       return null;
     }
@@ -63,27 +67,29 @@ export async function ingestProject(
     // 2. AI Extraction
     const htmlUrl = `https://github.com/${owner}/${repo}`;
     console.log(
-      `  📄 README: ${readmeContent.length} chars. Analyzing with AI...`
+      `[ANLZ]  >> README.md     :: size: ${readmeContent.length} chars | status: AI_PROCESSING`
     );
 
     const projectData = await extractProjectData(readmeContent, htmlUrl);
 
     // 3. Quality Filters
     if (!projectData.demo_url || !projectData.img_url) {
-      console.log(
-        `  ⚠️  Missing assets (demo=${!!projectData.demo_url}, img=${!!projectData.img_url}). Skipping.`
+      console.warn(
+        `[DATA]  :: MISSING_ASSETS:: demo: ${!!projectData.demo_url} | img: ${!!projectData.img_url}`
       );
       return null;
     }
 
     const courseInfo = projectData.origin?.is_course
-      ? ` 🎓 [Course: ${projectData.origin.name || "Unknown"}]`
+      ? ` | type: COURSE (${projectData.origin.name || "Unknown"})`
       : "";
-    console.log(`  ✅ Extracted: "${projectData.title}"${courseInfo}`);
+    console.log(
+      `[DATA]  ++ EXTRACTED     :: title: "${projectData.title}"${courseInfo}`
+    );
 
     return projectData;
   } catch (err: any) {
-    console.error(`  ❌ Extraction Failed: ${err.message}`);
+    console.error(`[ERR]   :: EXTRACT_FAIL  :: ${err.message}`);
     // We strictly return null on failure to allow caller to continue
     return null;
   }
@@ -93,7 +99,7 @@ export async function ingestProject(
  * Saves or updates a project in the database.
  */
 export async function saveProject(project: Project): Promise<void> {
-  console.log(`> 💾 Saving '${project.title}' to DB...`);
+  console.log(`[DB]    >> WRITING       :: project: '${project.title}'`);
 
   await prisma.project.upsert({
     where: { id: project.id },
@@ -119,5 +125,5 @@ export async function saveProject(project: Project): Promise<void> {
       origin: project.origin as any,
     },
   });
-  console.log(`  ✨ Saved: ${project.id}`);
+  console.log(`[DB]    ++ SAVED         :: id: ${project.id}`);
 }

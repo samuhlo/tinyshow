@@ -10,7 +10,9 @@ const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 const GITHUB_USERNAME = process.argv[2] || process.env.GITHUB_USERNAME;
 
 if (!GITHUB_TOKEN) {
-  console.error("❌ Error: GITHUB_SEED_TOKEN is missing in .env");
+  console.error(
+    "[ERR]   :: MISSING_ENV   :: GITHUB_SEED_TOKEN is missing in .env"
+  );
   process.exit(1);
 }
 
@@ -22,7 +24,7 @@ const username = GITHUB_USERNAME as string;
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 async function main() {
-  console.log(`\n🌱 Seeding projects for user: @${username}...\n`);
+  console.log(`\n[SEED]  >> START         :: user: @${username}\n`);
 
   try {
     // 1. Fetch all public repositories (excluding forks by default for cleaner showcase)
@@ -44,7 +46,7 @@ async function main() {
     // Let's just filter forks for now.
 
     console.log(
-      `> Found ${repos.length} repos. processing ${sources.length} sources (non-forks)...`
+      `[REPO]  >> DISCOVERED    :: count: ${repos.length} | filtered: ${sources.length} (non-forks)`
     );
 
     const projects: Project[] = [];
@@ -67,10 +69,10 @@ async function main() {
     // The Zod types match well, but JSON fields might strictly require InputJsonValue.
     // Prisma's createMany is efficient.
 
-    console.log(`\n> 🧹 Clearing existing projects...`);
+    console.log(`\n[DB]    >> CLEANING      :: Removing existing projects...`);
     await prisma.project.deleteMany({});
 
-    console.log(`> 💾 Saving ${projects.length} projects to Neon DB...`);
+    console.log(`[DB]    >> BATCH_SAVE    :: count: ${projects.length}`);
 
     // We map explicitly to ensure type compatibility with Prisma's auto-generated types
     const projectsToInsert = projects.map((p) => ({
@@ -90,13 +92,14 @@ async function main() {
       skipDuplicates: true, // Just in case
     });
 
-    console.log(`\n===================================================`);
-    console.log(`🌱 Seed Complete: DB sync done.`);
+    console.log(`\n[DONE]  :: SEED_COMPLETE :: DB sync finished.`);
     if (projects.length === 0) {
-      console.log(`⚠️  No projects found/processed.`);
+      console.warn(
+        `[WARN]  :: NO_PROJECTS   :: No projects found or processed.`
+      );
     }
   } catch (error) {
-    console.error("Fatal Seed Error:", error);
+    console.error("[ERR]   :: FATAL_SEED    ::", error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

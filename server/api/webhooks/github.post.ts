@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   if (!WEBHOOK_SECRET) {
     console.warn(
-      "⚠️  Webhook Secret not set. Skipping signature verification (UNSAFE in production)."
+      "[WARN]  :: SIG_MISSING   :: Webhook Secret not set. Skipping verification (UNSAFE)."
     );
   } else if (!signature || !body) {
     throw createError({
@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
   const branch = payload.ref.replace("refs/heads/", "");
 
   console.log(
-    `🪝 Webhook triggered for ${owner}/${repoName} on branch ${branch}`
+    `[HOOK]  :: TRIGGER_REC   :: source: ${owner}/${repoName} | branch: ${branch}`
   );
 
   // Instantiate Octokit

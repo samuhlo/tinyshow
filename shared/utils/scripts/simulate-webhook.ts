@@ -32,8 +32,8 @@ const hmac = crypto.createHmac("sha256", SECRET);
 const signature = "sha256=" + hmac.update(body).digest("hex");
 
 async function testWebhook() {
-  console.log(`🚀 Sending Webhook to ${URL}...`);
-  console.log(`🔑 Signature: ${signature}`);
+  console.log(`[TEST]  -> OUTBOUND      :: target: ${URL}`);
+  console.log(`[TEST]  :: SIGNATURE     :: ${signature}`);
 
   try {
     const res = await fetch(URL, {
@@ -47,16 +47,16 @@ async function testWebhook() {
     });
 
     const data = await res.json(); // Nitro handlers usually return JSON
-    console.log(`\nResponse Status: ${res.status}`);
-    console.log("Response Body:", data);
+    console.log(`\n[TEST]  :: RESPONSE      :: status: ${res.status}`);
+    console.log("[TEST]  :: BODY          ::", data);
 
     if (res.ok) {
-      console.log("✅ Webhook processed successfully!");
+      console.log("[TEST]  ++ SUCCESS       :: Webhook processed.");
     } else {
-      console.error("❌ Webhook failed.");
+      console.error("[TEST]  :: FAILURE       :: Webhook returned error.");
     }
   } catch (err) {
-    console.error("❌ Connection failed (Is the server running?)");
+    console.error("[ERR]   :: CONN_REFUSED  :: Is the server running?");
     console.error(err);
   }
 }

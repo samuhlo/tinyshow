@@ -69,7 +69,7 @@ CRITICAL: Return ONLY valid JSON. No Markdown code fences.
     // Validate with Zod
     return ProjectSchema.parse(rawData);
   } catch (error) {
-    console.error("DeepSeek Extraction Failed:", error);
+    console.error("[ERR]   :: DEEPSEEK_FAIL ::", error);
     throw error;
   }
 };
