@@ -1,4 +1,4 @@
-import { extractProjectData } from "../server/utils/deepseek";
+import { extractProjectData } from "../../../server/utils/deepseek";
 import { config } from "dotenv";
 
 // Load environment variables locally
@@ -8,7 +8,9 @@ async function main() {
   const repoUrl = process.argv[2];
 
   if (!repoUrl) {
-    console.error("Usage: npx tsx scripts/test-ai.ts <github-repo-url>");
+    console.error(
+      "Usage: npx tsx shared/utils/scripts/test-ai.ts <github-repo-url>"
+    );
     process.exit(1);
   }
 
@@ -22,8 +24,8 @@ async function main() {
 
     let rawUrl = repoUrl;
     if (repoUrl.includes("github.com")) {
-      const parts = repoUrl.split("github.com/")[1].split("/");
-      if (parts.length >= 2) {
+      const parts = repoUrl.split("github.com/")[1]?.split("/");
+      if (parts && parts.length >= 2) {
         const user = parts[0];
         const repo = parts[1];
         // Default to main, but could be master.

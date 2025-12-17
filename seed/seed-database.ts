@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Octokit } from "octokit";
 import { extractProjectData } from "../server/utils/deepseek";
+import { ingestProject } from "../server/utils/ingest";
 import { type Project } from "../shared/types";
 import { prisma } from "../server/utils/prisma";
 
@@ -47,75 +48,16 @@ async function main() {
     );
 
     const projects: Project[] = [];
-    const errors: { repo: string; error: string }[] = [];
 
     // 2. Iterate and Process
     // Serial execution to be nice to DeepSeek/GitHub APIs
     for (const repo of sources) {
-      console.log(`\n---------------------------------------------------`);
-      console.log(`> 📦 Processing: ${repo.name}`);
+      const project = await ingestProject(username, repo.name, octokit);
 
-      try {
-        // Fetch README
-        // Try HEAD first, then main/master
-        let readmeContent = "";
-        let readmeUrl = "";
-
-        try {
-          const { data: readme } = await octokit.request(
-            "GET /repos/{owner}/{repo}/readme",
-            {
-              owner: username,
-              repo: repo.name,
-              mediaType: {
-                format: "raw",
-              },
-            }
-          );
-          readmeContent = readme as unknown as string; // octokit types are weird with raw mediaType
-        } catch (e: any) {
-          if (e.status === 404) {
-            console.log(`  ⚠️  No README found. Skipping.`);
-            continue;
-          }
-          throw e;
-        }
-
-        if (!readmeContent || readmeContent.length < 50) {
-          console.log(`  ⚠️  README too short. Skipping.`);
-          continue;
-        }
-
-        console.log(
-          `  📄 README: ${readmeContent.length} chars. Analyzing with AI...`
-        );
-
-        // DeepSeek Analysis
-        const projectData = await extractProjectData(
-          readmeContent,
-          repo.html_url || ""
-        );
-
-        // Quality Filter: Must have demo_url and img_url
-        if (!projectData.demo_url || !projectData.img_url) {
-          console.log(`  ⚠️  Missing assets (demo/img). Skipping.`);
-          continue;
-        }
-
-        // Post-process: Add stars/lang info from GitHub API to enrich?
-        // The AI extracts tech stack, but GitHub has precise language data.
-        // For now, trust the AI as per "The Brutalist Automaton" philosophy.
-
-        // Ensure ID is unique? Repo name is usually unique per user.
-
-        projects.push(projectData);
-        const courseInfo = projectData.origin?.is_course
-          ? ` 🎓 [Course: ${projectData.origin.name || "Unknown"}]`
-          : "";
-        console.log(`  ✅ Extracted: "${projectData.title}"${courseInfo}`);
-      } catch (err: any) {
-        console.error(`  ❌ Failed: ${err.message}`);
-        errors.push({ repo: repo.name, error: err.message });
+      if (project) {
+        projects.push(project);
+      } else {
+        // ingestProject logs its own skips/errors, but we can track count here if needed
       }
     }
 
@@ -150,9 +92,8 @@ async function main() {
 
     console.log(`\n===================================================`);
     console.log(`🌱 Seed Complete: DB sync done.`);
-    if (errors.length > 0) {
-      console.log(`⚠️  ${errors.length} failures:`);
-      errors.forEach((e) => console.log(`   - ${e.repo}: ${e.error}`));
+    if (projects.length === 0) {
+      console.log(`⚠️  No projects found/processed.`);
     }
   } catch (error) {
     console.error("Fatal Seed Error:", error);

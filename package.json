@@ -8,7 +8,9 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "seed": "npx tsx scripts/seed.ts"
+    "seed": "npx tsx seed/seed-database.ts",
+    "seed-single": "npx tsx seed/seed-single-database.ts",
+    "test-webhook": "npx tsx shared/utils/scripts/simulate-webhook.ts"
   },
   "dependencies": {
     "@nuxt/eslint": "1.12.1",

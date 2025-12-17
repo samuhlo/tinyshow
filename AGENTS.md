@@ -23,8 +23,8 @@ Un enfoque moderno, Type-Safe y orientado a la excelencia en movimiento (Motion-
 | **Estilos** | Tailwind CSS | Sistema de diseño atómico y utilitario. |
 | **Motion** | GSAP + Lenis | Coreografías complejas y scroll suave obligatorio. |
 | **Backend** | Nitro Engine | Server Routes para API y Webhooks. |
-| **AI Brain** | DeepSeek (V3/R1) | Procesamiento de READMEs y extracción de valor técnico. |
-| **Data** | JSON / KV | Persistencia ligera basada en archivos o Key-Value. |
+| **AI Brain** | DeepSeek (V3) | Procesamiento de READMEs (Bilingüe EN/ES) y extracción de valor técnico. |
+| **Data** | PostgreSQL | Neon Serverless DB gestionada con **Prisma ORM**. |
 | **Package** | pnpm | Gestión de dependencias rápida y eficiente. |
 
 ## 3. The Pipeline (Core Mechanics)
@@ -70,11 +70,21 @@ tinyshow/
 │   ├── api/
 │   │   └── showcase/                 # Endpoints frontend (GET projects)
 │   ├── webhooks/
-│   │   └── github.post.ts            # CRÍTICO: Recibe el push event
+│   │   └── github.post.ts            # Recibe el push event
 │   └── utils/
-│       └── deepseek.ts               # Cliente AI (DeepSeek V3/R1) & Parsing logic
+│       ├── deepseek.ts               # Cliente AI (DeepSeek V3)
+│       └── prisma.ts                 # Cliente Prisma
+├── seed/                             # Scripts de Base de Datos
+│   ├── seed-database.ts              # Carga masiva (Clean & Seed)
+│   └── seed-single-database.ts       # Carga unitaria
 ├── shared/
-│   └── types.ts                      # Código compartido: Interfaces y Zod Schemas
+│   ├── types.ts                      # Interfaces y Zod Schemas
+│   └── utils/
+│       └── scripts/
+│           └── test-ai.ts            # Script de prueba AI
+├── prisma/
+│   ├── schema.prisma                 # Definición de modelo
+│   └── migrations/                   # Historial de cambios
 ├── nuxt.config.ts                    # Configuración Nuxt
 ├── tailwind.config.ts                # Configuración Tailwind
 ├── tsconfig.json                     # Configuración TypeScript
@@ -95,8 +105,8 @@ cd tinyshow-v2
 # Instalar dependencias
 pnpm install
 
-# Generar tipos de Nuxt
-pnpm run postinstall
+# Generar cliente Prisma
+npx prisma generate
 ```
 
 ### 5.2. Configuración (.env)
@@ -108,9 +118,12 @@ NUXT_DEEPSEEK_API_KEY="sk-..."
 # Security
 NUXT_GITHUB_WEBHOOK_SECRET="tu_secreto_brutal"
 
-# Storage
-NITRO_STORAGE_DRIVER="fs"
-```
+# Database (Neon/Prisma)
+NEON_DATABASE_URL="postgresql://..."
+
+# Github Seed
+GITHUB_SEED_TOKEN="ghp_..."
+GITHUB_USERNAME="samuhlo-training"
 
 ### 5.3. Desarrollo
 
@@ -124,5 +137,17 @@ pnpm run dev
 Para poblar la base de datos sin esperar eventos push:
 
 ```bash
+# Carga masiva (Borra todo y recarga)
 pnpm run seed
+
+# Carga individual (Upsert de un solo repo)
+npx tsx seed/seed-single-database.ts <repo-url>
+```
+
+### 5.5. AI Testing
+
+Para verificar la extracción sin guardar en BD:
+
+```bash
+npx tsx shared/utils/scripts/test-ai.ts <repo-url>
 ```
