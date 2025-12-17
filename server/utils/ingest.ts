@@ -6,14 +6,26 @@ import { prisma } from "./prisma";
 // Re-export specific types if needed, or just use Project from shared/types
 
 /**
- * Fetches the README from a GitHub repository, extracts project data using DeepSeek,
- * and returns the Project object.
+ * [MODULE] :: INGEST_UTILS
+ * ----------------------------------------------------------------------
+ * Utilidades centrales para la ingesta y procesamiento de proyectos.
+ * Orquesta la extracción de datos desde GitHub y su persistencia.
  *
- * @param owner Repository owner
- * @param repo Repository name
- * @param octokit Octokit instance (authenticated or unauthenticated)
- * @param branch Optional branch (default: main, fallbacks to master)
- * @returns Project object or null if skipped/failed validation
+ * @module    server/utils/ingest
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
+/**
+ * [FETCH] :: INGEST_PROJECT
+ * Recupera el README, extrae metadatos con IA y valida los assets.
+ *
+ * @param   {String}   owner       - Propietario del repositorio.
+ * @param   {String}   repo        - Nombre del repositorio.
+ * @param   {Octokit}  octokit     - Instancia del cliente GitHub.
+ * @param   {String}   [branch='main'] - Rama objetivo (fallback automático).
+ *
+ * @returns {Promise<Project|null>} - Proyecto procesado o null si falla.
  */
 export async function ingestProject(
   owner: string,
@@ -96,7 +108,12 @@ export async function ingestProject(
 }
 
 /**
- * Saves or updates a project in the database.
+ * [PERSIST] :: SAVE_PROJECT
+ * Upsert del proyecto en base de datos usando Prisma.
+ *
+ * @param   {Project}  project     - Objeto de proyecto validado.
+ *
+ * @returns {Promise<void>}        - Promesa vacía al completar.
  */
 export async function saveProject(project: Project): Promise<void> {
   console.log(`[DB]    >> WRITING       :: project: '${project.title}'`);

@@ -2,12 +2,21 @@ import { Octokit } from "octokit";
 import crypto from "crypto";
 import { ingestProject, saveProject } from "../../utils/ingest";
 
-// Environment variables
+/**
+ * [WEBHOOK] :: GITHUB_PUSH_HANDLER
+ * ----------------------------------------------------------------------
+ * Endpoint reactivo para eventos 'push' de GitHub.
+ * Valida firmas, detecta cambios en README y dispara la ingesta.
+ *
+ * @module    server/api/webhooks
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
 const WEBHOOK_SECRET = process.env.NUXT_GITHUB_WEBHOOK_SECRET;
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 
 export default defineEventHandler(async (event) => {
-  // 1. Verify Method
+  // [STEP 1] :: VERIFY_METHOD
   if (event.method !== "POST") {
     throw createError({
       statusCode: 405,
@@ -15,7 +24,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 2. Verify Signature
+  // [STEP 2] :: VERIFY_SIGNATURE
   const signature = getHeader(event, "x-hub-signature-256");
   const body = await readRawBody(event);
 
@@ -40,7 +49,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // 3. Parse Payload
+  // [STEP 3] :: PARSE_PAYLOAD
   const payload = JSON.parse(body || "{}");
   const eventType = getHeader(event, "x-github-event");
 
@@ -52,7 +61,7 @@ export default defineEventHandler(async (event) => {
     return { status: "ignored", message: "Not a push event" };
   }
 
-  // 4. Check for README changes
+  // [STEP 4] :: DETECT_CHANGES
   const commits = payload.commits || [];
   let readmeChanged = false;
 
@@ -68,7 +77,7 @@ export default defineEventHandler(async (event) => {
     return { status: "skipped", message: "No README changes detected" };
   }
 
-  // 5. Trigger Ingest
+  // [STEP 5] :: TRIGGER_INGESTION
   const repo = payload.repository;
   if (!repo) {
     throw createError({

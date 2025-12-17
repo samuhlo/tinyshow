@@ -5,6 +5,16 @@ import { ingestProject } from "../server/utils/ingest";
 import { type Project } from "../shared/types";
 import { prisma } from "../server/utils/prisma";
 
+/**
+ * [SCRIPT] :: SEED_DATABASE
+ * ----------------------------------------------------------------------
+ * Script de inicialización de datos.
+ * Escanea repositorios de usuario y puebla la base de datos local.
+ *
+ * @module    seed/seed-database
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 // Get username from args or env, default to 'samuhlo' (user's ID in test) or error
 const GITHUB_USERNAME = process.argv[2] || process.env.GITHUB_USERNAME;
@@ -27,7 +37,7 @@ async function main() {
   console.log(`\n[SEED]  >> START         :: user: @${username}\n`);
 
   try {
-    // 1. Fetch all public repositories (excluding forks by default for cleaner showcase)
+    // [STEP 1] :: FETCH_REPOS
     // Pagination is handled by octokit iterator or we valid up to 100 for now.
     const { data: repos } = await octokit.request(
       "GET /users/{username}/repos",
@@ -51,7 +61,7 @@ async function main() {
 
     const projects: Project[] = [];
 
-    // 2. Iterate and Process
+    // [STEP 2] :: PROCESS_SEQUENCE
     // Serial execution to be nice to DeepSeek/GitHub APIs
     for (const repo of sources) {
       const project = await ingestProject(username, repo.name, octokit);
@@ -63,7 +73,7 @@ async function main() {
       }
     }
 
-    // 3. Save Data (Prisma)
+    // [STEP 3] :: PERSIST_DATA
 
     // Transform data for Prisma (if needed) or direct insert.
     // The Zod types match well, but JSON fields might strictly require InputJsonValue.
