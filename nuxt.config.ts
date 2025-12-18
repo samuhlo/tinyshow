@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     "@nuxtjs/i18n",
     "@nuxtjs/google-fonts",
   ],
-  srcDir: ".",
+  srcDir: "app",
   i18n: {
     locales: [
       { code: "en", language: "en-US", file: "en.json" },

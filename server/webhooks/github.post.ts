@@ -1,6 +1,6 @@
 import { Octokit } from "octokit";
 import crypto from "crypto";
-import { ingestProject, saveProject } from "../../utils/ingest";
+import { ingestProject, saveProject } from "../utils/ingest";
 
 /**
  * [WEBHOOK] :: GITHUB_PUSH_HANDLER

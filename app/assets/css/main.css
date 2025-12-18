@@ -1,12 +1,22 @@
 @import "tailwindcss";
 
+@theme {
+  --color-dark: #141414;
+  --color-light: #f8f8f8;
+  --color-accent: #f95c4b;
+
+  --font-display: "Archivo Black", sans-serif;
+  --font-sans: "Archivo", sans-serif;
+  --font-mono: "Space Mono", monospace;
+}
+
 :root {
-  font-family: theme("fontFamily.mono");
-  background-color: theme("colors.light");
-  color: theme("colors.dark");
+  font-family: var(--font-mono);
+  background-color: var(--color-light);
+  color: var(--color-dark);
 }
 
 ::selection {
-  background-color: theme("colors.accent");
+  background-color: var(--color-accent);
   color: white;
 }
