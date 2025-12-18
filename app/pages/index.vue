@@ -10,7 +10,7 @@
  * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
-import TechMenu from "~/components/ui/TechMenu.vue";
+import TechMenu from "~/components/home/TechMenu.vue";
 
 /**
  * [STATE] :: TECHNOLOGIES_LIST

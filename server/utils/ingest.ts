@@ -1,6 +1,6 @@
 import { Octokit } from "octokit";
 import { type Project } from "../../shared/types";
-import { extractProjectData } from "./deepseek";
+import { extractProjectData } from "./ai";
 import { prisma } from "./prisma";
 
 // Re-export specific types if needed, or just use Project from shared/types
