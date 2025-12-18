@@ -1,0 +1,23 @@
+<script setup lang="ts">
+interface Props {
+  text: string;
+  theme?: "light" | "dark";
+}
+
+withDefaults(defineProps<Props>(), {
+  theme: "light",
+});
+</script>
+
+<template>
+  <span
+    class="inline-block px-2 py-0.5 text-xs font-mono border rounded-full transition-colors duration-200"
+    :class="[
+      theme === 'light'
+        ? 'border-dark text-dark'
+        : 'border-white text-white',
+    ]"
+  >
+    {{ text }}
+  </span>
+</template>

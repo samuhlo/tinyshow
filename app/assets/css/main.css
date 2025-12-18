@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+:root {
+  font-family: theme("fontFamily.mono");
+  background-color: theme("colors.light");
+  color: theme("colors.dark");
+}
+
+::selection {
+  background-color: theme("colors.accent");
+  color: white;
+}
