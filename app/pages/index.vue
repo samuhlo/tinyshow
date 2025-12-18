@@ -51,23 +51,23 @@ const handleSelect = (tech: string) => {
 
 <template>
   <NuxtLayout name="default">
-    <!-- Hero Mode Container -->
+    <!-- Dynamic Layout Container -->
     <div
-      v-if="viewMode === 'hero'"
-      class="flex flex-col items-center justify-center min-h-[80vh]"
+      class="min-h-[80vh] transition-all duration-500"
+      :class="[
+        viewMode === 'hero'
+          ? 'flex flex-col items-center justify-center'
+          : 'grid grid-cols-1 md:grid-cols-12 gap-10 items-start'
+      ]"
     >
-      <TechMenu
-        :technologies="technologies"
-        :active-tech="activeTech"
-        :view-mode="viewMode"
-        @select="handleSelect"
-      />
-    </div>
-
-    <!-- Sidebar Mode Container (Grid) -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-10">
-      <!-- Left Column: Navigation -->
-      <aside class="md:col-span-3 lg:col-span-2 pt-0">
+      <!-- Navigation Wrapper -->
+      <aside
+        :class="[
+          viewMode === 'hero'
+            ? 'w-full flex justify-center'
+            : 'md:col-span-3 lg:col-span-2 pt-0'
+        ]"
+      >
         <TechMenu
           :technologies="technologies"
           :active-tech="activeTech"
@@ -76,9 +76,17 @@ const handleSelect = (tech: string) => {
         />
       </aside>
 
-      <!-- Right Column: Content (Future Project List) -->
-      <section class="md:col-span-9 lg:col-span-10 pt-0">
-         <!-- Content removed for now as requested -->
+      <!-- Content Area (Only visible in sidebar mode) -->
+      <section
+        v-if="viewMode === 'sidebar'"
+        class="md:col-span-9 lg:col-span-10 pt-0 opacity-0 animate-fade-in"
+        :style="{ animationFillMode: 'forwards', animationDelay: '0.3s' }"
+      >
+         <!-- Content placeholder -->
+         <div class="prose dark:prose-invert">
+            <h1>{{ activeTech }} Projects</h1>
+            <p>Project list coming soon...</p>
+         </div>
       </section>
     </div>
   </NuxtLayout>
