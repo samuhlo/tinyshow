@@ -7,7 +7,8 @@ TinyShow es un Live Showcase técnico. Rechaza el concepto de portfolio estátic
 - **Codename:** The Brutalist Automaton.
 - **Identity:** Escaparate autónomo. No es un CMS, es un "Active Listener".
 - **Aesthetics:** Brutalismo Estructural + Minimalismo Suizo ("Less but Heavier").
-- **Visual Language:** Alto contraste, tipografía pesada (Archivo Black), datos técnicos monoespaciados (Space Mono) y animaciones secas (GSAP).
+- **Visual Language:** Alto contraste, Iconografía Custom (Bariol Icons), tipografía pesada (Archivo Black), datos técnicos monoespaciados (Space Mono) y animaciones secas (GSAP).
+- **Branding:** Logotipo con motivo `{ TINYSH }` y spinner animado en la `O` implícita.
 - **Color Palette (Legacy/Refined):**
     - Off-White (`#F8F8F8`)
     - Deep Black (`#141414`)
@@ -25,6 +26,7 @@ Un enfoque moderno, Type-Safe y orientado a la excelencia en movimiento (Motion-
 | **Backend** | Nitro Engine | Server Routes para API y Webhooks. |
 | **AI Brain** | DeepSeek (V3) | Procesamiento de READMEs (Bilingüe EN/ES) y extracción de valor técnico. |
 | **Data** | PostgreSQL | Neon Serverless DB gestionada con **Prisma ORM**. |
+| **Media** | @nuxt/image | Optimización de imágenes. |
 | **Package** | pnpm | Gestión de dependencias rápida y eficiente. |
 
 ## 3. The Pipeline (Core Mechanics)
@@ -52,12 +54,14 @@ Estructura modular optimizada para separar la lógica de negocio (showcase) de l
 tinyshow/
 ├── app/                              # srcDir: Tu código fuente Vue
 │   ├── assets/
-│   │   └── css/
-│   │       └──main.css            # Tailwind @tailwind base + Fuentes Custom
+│   │   ├── css/
+│   │   │   └──main.css            # Tailwind + Font Faces
+│   │   └── fonts/                 # Fuentes locales (Bariol Icons)
 │   ├── components/
-│   │   ├── ui/                       # Elementos básicos (Botones brutales, inputs)
-│   │   ├── motion/                   # Visuales puros (Identity Spinner, Matrix Text)
-│   │   └── showcase/                 # Lógica de negocio (ProjectCard, ProjectList)
+│   │   ├── ui/                       # Elementos básicos (ActionBtn, TechPill, LangSwitcher)
+│   │   ├── home/                     # Componentes de Home (TechMenu)
+│   │   ├── project/                  # Componentes de Proyecto
+│   │   └── layout/                   # Componentes estructurales
 │   ├── composables/                  # State & Logic (useShowcaseStore, useAnimation)
 │   ├── layouts/                      # Estructura base
 │   ├── pages/                        # Rutas de la aplicación
@@ -72,7 +76,8 @@ tinyshow/
 │   ├── webhooks/
 │   │   └── github.post.ts            # Recibe el push event
 │   └── utils/
-│       ├── deepseek.ts               # Cliente AI (DeepSeek V3)
+│       ├── ai.ts                     # Cliente AI (DeepSeek V3)
+│       ├── ingest.ts                 # Lógica de ingesta
 │       └── prisma.ts                 # Cliente Prisma
 ├── seed/                             # Scripts de Base de Datos
 │   ├── seed-database.ts              # Carga masiva (Clean & Seed)
@@ -124,6 +129,7 @@ NEON_DATABASE_URL="postgresql://..."
 # Github Seed
 GITHUB_SEED_TOKEN="ghp_..."
 GITHUB_USERNAME="samuhlo-training"
+```
 
 ### 5.3. Desarrollo
 
@@ -138,10 +144,10 @@ Para poblar la base de datos sin esperar eventos push:
 
 ```bash
 # Carga masiva (Borra todo y recarga)
-pnpm run seed
+pnpm run seed <github-username> (o el de .env)
 
 # Carga individual (Upsert de un solo repo)
-npx tsx seed/seed-single-database.ts <repo-url>
+pnpm run seed-single <repo-url>
 ```
 
 ### 5.5. AI Testing
@@ -150,4 +156,12 @@ Para verificar la extracción sin guardar en BD:
 
 ```bash
 npx tsx shared/utils/scripts/test-ai.ts <repo-url>
+```
+
+### 5.6. Webhook Testing
+
+Para verificar la extracción sin guardar en BD:
+
+```bash
+pnpm run test-webhook
 ```

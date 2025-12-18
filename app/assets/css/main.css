@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Bariol Icons";
+  src: url("/fonts/bariol_icons-webfont.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-dark: #141414;
   --color-light: #f8f8f8;
@@ -8,6 +16,7 @@
   --font-display: "Archivo Black", sans-serif;
   --font-sans: "Archivo", sans-serif;
   --font-mono: "Space Mono", monospace;
+  --font-bariol: "Bariol Icons", sans-serif;
 }
 
 :root {

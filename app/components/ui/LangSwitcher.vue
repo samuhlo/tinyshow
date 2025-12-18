@@ -1,19 +1,27 @@
 <script setup lang="ts">
-const { locale, setLocale } = useI18n();
+const { locale } = useI18n();
+const switchLocalePath = useSwitchLocalePath();
 
-const toggleLocale = () => {
-  setLocale(locale.value === "en" ? "es" : "en");
+const toggleLocale = async () => {
+  const newLocale = locale.value === "en" ? "es" : "en";
+  await navigateTo(switchLocalePath(newLocale));
 };
 </script>
 
 <template>
   <button
     @click="toggleLocale"
-    class="font-mono text-xs uppercase tracking-widest hover:text-accent transition-colors duration-200"
+    class="font-sans text-sm uppercase tracking-widest group"
     aria-label="Toggle Language"
   >
-    <span :class="{ 'font-bold': locale === 'es', 'text-accent': locale === 'es' }">ES</span>
-    <span class="mx-1 opacity-50">//</span>
-    <span :class="{ 'font-bold': locale === 'en', 'text-accent': locale === 'en' }">EN</span>
+    <span
+      class="inline-block hover:scale-110 hover:text-accent transition-all duration-300"
+      :class="{ 'font-extrabold text-accent': locale === 'es' }"
+    >ES</span>
+    <span class="mx-1 ">//</span>
+    <span
+      class="inline-block hover:scale-110 hover:text-accent transition-all duration-300"
+      :class="{ 'font-extrabold text-accent': locale === 'en' }"
+    >EN</span>
   </button>
 </template>
