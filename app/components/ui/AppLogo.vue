@@ -34,6 +34,10 @@ const REEL_LENGTH = 10;
  */
 const strip   = ref<string[]>([]);
 const mounted = ref(false);
+const hasAnimated = useState<boolean>('app-logo-animated', () => false);
+// [STATE] :: PERSISTED_CHAR
+// Guardamos el carácter elegido para mantenerlo consistente entre navegaciones
+const activeChar = useState<string>('app-logo-char', () => '');
 
 /**
  * [UTIL] :: GET_RANDOM_CHAR
@@ -47,32 +51,37 @@ const getRandomChar = (): string => chars[Math.floor(Math.random() * chars.lengt
  * [LIFECYCLE] :: ON_MOUNTED
  * Inicializa el strip y dispara la animación del slot.
  *
- * ESTRUCTURA DEL STRIP:
- * ┌─────────────────────────────────────────────────────────────────────┐
- * │  Index 0   │  Index 1   │  Index 2..N                              │
- * │  [BUFFER]  │  [TARGET]  │  [...RANDOMS]                            │
- * │  (oculto)  │  (destino) │  (carrete visible durante animación)     │
- * └─────────────────────────────────────────────────────────────────────┘
- *
- * FLUJO DE ANIMACIÓN:
- * 1. Estado inicial: translateY posiciona el último random visible.
- * 2. Transición: El strip se desplaza hacia abajo (translateY aumenta).
- * 3. Estado final: translateY(-SLOT_HEIGHT) muestra el TARGET (index 1).
- *
- * El BUFFER (index 0) existe para el efecto "bounce" del easing que
- * puede sobrepasar momentáneamente la posición final.
+ * Si ya se animó previamente (tracking via useState), salta la animación
+ * para evitar repeticiones molestas al cambiar de ruta/idioma.
  */
 onMounted(() => {
-  const target  = getRandomChar();
-  const buffer  = getRandomChar();
-  const randoms = Array.from({ length: REEL_LENGTH }, () => getRandomChar());
+  // Si no tenemos carácter guardado (primera carga), generamos uno y lo guardamos.
+  if (!activeChar.value) {
+    activeChar.value = getRandomChar();
+  }
+  
+  const target = activeChar.value;
+  const buffer = getRandomChar();
 
-  strip.value = [buffer, target, ...randoms];
-
-  // Dispara animación en el siguiente frame para asegurar render del DOM
-  requestAnimationFrame(() => {
+  if (hasAnimated.value) {
+    // [SKIP] :: NO_ANIMATION
+    // Si ya animamos, mostramos directamente el target sin transiciones.
+    // Usamos un strip mínimo [buffer, target] y marcamos mounted true inmediato.
+    strip.value = [buffer, target];
     mounted.value = true;
-  });
+  } else {
+    // [PLAY] :: ANIMATION
+    // Primer render: generamos slot completo y animamos.
+    const randoms = Array.from({ length: REEL_LENGTH }, () => getRandomChar());
+    strip.value = [buffer, target, ...randoms];
+
+    // Dispara animación en el siguiente frame
+    requestAnimationFrame(() => {
+      mounted.value = true;
+      // Marcamos como animado para futuras cargas
+      setTimeout(() => { hasAnimated.value = true; }, 1000);
+    });
+  }
 });
 </script>
 
@@ -93,7 +102,8 @@ onMounted(() => {
            - Final: Target visible (translateY = -SLOT_HEIGHT). -->
       <div 
         v-if="strip.length"
-        class="flex flex-col absolute top-0 left-0 w-full text-center transition-transform duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+        class="flex flex-col absolute top-0 left-0 w-full text-center transition-transform ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+        :class="hasAnimated ? 'duration-0' : 'duration-1000'"
         :style="{ 
           transform: mounted 
             ? `translateY(-${SLOT_HEIGHT}px)` 
