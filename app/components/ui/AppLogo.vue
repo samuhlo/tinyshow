@@ -128,11 +128,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-/**
- * [STYLES] :: SCOPED_OVERRIDES
- * La fuente Bariol Icons se aplica via inline style en el strip.
- * Los estilos scoped están vacíos pero reservados para futuras extensiones.
- */
-</style>
 

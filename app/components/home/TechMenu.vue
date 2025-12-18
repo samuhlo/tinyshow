@@ -175,11 +175,11 @@ onMounted(() => {
       :key="tech"
       :ref="(el) => setButtonRef(el as HTMLElement, index)"
       @click="emit('select', tech)"
-      class="tech-btn relative group flex items-center origin-left transition-colors duration-300"
+      class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
       :class="[
         viewMode === 'hero'
-          ? 'font-sans font-black uppercase text-6xl md:text-8xl tracking-tighter text-dark hover:text-accent' 
-          : 'font-sans text-2xl text-left',
+          ? 'font-sans font-black uppercase text-6xl md:text-8xl tracking-tighter text-dark hover:text-accent ' 
+          : 'font-sans text-2xl text-left ',
         viewMode === 'sidebar' && activeTech === tech
           ? 'text-dark'
           : viewMode === 'sidebar'
