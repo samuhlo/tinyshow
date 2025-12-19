@@ -51,8 +51,8 @@ export default defineCachedEventHandler(
     }
   },
   {
-    maxAge: 60 * 60, // 1 hour
-    swr: true,
+    maxAge: import.meta.dev ? 0 : 60 * 60, // 1 hour in prod, 0 in dev
+    swr: !import.meta.dev, // Disable SWR in dev
     name: "projects-list",
     getKey: (event) => {
       // Create a unique key based on query params to cache filtered results separately

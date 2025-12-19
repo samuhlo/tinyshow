@@ -26,6 +26,7 @@ const { data: technologies } = await useFetch<string[]>("/api/projects/techs", {
 });
 
 
+
 /**
  * [STATE] :: VIEW_MODE
  * Controla el layout actual de la página.
