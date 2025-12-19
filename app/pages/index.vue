@@ -16,7 +16,14 @@ import TechMenu from "~/components/home/TechMenu.vue";
  * [STATE] :: TECHNOLOGIES_LIST
  * Lista estática de tecnologías disponibles en el portfolio.
  */
-const technologies = ["Vue.js", "Nuxt", "React", "Astro", "Node.js"];
+/**
+ * [STATE] :: TECHNOLOGIES_LIST
+ * Lista de tecnologías obtenidas de la API.
+ */
+const { data: technologies } = await useFetch<string[]>("/api/projects/techs", {
+  default: () => [],
+});
+
 
 /**
  * [STATE] :: VIEW_MODE
@@ -69,7 +76,7 @@ const handleSelect = (tech: string) => {
         ]"
       >
         <TechMenu
-          :technologies="technologies"
+          :technologies="technologies || []"
           :active-tech="activeTech"
           :view-mode="viewMode"
           @select="handleSelect"

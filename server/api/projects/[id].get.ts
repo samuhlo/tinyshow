@@ -12,40 +12,51 @@ import { prisma } from "../../utils/prisma";
  * @throws {404} - Si el proyecto no existe
  * ----------------------------------------------------------------------
  */
-export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
+export default defineCachedEventHandler(
+  async (event) => {
+    const id = getRouterParam(event, "id");
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      message: "Missing project ID",
-    });
-  }
-
-  try {
-    const project = await prisma.project.findUnique({
-      where: { id },
-    });
-
-    if (!project) {
+    if (!id) {
       throw createError({
-        statusCode: 404,
-        statusMessage: "Not Found",
-        message: `Project with ID '${id}' not found`,
+        statusCode: 400,
+        statusMessage: "Bad Request",
+        message: "Missing project ID",
       });
     }
 
-    return project;
-  } catch (error: any) {
-    // If it's already an H3 error, rethrow it
-    if (error.statusCode) throw error;
+    try {
+      const project = await prisma.project.findUnique({
+        where: { id },
+      });
 
-    console.error(`[API] :: projects/${id} :: Error fetching project`, error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Internal Server Error",
-      message: error.message,
-    });
+      if (!project) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: "Not Found",
+          message: `Project with ID '${id}' not found`,
+        });
+      }
+
+      return project;
+    } catch (error: any) {
+      // If it's already an H3 error, rethrow it
+      if (error.statusCode) throw error;
+
+      console.error(`[API] :: projects/${id} :: Error fetching project`, error);
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        message: error.message,
+      });
+    }
+  },
+  {
+    maxAge: 60 * 60, // 1 hour
+    swr: true,
+    name: "project-detail",
+    getKey: (event) => {
+      const id = getRouterParam(event, "id");
+      return `project:${id}`;
+    },
   }
-});
+);

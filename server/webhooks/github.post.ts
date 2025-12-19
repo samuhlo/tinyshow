@@ -102,6 +102,31 @@ export default defineEventHandler(async (event) => {
 
   if (project) {
     await saveProject(project);
+
+    // [STEP 6] :: INVALIDATE_CACHE
+    // Remove cached entries to ensure freshness
+    try {
+      const storage = useStorage("cache");
+      const keys = await storage.getKeys("nitro:handlers:_");
+      const projectKeys = keys.filter(
+        (k) =>
+          k.includes("projects-list") ||
+          k.includes("project-detail") ||
+          k.includes("projects-techs")
+      );
+
+      for (const key of projectKeys) {
+        await storage.removeItem(key);
+      }
+      console.log(
+        `[CACHE] >> INVALIDATED   :: count: ${
+          projectKeys.length
+        } | keys: ${projectKeys.join(", ")}`
+      );
+    } catch (err) {
+      console.error("[CACHE] :: ERROR         :: Failed to clear cache", err);
+    }
+
     return { status: "success", project: project.title };
   } else {
     return {

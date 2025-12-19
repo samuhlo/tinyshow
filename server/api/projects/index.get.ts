@@ -13,36 +13,53 @@ import { prisma } from "../../utils/prisma";
  * @returns {Promise<Project[]>} - Lista de proyectos
  * ----------------------------------------------------------------------
  */
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const primaryTech = query.primary_tech as string | undefined;
-  // Default to 50 to avoid massive payloads, but allow override
-  const limit = query.limit ? parseInt(query.limit as string) : 50;
+export default defineCachedEventHandler(
+  async (event) => {
+    const query = getQuery(event);
+    const primaryTech = query.primary_tech as string | undefined;
+    // Default to 50 to avoid massive payloads, but allow override
+    const limit = query.limit ? parseInt(query.limit as string) : 50;
 
-  try {
-    const whereClause: any = {};
-    if (primaryTech) {
-      whereClause.primary_tech = {
-        equals: primaryTech,
-        mode: "insensitive", // Case insensitive search
-      };
+    try {
+      const whereClause: any = {};
+      if (primaryTech) {
+        whereClause.primary_tech = {
+          equals: primaryTech,
+          mode: "insensitive", // Case insensitive search
+        };
+      }
+
+      const projects = await prisma.project.findMany({
+        where: whereClause,
+        take: limit,
+        orderBy: {
+          updatedAt: "desc", // Show most recently updated first
+        },
+      });
+
+      return projects;
+    } catch (error: any) {
+      console.error(
+        "[API] :: projects/index :: Error fetching projects",
+        error
+      );
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        message: error.message,
+      });
     }
-
-    const projects = await prisma.project.findMany({
-      where: whereClause,
-      take: limit,
-      orderBy: {
-        updatedAt: "desc", // Show most recently updated first
-      },
-    });
-
-    return projects;
-  } catch (error: any) {
-    console.error("[API] :: projects/index :: Error fetching projects", error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Internal Server Error",
-      message: error.message,
-    });
+  },
+  {
+    maxAge: 60 * 60, // 1 hour
+    swr: true,
+    name: "projects-list",
+    getKey: (event) => {
+      // Create a unique key based on query params to cache filtered results separately
+      const query = getQuery(event);
+      const tech = query.primary_tech || "all";
+      const limit = query.limit || "50";
+      return `projects:${tech}:${limit}`;
+    },
   }
-});
+);
