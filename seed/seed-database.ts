@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Octokit } from "octokit";
-import { extractProjectData } from "../server/utils/deepseek";
+import { extractProjectData } from "../server/utils/ai";
 import { ingestProject } from "../server/utils/ingest";
 import { type Project } from "../shared/types";
 import { prisma } from "../server/utils/prisma";
@@ -91,6 +91,7 @@ async function main() {
       tagline: p.tagline as any, // Cast to any to satisfy InputJsonValue (it's valid JSON)
       description: p.description as any,
       tech_stack: p.tech_stack,
+      primary_tech: p.primary_tech,
       img_url: p.img_url,
       repo_url: p.repo_url,
       demo_url: p.demo_url,

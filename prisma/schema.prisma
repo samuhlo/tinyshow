@@ -7,15 +7,16 @@ datasource db {
 }
 
 model Project {
-  id          String   @id // Generated from repo slug (e.g. 'tinyshow-v2')
-  title       String
-  tagline     Json // { en: string, es: string }
-  description Json // { en: string, es: string }
-  tech_stack  String[]
-  img_url     String?
-  repo_url    String
-  demo_url    String?
-  origin      Json? // { is_course, name, author, url }
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id // Generated from repo slug (e.g. 'tinyshow-v2')
+  title        String
+  tagline      Json // { en: string, es: string }
+  description  Json // { en: string, es: string }
+  tech_stack   String[]
+  primary_tech String   @default("Unknown")
+  img_url      String?
+  repo_url     String
+  demo_url     String?
+  origin       Json? // { is_course, name, author, url }
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

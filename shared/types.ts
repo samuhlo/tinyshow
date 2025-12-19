@@ -13,6 +13,9 @@ export const ProjectSchema = z.object({
     "Emotional summary of the project in EN and ES"
   ),
   tech_stack: z.array(z.string()).describe("e.g. Vue, Tailwind"),
+  primary_tech: z
+    .string()
+    .describe("Main technology: e.g. Astro > TS, Nuxt > Vue, Next > React"),
   img_url: z.string().nullish().describe("Project image URL"),
   repo_url: z.string(),
   demo_url: z.string().nullish(),

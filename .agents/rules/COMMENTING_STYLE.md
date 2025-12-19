@@ -1,12 +1,12 @@
-# Estándar JSDoc: "The Blueprint Block"
+# Estándar TSDoc: "The Blueprint Block"
 
-Vamos a tratar cada bloque de comentarios como una ficha técnica. La clave aquí es la alineación vertical y el uso de etiquetas en mayúsculas para categorizar la lógica.
+Vamos a tratar cada bloque de comentarios como una ficha técnica. La clave aquí es la alineación vertical y el uso de etiquetas en mayúsculas para categorizar la lógica, aprovechando el sistema de tipos de TypeScript.
 
 ## 1. Cabecera de Componente (Vue/Nuxt)
 
 Para el inicio de tus archivos `.vue` o módulos `.ts`.
 
-```javascript
+```typescript
 /**
  * [COMPONENT] :: USER_PROFILE_CARD
  * ----------------------------------------------------------------------
@@ -21,11 +21,11 @@ Para el inicio de tus archivos `.vue` o módulos `.ts`.
 
 ## 2. Métodos y Funciones (La Lógica)
 
-Olvídate de las frases largas. Usa el formato `[VERBO] + [OBJETO]`. Alinea los tipos y las descripciones obsesivamente.
+Olvídate de las frases largas. Usa el formato `[VERBO] + [OBJETO]`. Alinea los parámetros y las descripciones obsesivamente. En TSDoc omitimos los tipos en el comentario (ya están en el código), pero mantenemos la estructura visual.
 
 ### Estilo Incorrecto (Amateur)
 
-```javascript
+```typescript
 /**
  * Esta función calcula el total del carrito y añade impuestos
  * si el usuario es de europa.
@@ -36,17 +36,17 @@ Olvídate de las frases largas. Usa el formato `[VERBO] + [OBJETO]`. Alinea los 
 
 ### Estilo Samuh Lo (Professional)
 
-```javascript
+```typescript
 /**
  * [CALC] :: PROCESS_CART_TOTAL
  * Computa el valor final aplicando tasas regionales.
  *
- * @param   {Object}  cart        - Estado actual del carrito (Store).
- * @param   {String}  regionCode  - Código ISO (ej: 'ES', 'FR').
- * @param   {Boolean} [isVat=true]- Aplica impuestos si es true.
+ * @param cart       - Estado actual del carrito (Store).
+ * @param regionCode - Código ISO (ej: 'ES', 'FR').
+ * @param isVat      - (Optional) Aplica impuestos si es true.
  *
- * @returns {Number}              - Total normalizado (2 decimales).
- * @throws  {Error}               - Si el carrito está vacío.
+ * @returns Total normalizado (2 decimales).
+ * @throws  {Error}  - Si el carrito está vacío.
  */
-const processCartTotal = (cart, regionCode, isVat = true) => { ... }
+const processCartTotal = (cart: Cart, regionCode: string, isVat: boolean = true): number => { ... }
 ```
