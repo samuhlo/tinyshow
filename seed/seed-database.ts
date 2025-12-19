@@ -4,6 +4,7 @@ import { extractProjectData } from "../server/utils/ai";
 import { ingestProject } from "../server/utils/ingest";
 import { type Project } from "../shared/types";
 import { prisma } from "../server/utils/prisma";
+import * as readline from "readline";
 
 /**
  * [SCRIPT] :: SEED_DATABASE
@@ -33,8 +34,31 @@ const username = GITHUB_USERNAME as string;
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
+async function askQuestion(query: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
 async function main() {
   console.log(`\n[SEED]  >> START         :: user: @${username}\n`);
+
+  const answer = await askQuestion(
+    "Enable strict mode (require img_url & demo_url)? [Y/n]: "
+  );
+  const strictMode = answer.toLowerCase() !== "n";
+
+  console.log(
+    `[CONF]  >> MODE          :: ${strictMode ? "STRICT" : "LENIENT"}\n`
+  );
 
   try {
     // [STEP 1] :: FETCH_REPOS
@@ -64,7 +88,13 @@ async function main() {
     // [STEP 2] :: PROCESS_SEQUENCE
     // Serial execution to be nice to DeepSeek/GitHub APIs
     for (const repo of sources) {
-      const project = await ingestProject(username, repo.name, octokit);
+      const project = await ingestProject(
+        username,
+        repo.name,
+        octokit,
+        "main",
+        strictMode
+      );
 
       if (project) {
         projects.push(project);

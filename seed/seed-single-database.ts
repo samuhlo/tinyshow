@@ -2,6 +2,7 @@ import "dotenv/config";
 import { Octokit } from "octokit";
 import { ingestProject, saveProject } from "../server/utils/ingest";
 import { prisma } from "../server/utils/prisma";
+import * as readline from "readline";
 
 /**
  * [SCRIPT] :: SEED_SINGLE
@@ -16,6 +17,20 @@ import { prisma } from "../server/utils/prisma";
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
+async function askQuestion(query: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
+
 async function main() {
   const repoUrl = process.argv[2];
 
@@ -27,6 +42,15 @@ async function main() {
   }
 
   console.log(`\n[SEED]  >> START         :: target: ${repoUrl}\n`);
+
+  const answer = await askQuestion(
+    "Enable strict mode (require img_url & demo_url)? [Y/n]: "
+  );
+  const strictMode = answer.toLowerCase() !== "n";
+
+  console.log(
+    `[CONF]  >> MODE          :: ${strictMode ? "STRICT" : "LENIENT"}\n`
+  );
 
   try {
     // [STEP 1] :: PARSE_URL
@@ -57,7 +81,13 @@ async function main() {
     }
 
     // [STEP 2] :: TRIGGER_INGESTION
-    const project = await ingestProject(owner, repo, octokit);
+    const project = await ingestProject(
+      owner,
+      repo,
+      octokit,
+      "main",
+      strictMode
+    );
 
     if (!project) {
       console.error("[ERR]   :: INGEST_FAIL   :: See logs above.");

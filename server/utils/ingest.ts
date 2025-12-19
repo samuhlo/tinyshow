@@ -31,10 +31,11 @@ export async function ingestProject(
   owner: string,
   repo: string,
   octokit: Octokit,
-  branch: string = "main"
+  branch: string = "main",
+  strictMode: boolean = true
 ): Promise<Project | null> {
   console.log(
-    `[INGEST] >> START        :: project: ${owner}/${repo} | branch: ${branch}`
+    `[INGEST] >> START        :: project: ${owner}/${repo} | branch: ${branch} | strict: ${strictMode}`
   );
 
   try {
@@ -59,7 +60,7 @@ export async function ingestProject(
         console.warn(
           `[WARN]  :: BRANCH_404    :: 'main' not found. Retrying with 'master'`
         );
-        return ingestProject(owner, repo, octokit, "master");
+        return ingestProject(owner, repo, octokit, "master", strictMode);
       }
 
       if (e.status === 404) {
@@ -86,10 +87,25 @@ export async function ingestProject(
 
     // 3. Quality Filters
     if (!projectData.demo_url || !projectData.img_url) {
-      console.warn(
-        `[DATA]  :: MISSING_ASSETS:: demo: ${!!projectData.demo_url} | img: ${!!projectData.img_url}`
-      );
-      return null;
+      const missing = [];
+      if (!projectData.demo_url) missing.push("demo_url");
+      if (!projectData.img_url) missing.push("img_url");
+
+      if (strictMode) {
+        console.warn(
+          `[DATA]  :: SKIP_STRICT   :: Missing assets: ${missing.join(", ")}`
+        );
+        return null;
+      } else {
+        console.warn(
+          `[DATA]  :: WARN_ALLOW    :: Missing assets: ${missing.join(
+            ", "
+          )} (Allowed by non-strict mode)`
+        );
+        // Fallback default image if missing? Or just leave null?
+        // System seems to expect them, but user wants to allow missing.
+        // Let's proceed with what we have.
+      }
     }
 
     const courseInfo = projectData.origin?.is_course
