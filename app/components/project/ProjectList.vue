@@ -13,6 +13,18 @@
 import { gsap } from "gsap";
 import ProjectRow from "./ProjectRow.vue";
 
+const ANIM_DURATION_WAVE = 0.8;
+const ANIM_STAGGER_WAVE = 0.1;
+const ANIM_INITIAL_Y_OFFSET = 50;
+const ANIM_DELAY = 0;
+const ANIM_EASE_OUT = "power3.out";
+
+const FLIP_SYNC_DELAY = 0.3;
+const PROJECT_LIMIT = 50;
+const LOADING_TEXT = "LOADING_DATA...";
+
+
+
 // =====================================================================
 // [SECTION] :: COMPONENT PROPS
 // =====================================================================
@@ -31,7 +43,7 @@ const props = defineProps<Props>();
 const { data: projects, pending, refresh } = await useFetch("/api/projects", {
   query: computed(() => ({
     primary_tech: props.tech,
-    limit: 50,
+    limit: PROJECT_LIMIT,
   })),
   watch: [() => props.tech],
 });
@@ -59,16 +71,16 @@ const animateEntrance = (delay: number = 0) => {
   gsap.fromTo(
     rows,
     {
-      y: 50,
+      y: ANIM_INITIAL_Y_OFFSET,
       opacity: 0,
     },
     {
       y: 0,
       opacity: 1,
-      duration: 0.8,
-      stagger: 0.1,
+      duration: ANIM_DURATION_WAVE,
+      stagger: ANIM_STAGGER_WAVE,
       delay: delay,
-      ease: "power3.out",
+      ease: ANIM_EASE_OUT,
     }
   );
 };
@@ -107,7 +119,7 @@ onMounted(async () => {
     // Wait for a tick to ensure DOM is ready
     await nextTick();
     // Add delay to sync with TechMenu FLIP animation (0.8s)
-    animateEntrance(0.3);
+    animateEntrance(FLIP_SYNC_DELAY);
   }
 });
 </script>
@@ -127,7 +139,7 @@ onMounted(async () => {
 
     <!-- Loading State -->
     <div v-if="pending" class="py-12 text-center">
-      <span class="text-mono-sm animate-pulse">LOADING_DATA...</span>
+      <span class="text-mono-sm animate-pulse">{{ LOADING_TEXT }}</span>
     </div>
 
     <!-- Empty State -->

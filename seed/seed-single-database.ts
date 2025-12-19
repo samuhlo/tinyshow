@@ -22,6 +22,9 @@ import * as readline from "readline";
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 const OCTOKIT = new Octokit({ auth: GITHUB_TOKEN });
 
+const DEFAULT_BRANCH = "main";
+const GITHUB_DOMAIN = "github.com";
+
 // =====================================================================
 // [SECTION] :: UTILITIES
 // =====================================================================
@@ -76,8 +79,8 @@ async function main() {
     let owner = "";
     let repo = "";
 
-    if (repoUrl.includes("github.com")) {
-      const splitResult = repoUrl.split("github.com/");
+    if (repoUrl.includes(GITHUB_DOMAIN)) {
+      const splitResult = repoUrl.split(`${GITHUB_DOMAIN}/`);
       const path = splitResult[1];
       if (path) {
         const parts = path.split("/");
@@ -104,7 +107,7 @@ async function main() {
       owner,
       repo,
       OCTOKIT,
-      "main",
+      DEFAULT_BRANCH,
       strictMode
     );
 

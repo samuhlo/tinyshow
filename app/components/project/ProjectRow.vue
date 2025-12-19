@@ -13,6 +13,21 @@
 
 import { gsap } from "gsap";
 
+const IMG_SCALE_INITIAL = 0.8;
+const IMG_SCALE_HOVER = 1;
+const IMG_OFFSET_X_FACTOR = 0.75;
+const TILT_X_FACTOR = 15;
+const TILT_Y_FACTOR = 8;
+const ANIM_DURATION_ENTER = 0.35;
+const ANIM_DURATION_EXIT = 0.2;
+const ANIM_DURATION_TILT = 0.3;
+const ANIM_EASE_ENTER = "power2.out";
+const ANIM_EASE_EXIT = "power2.in";
+const MARQUEE_BASE_DURATION = 12;
+const MARQUEE_MIN_DURATION = 8;
+const MARQUEE_ITEMS_COUNT = 12;
+
+
 // =====================================================================
 // [SECTION] :: COMPONENT INTERFACES
 // =====================================================================
@@ -50,9 +65,9 @@ const imagePosition = ref({ x: 0, y: 0 });
 // Calculate marquee duration based on title length for constant speed
 const marqueeDuration = computed(() => {
   const titleLength = props.project.title.length;
-  const baseDuration = 12; // seconds for average title
+  const baseDuration = MARQUEE_BASE_DURATION; // seconds for average title
   const factor = titleLength / 20; // average title length
-  return Math.max(baseDuration * factor, 8); // minimum 5s
+  return Math.max(baseDuration * factor, MARQUEE_MIN_DURATION); // minimum 5s
 });
 
 // Store active timeline to kill on new hover
@@ -70,7 +85,7 @@ const updateImagePosition = () => {
   if (!rowRef.value) return;
   const rect = rowRef.value.getBoundingClientRect();
   imagePosition.value = {
-    x: rect.left + rect.width * 0.75, // 75% to the right
+    x: rect.left + rect.width * IMG_OFFSET_X_FACTOR, // 75% to the right
     y: rect.top + rect.height / 2,
   };
 };
@@ -98,11 +113,12 @@ const handleMouseEnter = async () => {
     activeTimeline = gsap.timeline();
     activeTimeline.fromTo(
       imageRef.value,
-      { scale: 0.8, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.35, ease: "power2.out" }
+      { scale: IMG_SCALE_INITIAL, opacity: 0 },
+      { scale: IMG_SCALE_HOVER, opacity: 1, duration: ANIM_DURATION_ENTER, ease: ANIM_EASE_ENTER }
     );
   }
 };
+
 
 /**
  * [HANDLE] :: ON_MOUSE_LEAVE
@@ -127,10 +143,10 @@ const handleMouseLeave = () => {
   });
 
   activeTimeline.to(imageRef.value, {
-    scale: 0.8,
+    scale: IMG_SCALE_INITIAL,
     opacity: 0,
-    duration: 0.2,
-    ease: "power2.in",
+    duration: ANIM_DURATION_EXIT,
+    ease: ANIM_EASE_EXIT,
   });
 };
 
@@ -150,10 +166,10 @@ const handleMouseMove = (event: MouseEvent) => {
   const offsetY = (event.clientY - centerY) / (rect.height / 2);
 
   gsap.to(imageRef.value, {
-    x: offsetX * 15,
-    y: offsetY * 8,
-    duration: 0.3,
-    ease: "power2.out",
+    x: offsetX * TILT_X_FACTOR,
+    y: offsetY * TILT_Y_FACTOR,
+    duration: ANIM_DURATION_TILT,
+    ease: ANIM_EASE_ENTER,
     overwrite: "auto",
   });
 };
@@ -222,7 +238,7 @@ onUnmounted(() => {
           :style="{ animationDuration: `${marqueeDuration}s` }"
         >
           <span
-            v-for="n in 12"
+            v-for="n in MARQUEE_ITEMS_COUNT"
             :key="n"
             class="marquee-item text-light/80 text-sm font-mono mx-6 tracking-wide"
           >

@@ -42,9 +42,14 @@ export const extractProjectData = async (
     throw new Error("Missing NUXT_DEEPSEEK_API_KEY");
   }
 
+  const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
+  const DEEPSEEK_MODEL = "deepseek-chat";
+  const MAX_README_CHARS = 15000;
+  const TEMPERATURE = 0.1;
+
   const openai = new OpenAI({
     apiKey: apiKey as string,
-    baseURL: "https://api.deepseek.com",
+    baseURL: DEEPSEEK_BASE_URL,
   });
 
   const jsonSchema = ProjectSchema.toJSONSchema();
@@ -78,13 +83,13 @@ CRITICAL: Return ONLY valid JSON. No Markdown code fences.
           role: "user",
           content: `Repository URL: ${repoUrl}\n\n${readmeContent.substring(
             0,
-            15000
+            MAX_README_CHARS
           )}`,
         }, // Truncate to avoid context limits if huge
       ],
-      model: "deepseek-chat",
+      model: DEEPSEEK_MODEL,
       response_format: { type: "json_object" },
-      temperature: 0.1, // Low temp for precision
+      temperature: TEMPERATURE, // Low temp for precision
     });
 
     const content = completion.choices[0]?.message?.content;

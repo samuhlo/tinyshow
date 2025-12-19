@@ -30,11 +30,18 @@ import { prisma } from "./prisma";
  *
  * @returns Proyecto procesado o null si falla.
  */
+const DEFAULT_BRANCH = "main";
+const FALLBACK_BRANCH = "master";
+const MIN_README_LENGTH = 50;
+const ENDPOINT_README = "GET /repos/{owner}/{repo}/readme";
+const MEDIA_TYPE_RAW = "raw";
+const GITHUB_BASE_URL = "https://github.com";
+
 export async function ingestProject(
   owner: string,
   repo: string,
   octokit: Octokit,
-  branch: string = "main",
+  branch: string = DEFAULT_BRANCH,
   strictMode: boolean = true
 ): Promise<Project | null> {
   console.log(
@@ -45,25 +52,22 @@ export async function ingestProject(
     // 1. Fetch README
     let readmeContent = "";
     try {
-      const { data: readme } = await octokit.request(
-        "GET /repos/{owner}/{repo}/readme",
-        {
-          owner,
-          repo,
-          ref: branch,
-          mediaType: {
-            format: "raw",
-          },
-        }
-      );
+      const { data: readme } = await octokit.request(ENDPOINT_README, {
+        owner,
+        repo,
+        ref: branch,
+        mediaType: {
+          format: MEDIA_TYPE_RAW,
+        },
+      });
       readmeContent = readme as unknown as string;
     } catch (e: any) {
       // Fallback: Try 'master' if 'main' failed and we haven't tried it yet
-      if (branch === "main" && e.status === 404) {
+      if (branch === DEFAULT_BRANCH && e.status === 404) {
         console.warn(
-          `[WARN]  :: BRANCH_404    :: 'main' not found. Retrying with 'master'`
+          `[WARN]  :: BRANCH_404    :: '${DEFAULT_BRANCH}' not found. Retrying with '${FALLBACK_BRANCH}'`
         );
-        return ingestProject(owner, repo, octokit, "master", strictMode);
+        return ingestProject(owner, repo, octokit, FALLBACK_BRANCH, strictMode);
       }
 
       if (e.status === 404) {
@@ -73,7 +77,7 @@ export async function ingestProject(
       throw e;
     }
 
-    if (!readmeContent || readmeContent.length < 50) {
+    if (!readmeContent || readmeContent.length < MIN_README_LENGTH) {
       console.warn(
         `[WARN]  :: SHORT_README  :: size: ${readmeContent.length} chars (min: 50). Skipping.`
       );
@@ -81,7 +85,7 @@ export async function ingestProject(
     }
 
     // 2. AI Extraction
-    const htmlUrl = `https://github.com/${owner}/${repo}`;
+    const htmlUrl = `${GITHUB_BASE_URL}/${owner}/${repo}`;
     console.log(
       `[ANLZ]  >> README.md     :: size: ${readmeContent.length} chars | status: AI_PROCESSING`
     );

@@ -21,20 +21,36 @@ const WEBHOOK_SECRET = process.env.NUXT_GITHUB_WEBHOOK_SECRET;
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 
 // =====================================================================
+const METHOD_POST = "POST";
+const HEADER_SIGNATURE = "x-hub-signature-256";
+const HEADER_EVENT = "x-github-event";
+
+const EVENT_PING = "ping";
+const EVENT_PUSH = "push";
+
+const HTTP_METHOD_NOT_ALLOWED = 405;
+const HTTP_UNAUTHORIZED = 401;
+const HTTP_BAD_REQUEST = 400;
+
+const HASH_ALGO = "sha256";
+const REF_PREFIX = "refs/heads/";
+const README_FILE = "README.md";
+
+// =====================================================================
 // [SECTION] :: EVENT HANDLER
 // =====================================================================
 
 export default defineEventHandler(async (event) => {
   // [STEP 1] :: VERIFY_METHOD
-  if (event.method !== "POST") {
+  if (event.method !== METHOD_POST) {
     throw createError({
-      statusCode: 405,
+      statusCode: HTTP_METHOD_NOT_ALLOWED,
       statusMessage: "Method Not Allowed",
     });
   }
 
   // [STEP 2] :: VERIFY_SIGNATURE
-  const signature = getHeader(event, "x-hub-signature-256");
+  const signature = getHeader(event, HEADER_SIGNATURE);
   const body = await readRawBody(event);
 
   if (!WEBHOOK_SECRET) {
@@ -43,16 +59,16 @@ export default defineEventHandler(async (event) => {
     );
   } else if (!signature || !body) {
     throw createError({
-      statusCode: 401,
+      statusCode: HTTP_UNAUTHORIZED,
       statusMessage: "Missing signature or body",
     });
   } else {
     // Verify HMAC
-    const hmac = crypto.createHmac("sha256", WEBHOOK_SECRET);
-    const digest = "sha256=" + hmac.update(body).digest("hex");
+    const hmac = crypto.createHmac(HASH_ALGO, WEBHOOK_SECRET);
+    const digest = `${HASH_ALGO}=` + hmac.update(body).digest("hex");
     if (signature !== digest) {
       throw createError({
-        statusCode: 401,
+        statusCode: HTTP_UNAUTHORIZED,
         statusMessage: "Invalid signature",
       });
     }
@@ -60,13 +76,13 @@ export default defineEventHandler(async (event) => {
 
   // [STEP 3] :: PARSE_PAYLOAD
   const payload = JSON.parse(body || "{}");
-  const eventType = getHeader(event, "x-github-event");
+  const eventType = getHeader(event, HEADER_EVENT);
 
-  if (eventType === "ping") {
+  if (eventType === EVENT_PING) {
     return { status: "pong" };
   }
 
-  if (eventType !== "push") {
+  if (eventType !== EVENT_PUSH) {
     return { status: "ignored", message: "Not a push event" };
   }
 
@@ -76,7 +92,7 @@ export default defineEventHandler(async (event) => {
 
   for (const commit of commits) {
     const changes = [...commit.added, ...commit.modified];
-    if (changes.some((file: string) => file === "README.md")) {
+    if (changes.some((file: string) => file === README_FILE)) {
       readmeChanged = true;
       break; // One change is enough
     }
@@ -97,7 +113,7 @@ export default defineEventHandler(async (event) => {
 
   const owner = repo.owner.name || repo.owner.login; // GitHub payload can vary
   const repoName = repo.name;
-  const branch = payload.ref.replace("refs/heads/", "");
+  const branch = payload.ref.replace(REF_PREFIX, "");
 
   console.log(
     `[HOOK]  :: TRIGGER_REC   :: source: ${owner}/${repoName} | branch: ${branch}`

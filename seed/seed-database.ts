@@ -23,6 +23,9 @@ import * as readline from "readline";
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
 const GITHUB_USERNAME = process.argv[2] || process.env.GITHUB_USERNAME;
 
+const DEFAULT_PER_PAGE = 100;
+const DEFAULT_BRANCH = "main";
+
 if (!GITHUB_TOKEN) {
   console.error(
     "[ERR]   :: MISSING_ENV   :: GITHUB_SEED_TOKEN is missing in .env"
@@ -82,7 +85,7 @@ async function main() {
         type: "owner",
         sort: "updated",
         direction: "desc",
-        per_page: 100,
+        per_page: DEFAULT_PER_PAGE,
       }
     );
 
@@ -100,7 +103,7 @@ async function main() {
         USERNAME,
         repo.name,
         OCTOKIT,
-        "main",
+        DEFAULT_BRANCH,
         strictMode
       );
 

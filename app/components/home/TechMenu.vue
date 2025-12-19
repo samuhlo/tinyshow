@@ -15,6 +15,20 @@ import { Flip } from "gsap/Flip";
 
 gsap.registerPlugin(Flip);
 
+const VIEW_HERO = "hero";
+const VIEW_SIDEBAR = "sidebar";
+
+const ANIM_FLIP_DURATION = 0.8;
+const ANIM_FLIP_STAGGER = 0.15;
+const ANIM_INDICATOR_DURATION = 0.5;
+const ANIM_HIDE_DURATION = 0.3;
+const ANIM_FADE_IN_DURATION = 0.4;
+
+const EASE_EXPO_OUT = "expo.out";
+const EASE_POWER2_IN = "power2.in";
+const EASE_POWER2_OUT = "power2.out";
+
+
 // =====================================================================
 // [SECTION] :: COMPONENT PROPS & EMITS
 // =====================================================================
@@ -58,7 +72,7 @@ const setButtonRef = (el: HTMLElement | null, index: number) => {
  * Desplaza el indicador visual hacia el botón de la tecnología activa.
  */
 const animateIndicator = () => {
-  if (!indicatorRef.value || !props.activeTech || props.viewMode !== "sidebar") return;
+  if (!indicatorRef.value || !props.activeTech || props.viewMode !== VIEW_SIDEBAR) return;
 
   const activeIndex = props.technologies.indexOf(props.activeTech);
   if (activeIndex === -1) return;
@@ -76,8 +90,8 @@ const animateIndicator = () => {
     y: targetY,
     opacity: 1,
     scaleY: 1,
-    duration: 0.5,
-    ease: "expo.out",
+    duration: ANIM_INDICATOR_DURATION,
+    ease: EASE_EXPO_OUT,
   });
 };
 
@@ -91,8 +105,8 @@ const hideIndicator = () => {
   gsap.to(indicatorRef.value, {
     opacity: 0,
     scaleY: 0,
-    duration: 0.3,
-    ease: "power2.in",
+    duration: ANIM_HIDE_DURATION,
+    ease: EASE_POWER2_IN,
   });
 };
 
@@ -121,16 +135,16 @@ watch(
     // FLIP animation con stagger y easing premium
     tl.add(
       Flip.from(state, {
-        duration: 0.8,
-        ease: "expo.out",
+        duration: ANIM_FLIP_DURATION,
+        ease: EASE_EXPO_OUT,
         stagger: {
-          amount: 0.15,
+          amount: ANIM_FLIP_STAGGER,
           from: "start",
         },
         absolute: true,
         onComplete: () => {
           // Anima el indicador después de que los botones estén en su lugar
-          if (newMode === "sidebar") {
+          if (newMode === VIEW_SIDEBAR) {
             setTimeout(animateIndicator, 50);
           }
         },
@@ -138,19 +152,19 @@ watch(
     );
 
     // Si cambiamos a hero, oculta el indicador
-    if (newMode === "hero") {
+    if (newMode === VIEW_HERO) {
       hideIndicator();
     }
 
     // Animación de entrada para los colores en modo sidebar
-    if (newMode === "sidebar") {
+    if (newMode === VIEW_SIDEBAR) {
       tl.to(
         buttons,
         {
           opacity: 1,
-          duration: 0.4,
+          duration: ANIM_FADE_IN_DURATION,
           stagger: 0.05,
-          ease: "power2.out",
+          ease: EASE_POWER2_OUT,
         },
         "-=0.4"
       );
@@ -162,7 +176,7 @@ watch(
 watch(
   () => props.activeTech,
   async (newTech, oldTech) => {
-    if (props.viewMode !== "sidebar" || !newTech) return;
+    if (props.viewMode !== VIEW_SIDEBAR || !newTech) return;
 
     await nextTick();
     animateIndicator();
@@ -195,7 +209,7 @@ onMounted(() => {
     <span
       ref="indicatorRef"
       class="absolute left-0 w-1 h-8 bg-accent origin-center"
-      :class="viewMode === 'sidebar' ? 'block' : 'hidden'"
+      :class="viewMode === VIEW_SIDEBAR ? 'block' : 'hidden'"
       style="top: 0"
     ></span>
 
@@ -206,12 +220,12 @@ onMounted(() => {
       @click="emit('select', tech)"
       class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
       :class="[
-        viewMode === 'hero'
+        viewMode === VIEW_HERO
           ? 'font-sans font-black uppercase text-6xl md:text-8xl tracking-tighter text-dark hover:text-accent ' 
           : 'font-sans text-2xl text-left ',
-        viewMode === 'sidebar' && activeTech === tech
+        viewMode === VIEW_SIDEBAR && activeTech === tech
           ? 'text-dark'
-          : viewMode === 'sidebar'
+          : viewMode === VIEW_SIDEBAR
           ? 'text-gray-400 hover:text-dark'
           : '',
       ]"

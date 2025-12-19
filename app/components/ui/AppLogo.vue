@@ -15,20 +15,26 @@
 // [SECTION] :: CONFIGURATION
 // =====================================================================
 
-const CHARS_ALPHABET = 'abcdefghijklmnoprstuvwxyz.,?/;:-=1234567890_+';
-const SLOT_HEIGHT    = 50;
-const REEL_LENGTH    = 10;
+const CHARS_ALPHABET = "abcdefghijklmnoprstuvwxyz.,?/;:-=1234567890_+";
+const SLOT_HEIGHT = 50;
+const REEL_LENGTH = 10;
+const ANIMATION_DURATION_MS = 1000;
+const STATE_ANIMATED_KEY = "app-logo-animated";
+const STATE_CHAR_KEY = "app-logo-char";
+const FONT_FAMILY_ICONS = "'Bariol Icons', sans-serif";
+const EASING_CUBIC = "cubic-bezier(0.34,1.56,0.64,1)";
+
 
 // =====================================================================
 // [SECTION] :: COMPONENT STATE
 // =====================================================================
 
-const strip   = ref<string[]>([]);
+const strip = ref<string[]>([]);
 const mounted = ref(false);
-const hasAnimated = useState<boolean>('app-logo-animated', () => false);
+const hasAnimated = useState<boolean>(STATE_ANIMATED_KEY, () => false);
 
 // Persist selection across navigations
-const activeChar = useState<string>('app-logo-char', () => '');
+const activeChar = useState<string>(STATE_CHAR_KEY, () => "");
 
 // =====================================================================
 // [SECTION] :: LOGIC UTILS
@@ -64,7 +70,9 @@ onMounted(() => {
 
     requestAnimationFrame(() => {
       mounted.value = true;
-      setTimeout(() => { hasAnimated.value = true; }, 1000);
+      setTimeout(() => {
+        hasAnimated.value = true;
+      }, ANIMATION_DURATION_MS);
     });
   }
 });
@@ -87,13 +95,14 @@ onMounted(() => {
            - Final: Target visible (translateY = -SLOT_HEIGHT). -->
       <div 
         v-if="strip.length"
-        class="flex flex-col absolute top-0 left-0 w-full text-center transition-transform ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+        class="flex flex-col absolute top-0 left-0 w-full text-center transition-transform"
         :class="hasAnimated ? 'duration-0' : 'duration-1000'"
-        :style="{ 
-          transform: mounted 
-            ? `translateY(-${SLOT_HEIGHT}px)` 
+        :style="{
+          transform: mounted
+            ? `translateY(-${SLOT_HEIGHT}px)`
             : `translateY(-${SLOT_HEIGHT * (strip.length - 1)}px)`,
-          fontFamily: '\'Bariol Icons\', sans-serif'
+          fontFamily: FONT_FAMILY_ICONS,
+          transitionTimingFunction: EASING_CUBIC,
         }"
       >
         <!-- [SLOT] :: ICON_CELL

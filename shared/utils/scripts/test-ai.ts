@@ -15,6 +15,11 @@ import { config } from "dotenv";
 // Load environment variables locally
 config();
 
+const GITHUB_DOMAIN = "github.com";
+const RAW_GITHUB_BASE = "https://raw.githubusercontent.com";
+const DEFAULT_BRANCH = "main";
+const FALLBACK_BRANCH = "master";
+
 // =====================================================================
 // [SECTION] :: UTILITIES
 // =====================================================================
@@ -61,12 +66,12 @@ async function main() {
   try {
     // 1. Convert GitHub URL to Raw README URL
     let rawUrl = repoUrl;
-    if (repoUrl.includes("github.com")) {
-      const parts = repoUrl.split("github.com/")[1]?.split("/");
+    if (repoUrl.includes(GITHUB_DOMAIN)) {
+      const parts = repoUrl.split(`${GITHUB_DOMAIN}/`)[1]?.split("/");
       if (parts && parts.length >= 2) {
         const user = parts[0];
         const repo = parts[1];
-        rawUrl = `https://raw.githubusercontent.com/${user}/${repo}/main/README.md`;
+        rawUrl = `${RAW_GITHUB_BASE}/${user}/${repo}/${DEFAULT_BRANCH}/README.md`;
       }
     }
 
@@ -74,11 +79,11 @@ async function main() {
     const res = await fetch(rawUrl);
 
     if (!res.ok) {
-      if (rawUrl.includes("/main/")) {
+      if (rawUrl.includes(`/${DEFAULT_BRANCH}/`)) {
         console.warn(
-          "[WARN]  :: BRANCH_404    :: 'main' not found. Retrying with 'master'..."
+          `[WARN]  :: BRANCH_404    :: '${DEFAULT_BRANCH}' not found. Retrying with '${FALLBACK_BRANCH}'...`
         );
-        rawUrl = rawUrl.replace("/main/", "/master/");
+        rawUrl = rawUrl.replace(`/${DEFAULT_BRANCH}/`, `/${FALLBACK_BRANCH}/`);
         const res2 = await fetch(rawUrl);
         if (!res2.ok)
           throw new Error(`Failed to fetch README: ${res2.statusText}`);

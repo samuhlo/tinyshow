@@ -19,8 +19,11 @@ interface Props {
   theme?: "light" | "dark";
 }
 
+const THEME_LIGHT = "light";
+const THEME_DARK = "dark";
+
 withDefaults(defineProps<Props>(), {
-  theme: "light",
+  theme: THEME_LIGHT,
 });
 </script>
 
@@ -28,7 +31,7 @@ withDefaults(defineProps<Props>(), {
   <span
     class="inline-block px-2 py-0.5 text-xs font-mono border rounded-full transition-colors duration-200"
     :class="[
-      theme === 'light'
+      theme === THEME_LIGHT
         ? 'border-dark text-dark'
         : 'border-white text-white',
     ]"

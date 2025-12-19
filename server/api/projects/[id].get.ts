@@ -15,13 +15,21 @@ import { prisma } from "../../utils/prisma";
 // [SECTION] :: ENDPOINT HANDLER
 // =====================================================================
 
+const PARAM_ID = "id";
+const CACHE_MAX_AGE = 60 * 60; // 1 hour
+const NO_CACHE = 0;
+
+const HTTP_BAD_REQUEST = 400;
+const HTTP_NOT_FOUND = 404;
+const HTTP_INTERNAL_ERROR = 500;
+
 export default defineCachedEventHandler(
   async (event) => {
-    const id = getRouterParam(event, "id");
+    const id = getRouterParam(event, PARAM_ID);
 
     if (!id) {
       throw createError({
-        statusCode: 400,
+        statusCode: HTTP_BAD_REQUEST,
         statusMessage: "Bad Request",
         message: "Missing project ID",
       });
@@ -34,7 +42,7 @@ export default defineCachedEventHandler(
 
       if (!project) {
         throw createError({
-          statusCode: 404,
+          statusCode: HTTP_NOT_FOUND,
           statusMessage: "Not Found",
           message: `Project with ID '${id}' not found`,
         });
@@ -47,18 +55,18 @@ export default defineCachedEventHandler(
 
       console.error(`[API] :: projects/${id} :: Error fetching project`, error);
       throw createError({
-        statusCode: 500,
+        statusCode: HTTP_INTERNAL_ERROR,
         statusMessage: "Internal Server Error",
         message: error.message,
       });
     }
   },
   {
-    maxAge: import.meta.dev ? 0 : 60 * 60, // 1 hour in prod, 0 in dev
+    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hour in prod, 0 in dev
     swr: !import.meta.dev, // Disable SWR in dev
     name: "project-detail",
     getKey: (event) => {
-      const id = getRouterParam(event, "id");
+      const id = getRouterParam(event, PARAM_ID);
       return `project:${id}`;
     },
   }

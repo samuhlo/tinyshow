@@ -17,12 +17,15 @@ const switchLocalePath = useSwitchLocalePath();
 // [SECTION] :: INTERACTION HANDLERS
 // =====================================================================
 
+const LOCALE_EN = "en";
+const LOCALE_ES = "es";
+
 /**
  * [HANDLE] :: TOGGLE_LOCALE
  * Alterna el idioma de la aplicación y navega a la ruta equivalente.
  */
 const toggleLocale = async () => {
-  const newLocale = locale.value === "en" ? "es" : "en";
+  const newLocale = locale.value === LOCALE_EN ? LOCALE_ES : LOCALE_EN;
   await navigateTo(switchLocalePath(newLocale));
 };
 </script>
@@ -35,12 +38,12 @@ const toggleLocale = async () => {
   >
     <span
       class="inline-block hover:scale-110 hover:text-accent transition-all duration-300"
-      :class="{ 'font-extrabold text-accent': locale === 'es' }"
+      :class="{ 'font-extrabold text-accent': locale === LOCALE_ES }"
     >ES</span>
     <span class="mx-1 ">//</span>
     <span
       class="inline-block hover:scale-110 hover:text-accent transition-all duration-300"
-      :class="{ 'font-extrabold text-accent': locale === 'en' }"
+      :class="{ 'font-extrabold text-accent': locale === LOCALE_EN }"
     >EN</span>
   </button>
 </template>

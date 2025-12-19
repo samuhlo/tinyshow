@@ -34,7 +34,14 @@ const { data: technologies } = await useFetch<string[]>("/api/projects/techs", {
  * [STATE] :: VIEW_MODE
  * Controla el layout actual de la página (hero | sidebar).
  */
-const viewMode = ref<"hero" | "sidebar">("hero");
+const VIEW_HERO = "hero";
+const VIEW_SIDEBAR = "sidebar";
+
+/**
+ * [STATE] :: VIEW_MODE
+ * Controla el layout actual de la página (hero | sidebar).
+ */
+const viewMode = ref<typeof VIEW_HERO | typeof VIEW_SIDEBAR>(VIEW_HERO);
 
 /**
  * [STATE] :: ACTIVE_TECH
@@ -56,8 +63,8 @@ const activeTech = ref<string | null>(null);
 const handleSelect = (tech: string) => {
   activeTech.value = tech;
   
-  if (viewMode.value === "hero") {
-    viewMode.value = "sidebar";
+  if (viewMode.value === VIEW_HERO) {
+    viewMode.value = VIEW_SIDEBAR;
   }
 };
 </script>
@@ -68,7 +75,7 @@ const handleSelect = (tech: string) => {
     <div
       class="min-h-[80vh] transition-all duration-500"
       :class="[
-        viewMode === 'hero'
+        viewMode === VIEW_HERO
           ? 'flex flex-col items-center justify-center'
           : 'grid grid-cols-1 md:grid-cols-12 gap-10 items-start'
       ]"
@@ -76,7 +83,7 @@ const handleSelect = (tech: string) => {
       <!-- Navigation Wrapper -->
       <aside
         :class="[
-          viewMode === 'hero'
+          viewMode === VIEW_HERO
             ? 'w-full flex justify-center'
             : 'md:col-span-3 lg:col-span-2 pt-0'
         ]"
@@ -91,7 +98,7 @@ const handleSelect = (tech: string) => {
 
       <!-- Content Area (Only visible in sidebar mode) -->
       <section
-        v-if="viewMode === 'sidebar'"
+        v-if="viewMode === VIEW_SIDEBAR"
         class="md:col-start-5 md:col-span-8 lg:col-start-5 lg:col-span-8 pt-0"
       >
         <ProjectList :tech="activeTech" />

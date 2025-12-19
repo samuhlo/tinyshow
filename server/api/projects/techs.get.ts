@@ -15,6 +15,10 @@ import { prisma } from "../../utils/prisma";
 // [SECTION] :: ENDPOINT HANDLER
 // =====================================================================
 
+const CACHE_MAX_AGE = 60 * 60; // 1 hour
+const NO_CACHE = 0;
+const HTTP_INTERNAL_ERROR = 500;
+
 export default defineCachedEventHandler(
   async (event) => {
     try {
@@ -34,14 +38,14 @@ export default defineCachedEventHandler(
     } catch (error: any) {
       console.error("[API] :: projects/techs :: Error fetching techs", error);
       throw createError({
-        statusCode: 500,
+        statusCode: HTTP_INTERNAL_ERROR,
         statusMessage: "Internal Server Error",
         message: error.message,
       });
     }
   },
   {
-    maxAge: import.meta.dev ? 0 : 60 * 60, // 1 hour in prod, 0 in dev
+    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hour in prod, 0 in dev
     swr: !import.meta.dev, // Disable SWR in dev
     name: "projects-techs",
     getKey: () => "techs",

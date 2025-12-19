@@ -18,20 +18,25 @@ import crypto from "crypto";
 
 const SECRET = process.env.NUXT_GITHUB_WEBHOOK_SECRET || "tu_secreto_brutal";
 const TARGET_URL = "http://localhost:3000/api/webhooks/github";
+const REF_MAIN = "refs/heads/main";
+const HASH_ALGO = "sha256";
+const EVENT_TYPE = "push";
+const DEFAULT_REPO = "tiny-showcase";
+const DEFAULT_OWNER = "samuhlo";
 
 /**
  * [DATA] :: MOCK_PAYLOAD
  * Simulación de un evento 'push' que modifica el archivo README.md.
  */
 const MOCK_PAYLOAD = {
-  ref: "refs/heads/main",
+  ref: REF_MAIN,
   repository: {
-    name: "tiny-showcase",
-    full_name: "samuhlo/tiny-showcase",
+    name: DEFAULT_REPO,
+    full_name: `${DEFAULT_OWNER}/${DEFAULT_REPO}`,
     owner: {
-      name: "samuhlo",
+      name: DEFAULT_OWNER,
     },
-    html_url: "https://github.com/samuhlo/tiny-showcase",
+    html_url: `https://github.com/${DEFAULT_OWNER}/${DEFAULT_REPO}`,
   },
   commits: [
     {
@@ -53,8 +58,8 @@ const MOCK_PAYLOAD = {
  */
 async function testWebhook() {
   const body = JSON.stringify(MOCK_PAYLOAD);
-  const hmac = crypto.createHmac("sha256", SECRET);
-  const signature = "sha256=" + hmac.update(body).digest("hex");
+  const hmac = crypto.createHmac(HASH_ALGO, SECRET);
+  const signature = `${HASH_ALGO}=` + hmac.update(body).digest("hex");
 
   console.log(`[TEST]  -> OUTBOUND      :: target: ${TARGET_URL}`);
   console.log(`[TEST]  :: SIGNATURE     :: ${signature}`);
@@ -65,7 +70,7 @@ async function testWebhook() {
       headers: {
         "Content-Type": "application/json",
         "x-hub-signature-256": signature,
-        "x-github-event": "push",
+        "x-github-event": EVENT_TYPE,
       },
       body: body,
     });
