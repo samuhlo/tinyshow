@@ -90,7 +90,7 @@ onMounted(async () => {
     // Wait for a tick to ensure DOM is ready
     await nextTick();
     // Add delay to sync with TechMenu FLIP animation (0.8s)
-    animateEntrance(0.6);
+    animateEntrance(0.3);
   }
 });
 </script>
