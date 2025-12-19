@@ -11,6 +11,7 @@
  * ----------------------------------------------------------------------
  */
 import TechMenu from "~/components/home/TechMenu.vue";
+import ProjectList from "~/components/project/ProjectList.vue";
 
 /**
  * [STATE] :: TECHNOLOGIES_LIST
@@ -86,14 +87,9 @@ const handleSelect = (tech: string) => {
       <!-- Content Area (Only visible in sidebar mode) -->
       <section
         v-if="viewMode === 'sidebar'"
-        class="md:col-span-9 lg:col-span-10 pt-0 opacity-0 animate-fade-in"
-        :style="{ animationFillMode: 'forwards', animationDelay: '0.3s' }"
+        class="md:col-start-5 md:col-span-8 lg:col-start-5 lg:col-span-8 pt-0"
       >
-         <!-- Content placeholder -->
-         <div class="prose dark:prose-invert">
-            <h1>{{ activeTech }} Projects</h1>
-            <p>Project list coming soon...</p>
-         </div>
+        <ProjectList :tech="activeTech" />
       </section>
     </div>
   </NuxtLayout>
