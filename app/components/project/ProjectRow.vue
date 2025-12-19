@@ -1,20 +1,26 @@
 <script setup lang="ts">
+import { gsap } from "gsap";
+
 /**
  * [COMPONENT] :: ProjectRow
  * ----------------------------------------------------------------------
- * Represents a single project in the list.
+ * Represents a single project in the list with interactive hover effects.
  * Follows the "Structural & Raw" design philosophy.
  *
- * Layout: Index (01) | Title | Arrow (->)
+ * Features:
+ * - Image preview with GSAP entrance animation (teleported to body)
+ * - Subtle tilt effect following mouse position
+ * - Blur overlay on background content
+ * - Scrolling "View project" marquee
  *
- * @param {Object} project - Project data
+ * @param {Object} project - Project data including img_url
  * @param {Number} index - Display index (0-based)
  */
 
 interface Project {
   id: string;
   title: string;
-  // Add other properties as needed from your Prisma model
+  img_url?: string | null;
 }
 
 interface Props {
@@ -28,48 +34,217 @@ const props = defineProps<Props>();
 const formattedIndex = computed(() => {
   return (props.index + 1).toString().padStart(2, "0");
 });
+
+// Hover state
+const isHovering = ref(false);
+const rowRef = ref<HTMLElement | null>(null);
+const imageRef = ref<HTMLElement | null>(null);
+
+// Image position (calculated from row position)
+const imagePosition = ref({ x: 0, y: 0 });
+
+// Store active timeline to kill on new hover
+let activeTimeline: gsap.core.Timeline | null = null;
+
+/**
+ * Calculate image position based on row center
+ */
+const updateImagePosition = () => {
+  if (!rowRef.value) return;
+  const rect = rowRef.value.getBoundingClientRect();
+  imagePosition.value = {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+};
+
+/**
+ * Handle mouse enter - show overlay immediately, animate image
+ */
+const handleMouseEnter = async () => {
+  // Kill any previous animation to prevent glitches
+  if (activeTimeline) {
+    activeTimeline.kill();
+    activeTimeline = null;
+  }
+
+  // Calculate position before showing
+  updateImagePosition();
+  isHovering.value = true;
+
+  // Wait for DOM to update after v-if becomes true
+  await nextTick();
+
+  // Only animate the image (overlay appears instantly via v-if)
+  if (imageRef.value && props.project.img_url) {
+    activeTimeline = gsap.timeline();
+    activeTimeline.fromTo(
+      imageRef.value,
+      { scale: 0.8, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.35, ease: "power2.out" }
+    );
+  }
+};
+
+/**
+ * Handle mouse leave - animate out and hide
+ */
+const handleMouseLeave = () => {
+  // Kill any previous animation
+  if (activeTimeline) {
+    activeTimeline.kill();
+    activeTimeline = null;
+  }
+
+  // If no image, just hide immediately
+  if (!imageRef.value || !props.project.img_url) {
+    isHovering.value = false;
+    return;
+  }
+
+  // Animate image out, then hide overlay
+  activeTimeline = gsap.timeline({
+    onComplete: () => {
+      isHovering.value = false;
+      activeTimeline = null;
+    },
+  });
+
+  activeTimeline.to(imageRef.value, {
+    scale: 0.8,
+    opacity: 0,
+    duration: 0.2,
+    ease: "power2.in",
+  });
+};
+
+/**
+ * Handle mouse move - apply subtle tilt effect to image
+ */
+const handleMouseMove = (event: MouseEvent) => {
+  if (!rowRef.value || !imageRef.value || !isHovering.value) return;
+
+  const rect = rowRef.value.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  // Calculate offset from center (normalized to -1 to 1)
+  const offsetX = (event.clientX - centerX) / (rect.width / 2);
+  const offsetY = (event.clientY - centerY) / (rect.height / 2);
+
+  // Apply subtle movement (max 15px in any direction)
+  gsap.to(imageRef.value, {
+    x: offsetX * 15,
+    y: offsetY * 8,
+    duration: 0.3,
+    ease: "power2.out",
+    overwrite: "auto",
+  });
+};
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (activeTimeline) {
+    activeTimeline.kill();
+  }
+});
 </script>
 
 <template>
   <article
+    ref="rowRef"
     class="project-row group relative flex items-center justify-between py-6 border-b border-dark/10 cursor-pointer overflow-hidden"
+    :class="isHovering ? 'bg-dark' : ''"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+    @mousemove="handleMouseMove"
   >
-    <!-- Background hover effect -->
-    <div
-      class="absolute inset-0 bg-dark transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-expo-out -z-10"
-    ></div>
-
-    <div class="flex items-center gap-12 pl-2">
+    <!-- Content layer (index + title) -->
+    <div class="flex items-center gap-12 pl-2 relative z-10">
       <!-- Index -->
       <span
-        class="text-mono-sm text-gray-500 group-hover:text-accent transition-colors duration-300"
+        class="text-mono-sm transition-colors duration-200"
+        :class="isHovering ? 'text-light' : 'text-dark'"
       >
         {{ formattedIndex }}
       </span>
 
       <!-- Title -->
       <h3
-        class="text-2xl font-sans text-dark group-hover:text-light transition-colors duration-300"
+        class="text-2xl font-sans transition-colors duration-200"
+        :class="isHovering ? 'text-light' : 'text-dark'"
       >
         {{ project.title }}
       </h3>
     </div>
 
     <!-- Arrow icon -->
-    <div class="pr-4 overflow-hidden">
+    <div class="pr-4 overflow-hidden relative z-10">
       <span
-        class="inline-block text-dark group-hover:text-accent group-hover:translate-x-2 transition-all duration-300 text-2xl"
+        class="inline-block text-2xl transition-all duration-200"
+        :class="isHovering ? 'text-light translate-x-2' : 'text-dark'"
       >
         <Icon name="material-symbols:arrow-forward" />
       </span>
     </div>
+
+    <!-- Hover overlay with blur + marquee (appears instantly) -->
+    <div
+      v-if="isHovering && project.img_url"
+      class="absolute inset-0 z-20 pointer-events-none overflow-hidden"
+    >
+      <!-- Dark background + blur overlay -->
+      <div class="absolute inset-0 backdrop-blur-xs bg-dark/20"></div>
+
+      <!-- Scrolling Marquee -->
+      <div class="absolute inset-0 flex items-center overflow-hidden">
+        <div class="marquee-track flex whitespace-nowrap">
+          <span
+            v-for="n in 12"
+            :key="n"
+            class="marquee-item text-light/80 text-sm font-mono mx-6 tracking-wide"
+          >
+            [ View {{ project.title }} ]
+          </span>
+        </div>
+      </div>
+    </div>
   </article>
+
+  <!-- Project Image Preview (Teleported to body to escape overflow:hidden) -->
+  <Teleport to="body">
+    <div
+      v-if="isHovering && project.img_url"
+      ref="imageRef"
+      class="fixed z-[9999] w-[320px] h-[200px] rounded-xl overflow-hidden shadow-2xl pointer-events-none"
+      :style="{
+        left: `${imagePosition.x}px`,
+        top: `${imagePosition.y}px`,
+        transform: 'translate(-50%, -50%) scale(0.8)',
+        opacity: 0,
+      }"
+    >
+      <img
+        :src="project.img_url"
+        :alt="project.title"
+        class="w-full h-full object-cover"
+      />
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
-/* Custom easing usually defined in global css or tailwind config, 
-   but using standard cubic-bezier for 'expo-out' approximation if not available */
-.ease-expo-out {
-  transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+/* Marquee animation */
+.marquee-track {
+  animation: marquee 12s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 </style>
