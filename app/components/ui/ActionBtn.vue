@@ -1,4 +1,19 @@
 <script setup lang="ts">
+/**
+ * [COMPONENT] :: ACTION_BTN
+ * ----------------------------------------------------------------------
+ * Botón de acción estéticamente alineado con el estilo brutalista.
+ * Soporta iconos reactivos y navegación vía NuxtLink.
+ *
+ * @module    components/ui
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
+// =====================================================================
+// [SECTION] :: COMPONENT PROPS
+// =====================================================================
+
 interface Props {
   label: string;
   icon?: string;

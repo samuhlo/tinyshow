@@ -1,23 +1,24 @@
-import { prisma } from "../../utils/prisma";
-
 /**
- * [API] :: GET /api/projects
+ * [API] :: GET_PROJECTS
  * ----------------------------------------------------------------------
  * Endpoint para listar proyectos del portfolio.
  * Soporta filtrado por tecnología principal y búsqueda simple.
  *
- * @queries
- * - primary_tech? (string) - Filtrar por tecnología principal (ej: 'Nuxt')
- * - limit? (number) - Limitar número de resultados (default: 50)
- *
- * @returns {Promise<Project[]>} - Lista de proyectos
+ * @module    server/api/projects
+ * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
+
+import { prisma } from "../../utils/prisma";
+
+// =====================================================================
+// [SECTION] :: ENDPOINT HANDLER
+// =====================================================================
+
 export default defineCachedEventHandler(
   async (event) => {
     const query = getQuery(event);
     const primaryTech = query.primary_tech as string | undefined;
-    // Default to 50 to avoid massive payloads, but allow override
     const limit = query.limit ? parseInt(query.limit as string) : 50;
 
     try {
@@ -25,7 +26,7 @@ export default defineCachedEventHandler(
       if (primaryTech) {
         whereClause.primary_tech = {
           equals: primaryTech,
-          mode: "insensitive", // Case insensitive search
+          mode: "insensitive",
         };
       }
 
@@ -33,7 +34,7 @@ export default defineCachedEventHandler(
         where: whereClause,
         take: limit,
         orderBy: {
-          updatedAt: "desc", // Show most recently updated first
+          updatedAt: "desc",
         },
       });
 
@@ -55,7 +56,6 @@ export default defineCachedEventHandler(
     swr: !import.meta.dev, // Disable SWR in dev
     name: "projects-list",
     getKey: (event) => {
-      // Create a unique key based on query params to cache filtered results separately
       const query = getQuery(event);
       const tech = query.primary_tech || "all";
       const limit = query.limit || "50";

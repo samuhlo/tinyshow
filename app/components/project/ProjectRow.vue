@@ -1,21 +1,21 @@
 <script setup lang="ts">
+/**
+ * [COMPONENT] :: PROJECT_ROW
+ * ----------------------------------------------------------------------
+ * Fila interactiva para la visualización de proyectos individuales.
+ * Implementa efectos de hover avanzados (image preview, tilt, marquee).
+ * Sigue la filosofía de diseño "Structural & Raw".
+ *
+ * @module    components/project
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 import { gsap } from "gsap";
 
-/**
- * [COMPONENT] :: ProjectRow
- * ----------------------------------------------------------------------
- * Represents a single project in the list with interactive hover effects.
- * Follows the "Structural & Raw" design philosophy.
- *
- * Features:
- * - Image preview with GSAP entrance animation (teleported to body)
- * - Subtle tilt effect following mouse position
- * - Blur overlay on background content
- * - Scrolling "View project" marquee
- *
- * @param {Object} project - Project data including img_url
- * @param {Number} index - Display index (0-based)
- */
+// =====================================================================
+// [SECTION] :: COMPONENT INTERFACES
+// =====================================================================
 
 interface Project {
   id: string;
@@ -29,6 +29,10 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+// =====================================================================
+// [SECTION] :: COMPONENT STATE & COMPUTED
+// =====================================================================
 
 // Format index to always be 2 digits (01, 02, etc.)
 const formattedIndex = computed(() => {
@@ -44,7 +48,6 @@ const imageRef = ref<HTMLElement | null>(null);
 const imagePosition = ref({ x: 0, y: 0 });
 
 // Calculate marquee duration based on title length for constant speed
-// ~50 pixels per second as base speed
 const marqueeDuration = computed(() => {
   const titleLength = props.project.title.length;
   const baseDuration = 12; // seconds for average title
@@ -55,20 +58,26 @@ const marqueeDuration = computed(() => {
 // Store active timeline to kill on new hover
 let activeTimeline: gsap.core.Timeline | null = null;
 
+// =====================================================================
+// [SECTION] :: INTERACTION LOGIC
+// =====================================================================
+
 /**
- * Calculate image position based on row - positioned to the right
+ * [CALC] :: UPDATE_IMAGE_POSITION
+ * Calcula la posición óptima del preview de imagen relative a la fila.
  */
 const updateImagePosition = () => {
   if (!rowRef.value) return;
   const rect = rowRef.value.getBoundingClientRect();
   imagePosition.value = {
-    x: rect.left + rect.width * 0.75, // 70% to the right instead of centered
+    x: rect.left + rect.width * 0.75, // 75% to the right
     y: rect.top + rect.height / 2,
   };
 };
 
 /**
- * Handle mouse enter - show overlay immediately, animate image
+ * [HANDLE] :: ON_MOUSE_ENTER
+ * Activa los efectos de hover y dispara la animación de entrada.
  */
 const handleMouseEnter = async () => {
   // Kill any previous animation to prevent glitches
@@ -84,7 +93,7 @@ const handleMouseEnter = async () => {
   // Wait for DOM to update after v-if becomes true
   await nextTick();
 
-  // Only animate the image (overlay appears instantly via v-if)
+  // Only animate the image
   if (imageRef.value && props.project.img_url) {
     activeTimeline = gsap.timeline();
     activeTimeline.fromTo(
@@ -96,22 +105,20 @@ const handleMouseEnter = async () => {
 };
 
 /**
- * Handle mouse leave - animate out and hide
+ * [HANDLE] :: ON_MOUSE_LEAVE
+ * Desactiva los efectos de hover y limpia las animaciones activas.
  */
 const handleMouseLeave = () => {
-  // Kill any previous animation
   if (activeTimeline) {
     activeTimeline.kill();
     activeTimeline = null;
   }
 
-  // If no image, just hide immediately
   if (!imageRef.value || !props.project.img_url) {
     isHovering.value = false;
     return;
   }
 
-  // Animate image out, then hide overlay
   activeTimeline = gsap.timeline({
     onComplete: () => {
       isHovering.value = false;
@@ -128,7 +135,9 @@ const handleMouseLeave = () => {
 };
 
 /**
- * Handle mouse move - apply subtle tilt effect to image
+ * [HANDLE] :: ON_MOUSE_MOVE
+ * Aplica un efecto de inclinación (tilt) dinámico basado en el cursor.
+ * @param event - Evento nativo del ratón.
  */
 const handleMouseMove = (event: MouseEvent) => {
   if (!rowRef.value || !imageRef.value || !isHovering.value) return;
@@ -137,11 +146,9 @@ const handleMouseMove = (event: MouseEvent) => {
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
 
-  // Calculate offset from center (normalized to -1 to 1)
   const offsetX = (event.clientX - centerX) / (rect.width / 2);
   const offsetY = (event.clientY - centerY) / (rect.height / 2);
 
-  // Apply subtle movement (max 15px in any direction)
   gsap.to(imageRef.value, {
     x: offsetX * 15,
     y: offsetY * 8,
@@ -151,7 +158,10 @@ const handleMouseMove = (event: MouseEvent) => {
   });
 };
 
-// Cleanup on unmount
+// =====================================================================
+// [SECTION] :: LIFECYCLE
+// =====================================================================
+
 onUnmounted(() => {
   if (activeTimeline) {
     activeTimeline.kill();

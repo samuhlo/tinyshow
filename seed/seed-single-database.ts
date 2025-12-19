@@ -1,9 +1,3 @@
-import "dotenv/config";
-import { Octokit } from "octokit";
-import { ingestProject, saveProject } from "../server/utils/ingest";
-import { prisma } from "../server/utils/prisma";
-import * as readline from "readline";
-
 /**
  * [SCRIPT] :: SEED_SINGLE
  * ----------------------------------------------------------------------
@@ -14,9 +8,30 @@ import * as readline from "readline";
  * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
-const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
+import "dotenv/config";
+import { Octokit } from "octokit";
+import { ingestProject, saveProject } from "../server/utils/ingest";
+import { prisma } from "../server/utils/prisma";
+import * as readline from "readline";
+
+// =====================================================================
+// [SECTION] :: CONFIGURATION
+// =====================================================================
+
+const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
+const OCTOKIT = new Octokit({ auth: GITHUB_TOKEN });
+
+// =====================================================================
+// [SECTION] :: UTILITIES
+// =====================================================================
+
+/**
+ * [I/O] :: ASK_QUESTION
+ * Promesa utilitaria para obtener entrada del usuario vía terminal.
+ * @param query - La pregunta a mostrar.
+ * @returns La respuesta del usuario.
+ */
 async function askQuestion(query: string): Promise<string> {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -30,6 +45,10 @@ async function askQuestion(query: string): Promise<string> {
     })
   );
 }
+
+// =====================================================================
+// [SECTION] :: MAIN EXECUTION
+// =====================================================================
 
 async function main() {
   const repoUrl = process.argv[2];
@@ -84,7 +103,7 @@ async function main() {
     const project = await ingestProject(
       owner,
       repo,
-      octokit,
+      OCTOKIT,
       "main",
       strictMode
     );
@@ -96,6 +115,8 @@ async function main() {
 
     // [STEP 3] :: PERSIST_DATA
     await saveProject(project);
+
+    console.log(`\n[DONE]  :: SEED_COMPLETE :: Project saved successfully.`);
   } catch (err) {
     console.error("[ERR]   :: FATAL         ::", err);
     process.exit(1);

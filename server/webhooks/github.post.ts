@@ -1,19 +1,28 @@
-import { Octokit } from "octokit";
-import crypto from "crypto";
-import { ingestProject, saveProject } from "../utils/ingest";
-
 /**
  * [WEBHOOK] :: GITHUB_PUSH_HANDLER
  * ----------------------------------------------------------------------
  * Endpoint reactivo para eventos 'push' de GitHub.
  * Valida firmas, detecta cambios en README y dispara la ingesta.
  *
- * @module    server/api/webhooks
+ * @module    server/webhooks
  * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
+
+import { Octokit } from "octokit";
+import crypto from "crypto";
+import { ingestProject, saveProject } from "../utils/ingest";
+
+// =====================================================================
+// [SECTION] :: CONFIGURATION
+// =====================================================================
+
 const WEBHOOK_SECRET = process.env.NUXT_GITHUB_WEBHOOK_SECRET;
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
+
+// =====================================================================
+// [SECTION] :: EVENT HANDLER
+// =====================================================================
 
 export default defineEventHandler(async (event) => {
   // [STEP 1] :: VERIFY_METHOD

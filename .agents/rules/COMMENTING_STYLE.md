@@ -50,3 +50,38 @@ Olvídate de las frases largas. Usa el formato `[VERBO] + [OBJETO]`. Alinea los 
  */
 const processCartTotal = (cart: Cart, regionCode: string, isVat: boolean = true): number => { ... }
 ```
+
+## 3. Separadores de Bloque (Visual Rhythm)
+
+Para mantener la legibilidad en archivos largos (SFC de Vue), usa separadores ASCII puros. Nada de emojis.
+
+```typescript
+// =====================================================================
+// [SECTION] :: COMPONENT STATE
+// =====================================================================
+const isLoading = ref(false);
+const userData = ref<User | null>(null);
+
+// =====================================================================
+// [SECTION] :: LIFECYCLE HOOKS
+// =====================================================================
+onMounted(() => { ... })
+```
+
+## 4. Constantes y "Magic Numbers" (Zero Tolerance)
+
+ESTRICTAMENTE PROHIBIDO: Dejar números o strings "mágicos" sueltos en la lógica. ACCIÓN: Extraer a constante en SCREAMING_SNAKE_CASE y documentar brevemente.
+
+### Incorrecto
+
+```typescript
+if (user.score > 100) { ... } // ¿Qué es 100?
+```
+
+### Correcto (Blueprint Style)
+
+```typescript
+const MIN_SCORE_FOR_VIP = 100; // Threshold para status VIP
+
+if (user.score > MIN_SCORE_FOR_VIP) { ... }
+```

@@ -3,7 +3,9 @@ import { type Project } from "../../shared/types";
 import { extractProjectData } from "./ai";
 import { prisma } from "./prisma";
 
-// Re-export specific types if needed, or just use Project from shared/types
+// =====================================================================
+// [SECTION] :: PROJECT INGESTION
+// =====================================================================
 
 /**
  * [MODULE] :: INGEST_UTILS
@@ -20,12 +22,13 @@ import { prisma } from "./prisma";
  * [FETCH] :: INGEST_PROJECT
  * Recupera el README, extrae metadatos con IA y valida los assets.
  *
- * @param   {String}   owner       - Propietario del repositorio.
- * @param   {String}   repo        - Nombre del repositorio.
- * @param   {Octokit}  octokit     - Instancia del cliente GitHub.
- * @param   {String}   [branch='main'] - Rama objetivo (fallback automático).
+ * @param owner      - Propietario del repositorio.
+ * @param repo       - Nombre del repositorio.
+ * @param octokit    - Instancia del cliente GitHub.
+ * @param branch     - (Optional) Rama objetivo (default: 'main').
+ * @param strictMode - (Optional) Si es true, requiere demo e imagen.
  *
- * @returns {Promise<Project|null>} - Proyecto procesado o null si falla.
+ * @returns Proyecto procesado o null si falla.
  */
 export async function ingestProject(
   owner: string,
@@ -122,14 +125,17 @@ export async function ingestProject(
     return null;
   }
 }
+// =====================================================================
+// [SECTION] :: DATABASE PERSISTENCE
+// =====================================================================
 
 /**
  * [PERSIST] :: SAVE_PROJECT
  * Upsert del proyecto en base de datos usando Prisma.
  *
- * @param   {Project}  project     - Objeto de proyecto validado.
+ * @param project - Objeto de proyecto validado.
  *
- * @returns {Promise<void>}        - Promesa vacía al completar.
+ * @returns Promesa vacía al completar.
  */
 export async function saveProject(project: Project): Promise<void> {
   console.log(`[DB]    >> WRITING       :: project: '${project.title}'`);

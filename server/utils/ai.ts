@@ -1,6 +1,32 @@
+/**
+ * [MODULE] :: AI_UTILS
+ * ----------------------------------------------------------------------
+ * Integración con DeepSeek para el análisis semántico de repositorios.
+ * Extrae metadatos técnicos estructurados a partir de archivos README.
+ *
+ * @module    server/utils/ai
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 import OpenAI from "openai";
 import { ProjectSchema, type Project } from "../../shared/types";
 
+// =====================================================================
+// [SECTION] :: DATA EXTRACTION
+// =====================================================================
+
+/**
+ * [EXTRACT] :: EXTRACT_PROJECT_DATA
+ * Utiliza IA para parsear el contenido de un README y transformarlo en
+ * una estructura conforme al esquema Project.
+ *
+ * @param readmeContent - El texto completo del archivo README.md.
+ * @param repoUrl      - (Optional) URL del repositorio para inferir datos.
+ *
+ * @returns Objeto Project validado por Zod.
+ * @throws  {Error} - Si la API Key falta o la IA devuelve datos corruptos.
+ */
 export const extractProjectData = async (
   readmeContent: string,
   repoUrl: string = ""

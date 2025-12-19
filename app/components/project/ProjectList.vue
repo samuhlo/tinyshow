@@ -1,22 +1,31 @@
 <script setup lang="ts">
-import { gsap } from "gsap";
-
 /**
- * [COMPONENT] :: ProjectList
+ * [COMPONENT] :: PROJECT_LIST
  * ----------------------------------------------------------------------
- * Lists projects for the selected technology.
- * Fetches data from API and animates entrance using GSAP.
+ * Listado reactivo de proyectos filtrados por tecnología.
+ * Gestiona la carga de datos y la orquestación de animaciones GSAP.
  *
- * @param {String} tech - Active technology to filter projects
+ * @module    components/project
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
  */
 
+import { gsap } from "gsap";
 import ProjectRow from "./ProjectRow.vue";
+
+// =====================================================================
+// [SECTION] :: COMPONENT PROPS
+// =====================================================================
 
 interface Props {
   tech: string | null;
 }
 
 const props = defineProps<Props>();
+
+// =====================================================================
+// [SECTION] :: DATA FETCHING
+// =====================================================================
 
 // Fetch projects based on active tech
 const { data: projects, pending, refresh } = await useFetch("/api/projects", {
@@ -27,14 +36,17 @@ const { data: projects, pending, refresh } = await useFetch("/api/projects", {
   watch: [() => props.tech],
 });
 
-// Animation Refs
+// =====================================================================
+// [SECTION] :: ANIMATION LOGIC
+// =====================================================================
+
 const listRef = ref<HTMLElement | null>(null);
 
 /**
- * Animate the list items when projects change
- */
-/**
- * Animate the list items when projects change
+ * [ANIM] :: ANIMATE_ENTRANCE
+ * Dispara la animación de entrada (fade + slide up) para los items.
+ *
+ * @param delay - (Optional) Retraso inicial para sincronizar con otras animaciones.
  */
 const animateEntrance = (delay: number = 0) => {
   if (!listRef.value) return;
@@ -61,6 +73,10 @@ const animateEntrance = (delay: number = 0) => {
   );
 };
 
+// =====================================================================
+// [SECTION] :: WATCHERS & LIFECYCLE
+// =====================================================================
+
 // Watch for data availability to trigger animation
 watch(
   projects,
@@ -84,6 +100,7 @@ watch(
     }
   }
 );
+
 // Ensure animation runs on mount if data is already available
 onMounted(async () => {
   if (projects.value && projects.value.length > 0) {

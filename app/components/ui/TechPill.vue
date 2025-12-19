@@ -1,4 +1,19 @@
 <script setup lang="ts">
+/**
+ * [COMPONENT] :: TECH_PILL
+ * ----------------------------------------------------------------------
+ * Etiqueta visual para representar una tecnología o stack.
+ * Soporta temas claros y oscuros para adaptarse al contexto.
+ *
+ * @module    components/ui
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
+// =====================================================================
+// [SECTION] :: COMPONENT PROPS
+// =====================================================================
+
 interface Props {
   text: string;
   theme?: "light" | "dark";

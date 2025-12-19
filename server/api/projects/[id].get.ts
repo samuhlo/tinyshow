@@ -1,17 +1,20 @@
-import { prisma } from "../../utils/prisma";
-
 /**
- * [API] :: GET /api/projects/:id
+ * [API] :: GET_PROJECT_DETAILS
  * ----------------------------------------------------------------------
  * Endpoint para obtener el detalle de un proyecto específico.
- * Busca por el ID (slug) del proyecto.
+ * Busca por el ID (slug) generado a partir del nombre del repositorio.
  *
- * @param {string} id - Slug del proyecto (ej: 'tinyshow-v2')
- *
- * @returns {Promise<Project>} - Objeto del proyecto
- * @throws {404} - Si el proyecto no existe
+ * @module    server/api/projects
+ * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
+
+import { prisma } from "../../utils/prisma";
+
+// =====================================================================
+// [SECTION] :: ENDPOINT HANDLER
+// =====================================================================
+
 export default defineCachedEventHandler(
   async (event) => {
     const id = getRouterParam(event, "id");

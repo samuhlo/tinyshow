@@ -1,6 +1,21 @@
+/**
+ * [MODULE] :: PRISMA_CLIENT
+ * ----------------------------------------------------------------------
+ * Configuración y exportación del cliente Prisma.
+ * Gestiona la conexión con Neon PostgreSQL usando el adaptador nativo.
+ *
+ * @module    server/utils/prisma
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
+
+// =====================================================================
+// [SECTION] :: DATABASE CONNECTION
+// =====================================================================
 
 const connectionString = process.env.NEON_DATABASE_URL;
 
@@ -14,6 +29,10 @@ const pool = new Pool({
   ssl: true,
 });
 const adapter = new PrismaPg(pool);
+
+// =====================================================================
+// [SECTION] :: CLIENT SINGLETON
+// =====================================================================
 
 const prismaClientSingleton = () => {
   return new PrismaClient({ adapter });

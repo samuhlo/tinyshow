@@ -1,7 +1,26 @@
 <script setup lang="ts">
+/**
+ * [COMPONENT] :: LANG_SWITCHER
+ * ----------------------------------------------------------------------
+ * Selector de idioma minimalista.
+ * Gestiona la conmutación entre ES y EN preservando la ruta actual.
+ *
+ * @module    components/ui
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 const { locale } = useI18n();
 const switchLocalePath = useSwitchLocalePath();
 
+// =====================================================================
+// [SECTION] :: INTERACTION HANDLERS
+// =====================================================================
+
+/**
+ * [HANDLE] :: TOGGLE_LOCALE
+ * Alterna el idioma de la aplicación y navega a la ruta equivalente.
+ */
 const toggleLocale = async () => {
   const newLocale = locale.value === "en" ? "es" : "en";
   await navigateTo(switchLocalePath(newLocale));

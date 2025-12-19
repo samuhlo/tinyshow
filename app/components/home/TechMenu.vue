@@ -1,8 +1,23 @@
 <script setup lang="ts">
+/**
+ * [COMPONENT] :: TECH_MENU
+ * ----------------------------------------------------------------------
+ * Menú de navegación principal basado en tecnologías.
+ * Implementa animaciones FLIP para transicionar entre estados Hero y Sidebar.
+ *
+ * @module    components/home
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 
 gsap.registerPlugin(Flip);
+
+// =====================================================================
+// [SECTION] :: COMPONENT PROPS & EMITS
+// =====================================================================
 
 interface Props {
   technologies: string[];
@@ -16,19 +31,31 @@ const emit = defineEmits<{
   (e: "select", tech: string): void;
 }>();
 
+// =====================================================================
+// [SECTION] :: COMPONENT STATE & REFS
+// =====================================================================
+
 const menuRef = ref<HTMLElement | null>(null);
 const indicatorRef = ref<HTMLElement | null>(null);
 const buttonRefs = ref<HTMLElement[]>([]);
 
+// =====================================================================
+// [SECTION] :: ANIMATION LOGIC
+// =====================================================================
+
 /**
- * Configura la referencia del botón para cada tecnología
+ * [SET] :: SET_BUTTON_REF
+ * Almacena la referencia del DOM para un botón de tecnología.
+ * @param el    - Elemento del botón.
+ * @param index - Índice en la lista.
  */
 const setButtonRef = (el: HTMLElement | null, index: number) => {
   if (el) buttonRefs.value[index] = el;
 };
 
 /**
- * Anima el indicador flotante hacia el botón activo
+ * [ANIM] :: ANIMATE_INDICATOR
+ * Desplaza el indicador visual hacia el botón de la tecnología activa.
  */
 const animateIndicator = () => {
   if (!indicatorRef.value || !props.activeTech || props.viewMode !== "sidebar") return;
@@ -55,7 +82,8 @@ const animateIndicator = () => {
 };
 
 /**
- * Oculta el indicador con animación
+ * [ANIM] :: HIDE_INDICATOR
+ * Oculta el indicador visual con una transición suave.
  */
 const hideIndicator = () => {
   if (!indicatorRef.value) return;
@@ -67,6 +95,10 @@ const hideIndicator = () => {
     ease: "power2.in",
   });
 };
+
+// =====================================================================
+// [SECTION] :: WATCHERS & LIFECYCLE
+// =====================================================================
 
 // Watch para cambios de viewMode - FLIP Animation
 watch(
@@ -134,9 +166,6 @@ watch(
 
     await nextTick();
     animateIndicator();
-
-    // Los colores se manejan con CSS para evitar glitches
-    // El indicador flotante es el único elemento animado con GSAP
   }
 );
 

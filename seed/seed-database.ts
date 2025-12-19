@@ -1,11 +1,3 @@
-import "dotenv/config";
-import { Octokit } from "octokit";
-import { extractProjectData } from "../server/utils/ai";
-import { ingestProject } from "../server/utils/ingest";
-import { type Project } from "../shared/types";
-import { prisma } from "../server/utils/prisma";
-import * as readline from "readline";
-
 /**
  * [SCRIPT] :: SEED_DATABASE
  * ----------------------------------------------------------------------
@@ -16,8 +8,19 @@ import * as readline from "readline";
  * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
+
+import "dotenv/config";
+import { Octokit } from "octokit";
+import { ingestProject } from "../server/utils/ingest";
+import { type Project } from "../shared/types";
+import { prisma } from "../server/utils/prisma";
+import * as readline from "readline";
+
+// =====================================================================
+// [SECTION] :: CONFIGURATION
+// =====================================================================
+
 const GITHUB_TOKEN = process.env.GITHUB_SEED_TOKEN;
-// Get username from args or env, default to 'samuhlo' (user's ID in test) or error
 const GITHUB_USERNAME = process.argv[2] || process.env.GITHUB_USERNAME;
 
 if (!GITHUB_TOKEN) {
@@ -27,13 +30,19 @@ if (!GITHUB_TOKEN) {
   process.exit(1);
 }
 
-// User check removed as we have a default now
+const USERNAME = GITHUB_USERNAME as string;
+const OCTOKIT = new Octokit({ auth: GITHUB_TOKEN });
 
-// Safe cast because we validated earlier
-const username = GITHUB_USERNAME as string;
+// =====================================================================
+// [SECTION] :: UTILITIES
+// =====================================================================
 
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
-
+/**
+ * [I/O] :: ASK_QUESTION
+ * Promesa utilitaria para obtener entrada del usuario vía terminal.
+ * @param query - La pregunta a mostrar.
+ * @returns La respuesta del usuario.
+ */
 async function askQuestion(query: string): Promise<string> {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -48,8 +57,12 @@ async function askQuestion(query: string): Promise<string> {
   );
 }
 
+// =====================================================================
+// [SECTION] :: MAIN EXECUTION
+// =====================================================================
+
 async function main() {
-  console.log(`\n[SEED]  >> START         :: user: @${username}\n`);
+  console.log(`\n[SEED]  >> START         :: user: @${USERNAME}\n`);
 
   const answer = await askQuestion(
     "Enable strict mode (require img_url & demo_url)? [Y/n]: "
@@ -62,22 +75,18 @@ async function main() {
 
   try {
     // [STEP 1] :: FETCH_REPOS
-    // Pagination is handled by octokit iterator or we valid up to 100 for now.
-    const { data: repos } = await octokit.request(
+    const { data: repos } = await OCTOKIT.request(
       "GET /users/{username}/repos",
       {
-        username: username,
-        type: "owner", // Repos owned by the user
+        username: USERNAME,
+        type: "owner",
         sort: "updated",
         direction: "desc",
-        per_page: 100, // Limit for V1
+        per_page: 100,
       }
     );
 
-    // Filter: Not forks, has description (optional), public
-    const sources = repos.filter((r) => !r.fork && !r.archived); // Maybe include archived? User had an archived one in test. Let's keep archived.
-    // User test repo 'diet-planner-alpha' was archived and processed successfully.
-    // Let's just filter forks for now.
+    const sources = repos.filter((r) => !r.fork && !r.archived);
 
     console.log(
       `[REPO]  >> DISCOVERED    :: count: ${repos.length} | filtered: ${sources.length} (non-forks)`
@@ -86,39 +95,30 @@ async function main() {
     const projects: Project[] = [];
 
     // [STEP 2] :: PROCESS_SEQUENCE
-    // Serial execution to be nice to DeepSeek/GitHub APIs
     for (const repo of sources) {
       const project = await ingestProject(
-        username,
+        USERNAME,
         repo.name,
-        octokit,
+        OCTOKIT,
         "main",
         strictMode
       );
 
       if (project) {
         projects.push(project);
-      } else {
-        // ingestProject logs its own skips/errors, but we can track count here if needed
       }
     }
 
     // [STEP 3] :: PERSIST_DATA
-
-    // Transform data for Prisma (if needed) or direct insert.
-    // The Zod types match well, but JSON fields might strictly require InputJsonValue.
-    // Prisma's createMany is efficient.
-
     console.log(`\n[DB]    >> CLEANING      :: Removing existing projects...`);
     await prisma.project.deleteMany({});
 
     console.log(`[DB]    >> BATCH_SAVE    :: count: ${projects.length}`);
 
-    // We map explicitly to ensure type compatibility with Prisma's auto-generated types
     const projectsToInsert = projects.map((p) => ({
       id: p.id,
       title: p.title,
-      tagline: p.tagline as any, // Cast to any to satisfy InputJsonValue (it's valid JSON)
+      tagline: p.tagline as any,
       description: p.description as any,
       tech_stack: p.tech_stack,
       primary_tech: p.primary_tech,
@@ -130,7 +130,7 @@ async function main() {
 
     await prisma.project.createMany({
       data: projectsToInsert,
-      skipDuplicates: true, // Just in case
+      skipDuplicates: true,
     });
 
     console.log(`\n[DONE]  :: SEED_COMPLETE :: DB sync finished.`);

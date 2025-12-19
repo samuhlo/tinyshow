@@ -1,11 +1,29 @@
+/**
+ * [SCRIPT] :: SIMULATE_WEBHOOK
+ * ----------------------------------------------------------------------
+ * Utilidad para testear el endpoint de webhooks localmente.
+ * Genera una firma HMAC válida y envía un payload simulado de GitHub.
+ *
+ * @module    shared/scripts
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 import "dotenv/config";
 import crypto from "crypto";
 
-const SECRET = process.env.NUXT_GITHUB_WEBHOOK_SECRET || "tu_secreto_brutal";
-const URL = "http://localhost:3000/api/webhooks/github";
+// =====================================================================
+// [SECTION] :: CONFIGURATION
+// =====================================================================
 
-// Payload simulating a push event that modifies README.md
-const payload = {
+const SECRET = process.env.NUXT_GITHUB_WEBHOOK_SECRET || "tu_secreto_brutal";
+const TARGET_URL = "http://localhost:3000/api/webhooks/github";
+
+/**
+ * [DATA] :: MOCK_PAYLOAD
+ * Simulación de un evento 'push' que modifica el archivo README.md.
+ */
+const MOCK_PAYLOAD = {
   ref: "refs/heads/main",
   repository: {
     name: "tiny-showcase",
@@ -25,18 +43,24 @@ const payload = {
   ],
 };
 
-const body = JSON.stringify(payload);
+// =====================================================================
+// [SECTION] :: TEST EXECUTION
+// =====================================================================
 
-// Calculate Signature
-const hmac = crypto.createHmac("sha256", SECRET);
-const signature = "sha256=" + hmac.update(body).digest("hex");
-
+/**
+ * [TEST] :: EXECUTE_WEBHOOK_TEST
+ * Orquesta la petición POST firmada hacia el servidor local.
+ */
 async function testWebhook() {
-  console.log(`[TEST]  -> OUTBOUND      :: target: ${URL}`);
+  const body = JSON.stringify(MOCK_PAYLOAD);
+  const hmac = crypto.createHmac("sha256", SECRET);
+  const signature = "sha256=" + hmac.update(body).digest("hex");
+
+  console.log(`[TEST]  -> OUTBOUND      :: target: ${TARGET_URL}`);
   console.log(`[TEST]  :: SIGNATURE     :: ${signature}`);
 
   try {
-    const res = await fetch(URL, {
+    const res = await fetch(TARGET_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,7 +70,7 @@ async function testWebhook() {
       body: body,
     });
 
-    const data = await res.json(); // Nitro handlers usually return JSON
+    const data = await res.json();
     console.log(`\n[TEST]  :: RESPONSE      :: status: ${res.status}`);
     console.log("[TEST]  :: BODY          ::", data);
 

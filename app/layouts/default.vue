@@ -1,4 +1,15 @@
 <script setup lang="ts">
+/**
+ * [LAYOUT] :: DEFAULT
+ * ----------------------------------------------------------------------
+ * Layout base de la aplicación.
+ * Proporciona el contenedor principal, el header fijo y el sistema de slots.
+ *
+ * @module    layouts/default
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 import AppLogo from "~/components/ui/AppLogo.vue";
 import LangSwitcher from "~/components/ui/LangSwitcher.vue";
 </script>

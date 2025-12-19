@@ -1,4 +1,19 @@
+/**
+ * [MODULE] :: SHARED_TYPES
+ * ----------------------------------------------------------------------
+ * Definiciones de esquemas de validación y tipos principales.
+ * Utiliza Zod para asegurar la integridad de los datos en toda la APP.
+ *
+ * @module    shared/types
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
 import { z } from "zod";
+
+// =====================================================================
+// [SECTION] :: SCHEMAS
+// =====================================================================
 
 export const LocalizedText = z.object({
   en: z.string(),
@@ -31,5 +46,9 @@ export const ProjectSchema = z.object({
     .nullish()
     .describe("Origin of the project if it's from a course"),
 });
+
+// =====================================================================
+// [SECTION] :: TYPES
+// =====================================================================
 
 export type Project = z.infer<typeof ProjectSchema>;

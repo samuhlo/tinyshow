@@ -10,44 +10,48 @@
  * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
+
 import TechMenu from "~/components/home/TechMenu.vue";
 import ProjectList from "~/components/project/ProjectList.vue";
 
+// =====================================================================
+// [SECTION] :: REMOTE DATA
+// =====================================================================
+
 /**
- * [STATE] :: TECHNOLOGIES_LIST
- * Lista estática de tecnologías disponibles en el portfolio.
- */
-/**
- * [STATE] :: TECHNOLOGIES_LIST
- * Lista de tecnologías obtenidas de la API.
+ * [DATA] :: TECHNOLOGIES
+ * Lista de tecnologías obtenidas de la API para el menú principal.
  */
 const { data: technologies } = await useFetch<string[]>("/api/projects/techs", {
   default: () => [],
 });
 
-
+// =====================================================================
+// [SECTION] :: COMPONENT STATE
+// =====================================================================
 
 /**
  * [STATE] :: VIEW_MODE
- * Controla el layout actual de la página.
- * @type {Ref<'hero' | 'sidebar'>}
+ * Controla el layout actual de la página (hero | sidebar).
  */
 const viewMode = ref<"hero" | "sidebar">("hero");
 
 /**
  * [STATE] :: ACTIVE_TECH
  * Tecnología actualmente seleccionada por el usuario.
- * @type {Ref<string | null>}
  */
 const activeTech = ref<string | null>(null);
+
+// =====================================================================
+// [SECTION] :: LOGIC HANDLERS
+// =====================================================================
 
 /**
  * [HANDLE] :: SELECT_TECH
  * Procesa la selección de una tecnología en el menú.
  * Transiciona la vista de 'hero' a 'sidebar' si es necesario.
  *
- * @param   {String}  tech  - Nombre de la tecnología seleccionada.
- * @returns {void}
+ * @param tech - Nombre de la tecnología seleccionada.
  */
 const handleSelect = (tech: string) => {
   activeTech.value = tech;

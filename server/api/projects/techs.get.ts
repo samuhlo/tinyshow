@@ -1,25 +1,31 @@
-import { prisma } from "../../utils/prisma";
-
 /**
- * [API] :: GET /api/projects/techs
+ * [API] :: GET_TECHS
  * ----------------------------------------------------------------------
  * Endpoint auxiliar para obtener la lista de tecnologías principales.
  * Útil para poblar menús de filtrado en el frontend.
  *
- * @returns {Promise<string[]>} - Lista de tecnologías únicas ordenadas
+ * @module    server/api/projects
+ * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
+
+import { prisma } from "../../utils/prisma";
+
+// =====================================================================
+// [SECTION] :: ENDPOINT HANDLER
+// =====================================================================
+
 export default defineCachedEventHandler(
   async (event) => {
     try {
-      // Group by primary_tech to get unique values efficienty
+      // Group by primary_tech to get unique values efficiently
       const groups = await prisma.project.groupBy({
         by: ["primary_tech"],
         _count: {
           primary_tech: true,
         },
         orderBy: {
-          primary_tech: "asc", // Alphabetical order
+          primary_tech: "asc",
         },
       });
 
