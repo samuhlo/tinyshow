@@ -21,7 +21,7 @@
  * @const {Number}  SLOT_HEIGHT - Altura fija de cada celda del strip (px).
  * @const {Number}  REEL_LENGTH - Cantidad de iconos random en el carrete.
  */
-const chars       = 'abcdefghijklmnopqrstuvwxyz';
+const chars       = 'abcdefghijklmnoprstuvwxyz.,?/;:-=1234567890_+';
 const SLOT_HEIGHT = 50;
 const REEL_LENGTH = 10;
 
@@ -117,7 +117,7 @@ onMounted(() => {
         <span 
           v-for="(char, i) in strip" 
           :key="i"
-          class="h-12 w-auto flex items-center justify-center leading-none text-accent"
+          class="text-4xl h-12 w-auto flex items-center justify-center leading-none text-accent"
         >
           {{ char }}
         </span>
