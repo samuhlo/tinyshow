@@ -9,6 +9,29 @@
  * @architect Samuh Lo
  * ----------------------------------------------------------------------
  */
+
+let originalTitle = 'TinyShow'
+
+const handleBlur = () => {
+  originalTitle = document.title
+  document.title = 'Show must go ON !!!'
+}
+
+const handleFocus = () => {
+  if (originalTitle) {
+    document.title = originalTitle
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('blur', handleBlur)
+  window.addEventListener('focus', handleFocus)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('blur', handleBlur)
+  window.removeEventListener('focus', handleFocus)
+})
 </script>
 
 <template>

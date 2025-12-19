@@ -274,7 +274,7 @@ onUnmounted(() => {
         v-if="imageLoading" 
         class="absolute inset-0 flex items-center justify-center bg-transparent"
       >
-        <UiBrutalSpinner size="sm" color="accent" />
+        <UiLoadingSpinner size="sm" color="accent" />
       </div>
       
       <nuxt-img
