@@ -43,17 +43,26 @@ const imageRef = ref<HTMLElement | null>(null);
 // Image position (calculated from row position)
 const imagePosition = ref({ x: 0, y: 0 });
 
+// Calculate marquee duration based on title length for constant speed
+// ~50 pixels per second as base speed
+const marqueeDuration = computed(() => {
+  const titleLength = props.project.title.length;
+  const baseDuration = 12; // seconds for average title
+  const factor = titleLength / 20; // average title length
+  return Math.max(baseDuration * factor, 8); // minimum 5s
+});
+
 // Store active timeline to kill on new hover
 let activeTimeline: gsap.core.Timeline | null = null;
 
 /**
- * Calculate image position based on row center
+ * Calculate image position based on row - positioned to the right
  */
 const updateImagePosition = () => {
   if (!rowRef.value) return;
   const rect = rowRef.value.getBoundingClientRect();
   imagePosition.value = {
-    x: rect.left + rect.width / 2,
+    x: rect.left + rect.width * 0.75, // 70% to the right instead of centered
     y: rect.top + rect.height / 2,
   };
 };
@@ -198,7 +207,10 @@ onUnmounted(() => {
 
       <!-- Scrolling Marquee -->
       <div class="absolute inset-0 flex items-center overflow-hidden">
-        <div class="marquee-track flex whitespace-nowrap">
+        <div
+          class="marquee-track flex whitespace-nowrap"
+          :style="{ animationDuration: `${marqueeDuration}s` }"
+        >
           <span
             v-for="n in 12"
             :key="n"
@@ -216,7 +228,7 @@ onUnmounted(() => {
     <div
       v-if="isHovering && project.img_url"
       ref="imageRef"
-      class="fixed z-[9999] w-[320px] h-[200px] rounded-xl overflow-hidden shadow-2xl pointer-events-none"
+      class="fixed z-9999 lg:w-105 lg:h-55 md:w-80 md:h-40 xs:w-64 xs:h-40 rounded-xl overflow-hidden shadow-2xl pointer-events-none"
       :style="{
         left: `${imagePosition.x}px`,
         top: `${imagePosition.y}px`,
@@ -224,19 +236,21 @@ onUnmounted(() => {
         opacity: 0,
       }"
     >
-      <img
+      <nuxt-img
         :src="project.img_url"
         :alt="project.title"
         class="w-full h-full object-cover"
       />
+      <!-- Dark overlay for uniformity -->
+      <div class="absolute inset-0 bg-dark opacity-[0.1] pointer-events-none"></div>
     </div>
   </Teleport>
 </template>
 
 <style scoped>
-/* Marquee animation */
+/* Marquee animation - duration is set dynamically via inline style */
 .marquee-track {
-  animation: marquee 12s linear infinite;
+  animation: marquee linear infinite;
 }
 
 @keyframes marquee {
