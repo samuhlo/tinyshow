@@ -90,7 +90,7 @@ const handleSelect = (tech: string) => {
       >
         <!-- Loading State -->
         <div v-if="techPending" class="flex items-center justify-center py-12">
-          <UiBrutalSpinner size="lg" />
+          <UiBrutalSpinner size="lg" color="dark" />
         </div>
         
         <TechMenu

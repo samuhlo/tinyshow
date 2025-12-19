@@ -260,7 +260,8 @@ onUnmounted(() => {
     <div
       v-if="isHovering && project.img_url"
       ref="imageRef"
-      class="fixed z-9999 lg:w-105 lg:h-55 md:w-80 md:h-40 xs:w-64 xs:h-40 rounded-xl overflow-hidden shadow-2xl pointer-events-none"
+      class="fixed z-9999 lg:w-105 lg:h-55 md:w-80 md:h-40 xs:w-64 xs:h-40 rounded-xl overflow-hidden pointer-events-none"
+      :class="{ 'shadow-2xl': !imageLoading }"
       :style="{
         left: `${imagePosition.x}px`,
         top: `${imagePosition.y}px`,
@@ -271,9 +272,9 @@ onUnmounted(() => {
       <!-- Loading Spinner -->
       <div 
         v-if="imageLoading" 
-        class="absolute inset-0 flex items-center justify-center bg-dark"
+        class="absolute inset-0 flex items-center justify-center bg-transparent"
       >
-        <UiBrutalSpinner size="sm" />
+        <UiBrutalSpinner size="sm" color="accent" />
       </div>
       
       <nuxt-img
@@ -282,8 +283,8 @@ onUnmounted(() => {
         class="w-full h-full object-cover"
         @load="imageLoading = false"
       />
-      <!-- Dark overlay for uniformity -->
-      <div class="absolute inset-0 bg-dark opacity-[0.1] pointer-events-none"></div>
+      <!-- Dark overlay for uniformity (only show when loaded) -->
+      <div v-if="!imageLoading" class="absolute inset-0 bg-dark opacity-[0.1] pointer-events-none"></div>
     </div>
   </Teleport>
 </template>

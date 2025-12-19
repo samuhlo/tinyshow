@@ -139,7 +139,7 @@ onMounted(async () => {
 
     <!-- Loading State -->
     <div v-if="pending" class="py-12 flex justify-center">
-      <UiBrutalSpinner size="md" />
+      <UiBrutalSpinner size="md" color="dark" />
     </div>
 
     <!-- Empty State -->

@@ -2,8 +2,8 @@
 /**
  * [COMPONENT] :: BRUTAL_SPINNER
  * ----------------------------------------------------------------------
- * Spinner brutalista minimalista para estados de carga.
- * Diseño de dos bloques que rotan y se mueven en direcciones opuestas.
+ * Spinner de carga simple y circular.
+ * Adaptado a los colores del proyecto.
  *
  * @module    components/ui
  * @architect Samuh Lo
@@ -18,6 +18,10 @@ const SIZE_SM = 24;
 const SIZE_MD = 36;
 const SIZE_LG = 48;
 
+const BORDER_SM = 3;
+const BORDER_MD = 4;
+const BORDER_LG = 5;
+
 // =====================================================================
 // [SECTION] :: COMPONENT PROPS
 // =====================================================================
@@ -25,15 +29,18 @@ const SIZE_LG = 48;
 interface Props {
   /**
    * Tamaño del spinner.
-   * - `sm`: 24px - para hover de imágenes
-   * - `md`: 36px - para listas de proyectos
-   * - `lg`: 48px - para carga inicial
    */
   size?: 'sm' | 'md' | 'lg';
+  
+  /**
+   * Color del spinner.
+   */
+  color?: 'dark' | 'light' | 'accent';
 }
 
 const props = withDefaults(defineProps<Props>(), {
   size: 'md',
+  color: 'dark', // Default to dark for light backgrounds
 });
 
 // =====================================================================
@@ -46,9 +53,24 @@ const sizeMap = {
   lg: SIZE_LG,
 };
 
+const borderMap = {
+  sm: BORDER_SM,
+  md: BORDER_MD,
+  lg: BORDER_LG,
+};
+
+const colorMap = {
+  dark: 'var(--color-dark)',
+  light: 'var(--color-light)',
+  accent: 'var(--color-accent)',
+};
+
 const spinnerStyle = computed(() => ({
   width: `${sizeMap[props.size]}px`,
   height: `${sizeMap[props.size]}px`,
+  borderWidth: `${borderMap[props.size]}px`,
+  borderColor: colorMap[props.color],
+  borderBottomColor: 'transparent',
 }));
 </script>
 
@@ -65,44 +87,19 @@ const spinnerStyle = computed(() => ({
 
 <style scoped>
 .brutal-spinner {
-  display: flex;
-  animation: brutal-rotate 1.5s infinite linear;
+  border-style: solid;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
 
-.brutal-spinner::before,
-.brutal-spinner::after {
-  content: "";
-  flex: 1;
-  background: var(--color-dark);
-  animation: brutal-mvx 0.5s infinite linear alternate;
-}
-
-.brutal-spinner::before {
-  background: var(--color-accent);
-  animation-name: brutal-mvrx;
-}
-
-@keyframes brutal-rotate {
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
   100% {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes brutal-mvx {
-  0% {
-    transform: translateX(-30%);
-  }
-  100% {
-    transform: translateX(30%);
-  }
-}
-
-@keyframes brutal-mvrx {
-  0% {
-    transform: translateX(30%);
-  }
-  100% {
-    transform: translateX(-30%);
   }
 }
 
