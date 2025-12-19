@@ -138,8 +138,8 @@ onMounted(async () => {
     </header>
 
     <!-- Loading State -->
-    <div v-if="pending" class="py-12 text-center">
-      <span class="text-mono-sm animate-pulse">{{ LOADING_TEXT }}</span>
+    <div v-if="pending" class="py-12 flex justify-center">
+      <UiBrutalSpinner size="md" />
     </div>
 
     <!-- Empty State -->

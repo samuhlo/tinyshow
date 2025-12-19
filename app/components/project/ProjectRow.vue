@@ -59,6 +59,9 @@ const isHovering = ref(false);
 const rowRef = ref<HTMLElement | null>(null);
 const imageRef = ref<HTMLElement | null>(null);
 
+// Image loading state
+const imageLoading = ref(true);
+
 // Image position (calculated from row position)
 const imagePosition = ref({ x: 0, y: 0 });
 
@@ -100,6 +103,9 @@ const handleMouseEnter = async () => {
     activeTimeline.kill();
     activeTimeline = null;
   }
+
+  // Reset loading state for new hover
+  imageLoading.value = true;
 
   // Calculate position before showing
   updateImagePosition();
@@ -262,10 +268,19 @@ onUnmounted(() => {
         opacity: 0,
       }"
     >
+      <!-- Loading Spinner -->
+      <div 
+        v-if="imageLoading" 
+        class="absolute inset-0 flex items-center justify-center bg-dark"
+      >
+        <UiBrutalSpinner size="sm" />
+      </div>
+      
       <nuxt-img
         :src="project.img_url"
         :alt="project.title"
         class="w-full h-full object-cover"
+        @load="imageLoading = false"
       />
       <!-- Dark overlay for uniformity -->
       <div class="absolute inset-0 bg-dark opacity-[0.1] pointer-events-none"></div>

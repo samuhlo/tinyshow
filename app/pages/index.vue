@@ -22,7 +22,7 @@ import ProjectList from "~/components/project/ProjectList.vue";
  * [DATA] :: TECHNOLOGIES
  * Lista de tecnologías obtenidas de la API para el menú principal.
  */
-const { data: technologies } = await useFetch<string[]>("/api/projects/techs", {
+const { data: technologies, pending: techPending } = await useFetch<string[]>("/api/projects/techs", {
   default: () => [],
 });
 
@@ -88,7 +88,13 @@ const handleSelect = (tech: string) => {
             : 'md:col-span-3 lg:col-span-2 pt-0'
         ]"
       >
+        <!-- Loading State -->
+        <div v-if="techPending" class="flex items-center justify-center py-12">
+          <UiBrutalSpinner size="lg" />
+        </div>
+        
         <TechMenu
+          v-else
           :technologies="technologies || []"
           :active-tech="activeTech"
           :view-mode="viewMode"
