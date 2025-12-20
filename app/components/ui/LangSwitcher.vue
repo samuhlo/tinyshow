@@ -10,8 +10,7 @@
  * ----------------------------------------------------------------------
  */
 
-const { locale } = useI18n();
-const switchLocalePath = useSwitchLocalePath();
+const { locale, setLocale } = useI18n();
 
 // =====================================================================
 // [SECTION] :: INTERACTION HANDLERS
@@ -22,11 +21,12 @@ const LOCALE_ES = "es";
 
 /**
  * [HANDLE] :: TOGGLE_LOCALE
- * Alterna el idioma de la aplicación y navega a la ruta equivalente.
+ * Alterna el idioma de la aplicación sin recargar la página.
+ * Usa setLocale para cambio reactivo (sin remontado de componentes).
  */
-const toggleLocale = async () => {
+const toggleLocale = () => {
   const newLocale = locale.value === LOCALE_EN ? LOCALE_ES : LOCALE_EN;
-  await navigateTo(switchLocalePath(newLocale));
+  setLocale(newLocale);
 };
 </script>
 
