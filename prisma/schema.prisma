@@ -16,7 +16,7 @@ model Project {
   img_url      String?
   repo_url     String
   demo_url     String?
-  origin       Json? // { is_course, name, author, url }
+  origin       Json? // { is_course, name, author, course_url, author_url }
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

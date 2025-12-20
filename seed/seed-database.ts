@@ -14,7 +14,6 @@ import { Octokit } from "octokit";
 import { ingestProject } from "../server/utils/ingest";
 import { type Project } from "../shared/types";
 import { prisma } from "../server/utils/prisma";
-import * as readline from "readline";
 
 // =====================================================================
 // [SECTION] :: CONFIGURATION
@@ -37,43 +36,23 @@ const USERNAME = GITHUB_USERNAME as string;
 const OCTOKIT = new Octokit({ auth: GITHUB_TOKEN });
 
 // =====================================================================
-// [SECTION] :: UTILITIES
-// =====================================================================
-
-/**
- * [I/O] :: ASK_QUESTION
- * Promesa utilitaria para obtener entrada del usuario vía terminal.
- * @param query - La pregunta a mostrar.
- * @returns La respuesta del usuario.
- */
-async function askQuestion(query: string): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) =>
-    rl.question(query, (ans) => {
-      rl.close();
-      resolve(ans);
-    })
-  );
-}
-
-// =====================================================================
 // [SECTION] :: MAIN EXECUTION
 // =====================================================================
 
 async function main() {
   console.log(`\n[SEED]  >> START         :: user: @${USERNAME}\n`);
 
-  const answer = await askQuestion(
-    "Enable strict mode (require img_url & demo_url)? [Y/n]: "
-  );
-  const strictMode = answer.toLowerCase() !== "n";
+  // Read strict mode from env var (default: true)
+  const strictMode = process.env.NUXT_STRICT_MODE !== "false";
 
   console.log(
-    `[CONF]  >> MODE          :: ${strictMode ? "STRICT" : "LENIENT"}\n`
+    `[CONF]  >> MODE          :: ${strictMode ? "STRICT" : "LENIENT"}`
+  );
+  console.log(
+    `[WARN]  >> SYNC_INFO     :: El webhook usará este mismo modo (NUXT_STRICT_MODE=${strictMode})`
+  );
+  console.log(
+    `        >> Para cambiar el modo, modifica NUXT_STRICT_MODE en .env y re-ejecuta este seed.\n`
   );
 
   try {

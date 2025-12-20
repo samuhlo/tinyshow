@@ -38,10 +38,16 @@ export const ProjectSchema = z.object({
     .object({
       is_course: z
         .boolean()
-        .describe("true if the project is from a course, bootcmp, or tutorial"),
+        .describe(
+          "true if the project is from a course, bootcamp, or tutorial"
+        ),
       name: z.string().nullish().describe("Name of the course/bootcamp"),
-      author: z.string().nullish().describe("platform or instructor name"),
-      url: z.string().nullish().describe("URL to the course"),
+      author: z.string().nullish().describe("Instructor or platform name"),
+      course_url: z.string().nullish().describe("URL to the course page"),
+      author_url: z
+        .string()
+        .nullish()
+        .describe("Author's website, Twitter, or YouTube channel"),
     })
     .nullish()
     .describe("Origin of the project if it's from a course"),

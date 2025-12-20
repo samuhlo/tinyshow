@@ -70,7 +70,11 @@ GUIDELINES:
 6. **primary_tech**: The dominant technology. Rule: Framework > Language. Examples: 'Astro' over 'TypeScript', 'Nuxt' over 'Vue', 'Next' over 'React'.
 7. **repo_url**: Use '${repoUrl}' if provided, otherwise infer.
 8: **img_url**: If a relevant screenshot or header image is found in markdown standard syntax, use it. IMPORTANT: If the path is relative (e.g. './img.png' or 'public/img.png'), you MUST convert it to an absolute raw GitHub URL (e.g. 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}'). Use '${repoUrl}' to infer the owner and repo. Assume 'main' branch if not specified.
-9: **origin**: Analyze if the README mentions "Course", "Bootcamp", "Tutorial", "Based on", "Inspirado en", "Midudev", "Alura", etc. If yes, set is_course: true and extract details.
+9: **origin**: Analyze if the README mentions "Course", "Bootcamp", "Tutorial", "Based on", "Inspirado en", "Midudev", "Alura", etc. If yes, set is_course: true and extract:
+   - **name**: The official course name. IMPORTANT: Do NOT repeat the author's name here (e.g., avoid "Midudev Course" if author is "Midudev"). If no explicit course name is found, infer a descriptive name using the primary_tech and repo title (e.g., "Nuxt 3 Fundamentals", "Vue Portfolio Workshop").
+   - **author**: The instructor or platform name.
+   - **course_url**: Link to course landing page if found.
+   - **author_url**: Instructor's website, Twitter, or YouTube if found.
 
 CRITICAL: Return ONLY valid JSON. No Markdown code fences.
 `;

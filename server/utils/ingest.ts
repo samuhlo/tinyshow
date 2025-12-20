@@ -42,8 +42,12 @@ export async function ingestProject(
   repo: string,
   octokit: Octokit,
   branch: string = DEFAULT_BRANCH,
-  strictMode: boolean = true
+  strictModeOverride?: boolean
 ): Promise<Project | null> {
+  // Read from env var, fallback to explicit override, fallback to true
+  const envStrictMode = process.env.NUXT_STRICT_MODE !== "false";
+  const strictMode = strictModeOverride ?? envStrictMode;
+
   console.log(
     `[INGEST] >> START        :: project: ${owner}/${repo} | branch: ${branch} | strict: ${strictMode}`
   );
