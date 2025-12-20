@@ -10,6 +10,7 @@
  */
 
 import { prisma } from "../../utils/prisma";
+import type { Project, LocalizedTextType, OriginType } from "~~/shared/types";
 
 // =====================================================================
 // [SECTION] :: ENDPOINT HANDLER
@@ -42,7 +43,21 @@ export default defineCachedEventHandler(
         },
       });
 
-      return projects;
+      // Cast JSONB fields to proper types for frontend consumption
+      return projects.map(
+        (project): Project => ({
+          id: project.id,
+          title: project.title,
+          primary_tech: project.primary_tech,
+          tagline: project.tagline as unknown as LocalizedTextType,
+          description: project.description as unknown as LocalizedTextType,
+          tech_stack: project.tech_stack,
+          img_url: project.img_url,
+          repo_url: project.repo_url,
+          demo_url: project.demo_url,
+          origin: project.origin as unknown as OriginType,
+        })
+      );
     } catch (error: any) {
       console.error(
         "[API] :: projects/index :: Error fetching projects",

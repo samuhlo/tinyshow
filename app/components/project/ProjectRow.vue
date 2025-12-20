@@ -12,6 +12,7 @@
  */
 
 import { gsap } from "gsap";
+import type { Project } from "~~/shared/types";
 
 const IMG_SCALE_INITIAL = 0.8;
 const IMG_SCALE_HOVER = 1;
@@ -29,33 +30,8 @@ const MARQUEE_ITEMS_COUNT = 12;
 
 
 // =====================================================================
-// [SECTION] :: COMPONENT INTERFACES
+// [SECTION] :: COMPONENT PROPS
 // =====================================================================
-
-interface LocalizedText {
-  en: string;
-  es: string;
-}
-
-interface Origin {
-  is_course?: boolean;
-  name?: string;
-  author?: string;
-  url?: string;
-}
-
-interface Project {
-  id: string;
-  title: string;
-  tagline?: LocalizedText;
-  description?: LocalizedText;
-  tech_stack?: string[];
-  primary_tech?: string;
-  img_url?: string | null;
-  repo_url?: string;
-  demo_url?: string | null;
-  origin?: Origin | null;
-}
 
 interface Props {
   project: Project;

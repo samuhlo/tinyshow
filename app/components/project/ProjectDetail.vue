@@ -12,6 +12,7 @@
  */
 
 import { gsap } from "gsap";
+import type { Project, LocalizedTextType, OriginType } from "~~/shared/types";
 
 // =====================================================================
 // [SECTION] :: ANIMATION CONSTANTS
@@ -27,34 +28,8 @@ const CONTENT_INITIAL_X = 30;
 const CONTENT_INITIAL_OPACITY = 0;
 
 // =====================================================================
-// [SECTION] :: COMPONENT INTERFACES
+// [SECTION] :: COMPONENT PROPS
 // =====================================================================
-
-interface LocalizedText {
-  en?: string;
-  es?: string;
-  [key: string]: string | undefined;
-}
-
-interface Origin {
-  is_course?: boolean;
-  name?: string;
-  author?: string;
-  url?: string;
-}
-
-interface Project {
-  id: string;
-  title: string;
-  tagline?: LocalizedText | unknown;
-  description?: LocalizedText | unknown;
-  tech_stack?: string[];
-  primary_tech?: string;
-  img_url?: string | null;
-  repo_url?: string;
-  demo_url?: string | null;
-  origin?: Origin | unknown | null;
-}
 
 interface Props {
   project: Project;
@@ -87,9 +62,9 @@ const { locale } = useI18n();
  * Obtiene la descripción en el idioma actual.
  */
 const localizedDescription = computed(() => {
-  const desc = props.project.description as LocalizedText | null | undefined;
+  const desc = props.project.description;
   if (!desc) return "";
-  return desc[locale.value as keyof LocalizedText] || desc.en || "";
+  return desc[locale.value as keyof LocalizedTextType] || desc.en || "";
 });
 
 /**
@@ -97,7 +72,7 @@ const localizedDescription = computed(() => {
  * Genera el texto de origen en formato de comentario.
  */
 const originText = computed(() => {
-  const origin = props.project.origin as Origin | null | undefined;
+  const origin = props.project.origin;
   if (!origin?.name) return null;
   return `// ORIGIN : ${origin.name}${origin.author ? ` by ${origin.author}` : ""}`;
 });

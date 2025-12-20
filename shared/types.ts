@@ -57,4 +57,11 @@ export const ProjectSchema = z.object({
 // [SECTION] :: TYPES
 // =====================================================================
 
+/** Texto localizado en inglés y español */
+export type LocalizedTextType = z.infer<typeof LocalizedText>;
+
+/** Información de origen del proyecto (curso, bootcamp, etc.) */
+export type OriginType = z.infer<typeof ProjectSchema.shape.origin>;
+
+/** Tipo completo de proyecto */
 export type Project = z.infer<typeof ProjectSchema>;

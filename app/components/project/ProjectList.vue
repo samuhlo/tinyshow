@@ -53,20 +53,9 @@ const { data: projects, pending, refresh } = await useFetch("/api/projects", {
 // [SECTION] :: EXPANDED STATE
 // =====================================================================
 
-interface ExpandedProject {
-  id: string;
-  title: string;
-  tagline?: unknown;
-  description?: unknown;
-  tech_stack?: string[];
-  primary_tech?: string;
-  img_url?: string | null;
-  repo_url?: string;
-  demo_url?: string | null;
-  origin?: unknown;
-}
+import type { Project } from "~~/shared/types";
 
-const expandedProject = ref<ExpandedProject | null>(null);
+const expandedProject = ref<Project | null>(null);
 const expandedImageRect = ref<DOMRect | null>(null);
 
 // Ghost image for FLIP animation
@@ -80,7 +69,7 @@ const detailImageRef = ref<HTMLElement | null>(null);
  * Maneja la expansión de un proyecto al hacer click en el row.
  * Inicia la animación FLIP del ghost image.
  */
-const handleExpand = (project: ExpandedProject, imageRect: DOMRect | null) => {
+const handleExpand = (project: Project, imageRect: DOMRect | null) => {
   // If same project, close it
   if (expandedProject.value?.id === project.id) {
     expandedProject.value = null;
