@@ -29,7 +29,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <span
-    class="inline-block px-2 py-0.5 text-xs font-mono border rounded-full transition-colors duration-200"
+    class="inline-block px-2 py-0.5 text-xs font-mono border  transition-colors duration-200"
     :class="[
       theme === THEME_LIGHT
         ? 'border-dark text-dark'

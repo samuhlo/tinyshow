@@ -272,7 +272,7 @@ onMounted(() => {
       </div>
 
       <!-- Content Section -->
-      <div ref="contentRef" class="flex flex-col justify-between py-2">
+      <div ref="contentRef" class="flex flex-col justify-between py-2 mr-8">
         <!-- Header -->
         <div>
           <!-- Title -->
@@ -281,30 +281,32 @@ onMounted(() => {
           </h3>
 
           <!-- Subtitle -->
-          <p class="content-item text-mono-xs text-light/60 mb-6">
+          <p class="content-item text-mono-xs text-light/60 mb-7">
             {{ project.primary_tech }} + GSAP Showcase
           </p>
 
           <!-- Description -->
-          <p class="content-item font-mono text-sm text-light/80 leading-relaxed mb-6">
+          <p class="content-item font-mono text-sm text-light/80 leading-relaxed mb-5 ">
             {{ localizedDescription }}
           </p>
 
+          <div class="space-y-4 mb-5">
           <!-- Tech Pills -->
-          <div class="content-item flex flex-wrap gap-2 mb-8">
+          <div class="content-item flex flex-wrap gap-2 mb-5">
             <UiTechPill v-for="tech in project.tech_stack" :key="tech" :text="tech" theme="dark" />
           </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="space-y-4">
-          <!-- Origin -->
-          <p v-if="originText" class="content-item text-mono-xs text-light/30">
+            <!-- Origin -->
+          <p v-if="originText" class="content-item font-mono text-xs text-light/30">
             {{ originText }}
           </p>
 
+        </div>
+
+        <!-- Footer -->
+        
+        
           <!-- Action Links -->
-          <div class="content-item flex items-center gap-6">
+          <div class="content-item flex items-center gap-6 justify-end ">
             <UiActionLink v-if="project.repo_url" :href="project.repo_url" label="GITHUB" icon="mdi:github" />
             <UiActionLink v-if="project.demo_url" :href="project.demo_url" label="DEMO"
               icon="material-symbols:open-in-new" />
