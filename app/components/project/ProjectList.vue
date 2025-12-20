@@ -12,6 +12,7 @@
 
 import { gsap } from "gsap";
 import ProjectRow from "./ProjectRow.vue";
+import ProjectDetail from "./ProjectDetail.vue";
 
 const ANIM_DURATION_WAVE = 0.8;
 const ANIM_STAGGER_WAVE = 0.1;
@@ -47,6 +48,122 @@ const { data: projects, pending, refresh } = await useFetch("/api/projects", {
   })),
   watch: [() => props.tech],
 });
+
+// =====================================================================
+// [SECTION] :: EXPANDED STATE
+// =====================================================================
+
+interface ExpandedProject {
+  id: string;
+  title: string;
+  tagline?: unknown;
+  description?: unknown;
+  tech_stack?: string[];
+  primary_tech?: string;
+  img_url?: string | null;
+  repo_url?: string;
+  demo_url?: string | null;
+  origin?: unknown;
+}
+
+const expandedProject = ref<ExpandedProject | null>(null);
+const expandedImageRect = ref<DOMRect | null>(null);
+
+// Ghost image for FLIP animation
+const ghostImageUrl = ref<string | null>(null);
+const ghostImageStyle = ref<Record<string, string>>({});
+const ghostVisible = ref(false);
+const detailImageRef = ref<HTMLElement | null>(null);
+
+/**
+ * [HANDLE] :: EXPAND_PROJECT
+ * Maneja la expansión de un proyecto al hacer click en el row.
+ * Inicia la animación FLIP del ghost image.
+ */
+const handleExpand = (project: ExpandedProject, imageRect: DOMRect | null) => {
+  // If same project, close it
+  if (expandedProject.value?.id === project.id) {
+    expandedProject.value = null;
+    expandedImageRect.value = null;
+    return;
+  }
+  
+  // Setup ghost image for FLIP animation
+  if (imageRect && project.img_url) {
+    ghostImageUrl.value = project.img_url;
+    ghostImageStyle.value = {
+      position: 'fixed',
+      left: `${imageRect.left}px`,
+      top: `${imageRect.top}px`,
+      width: `${imageRect.width}px`,
+      height: `${imageRect.height}px`,
+      zIndex: '9999',
+      pointerEvents: 'none',
+      borderRadius: '0.75rem',
+      overflow: 'hidden',
+    };
+    ghostVisible.value = true;
+  }
+  
+  // Expand new project
+  expandedProject.value = project;
+  expandedImageRect.value = imageRect;
+};
+
+/**
+ * [ANIM] :: ANIMATE_GHOST_TO_DETAIL
+ * Anima el ghost image hacia la posición del detail image.
+ */
+const animateGhostToDetail = async () => {
+  await nextTick();
+  
+  // Find the detail image element
+  const detailImage = document.querySelector('.project-detail-image');
+  if (!detailImage || !ghostVisible.value) {
+    ghostVisible.value = false;
+    return;
+  }
+  
+  const targetRect = detailImage.getBoundingClientRect();
+  
+  // Get the ghost element
+  const ghostEl = document.querySelector('.ghost-image');
+  if (!ghostEl) {
+    ghostVisible.value = false;
+    return;
+  }
+  
+  // Animate ghost to target position
+  gsap.to(ghostEl, {
+    left: targetRect.left,
+    top: targetRect.top,
+    width: targetRect.width,
+    height: targetRect.height,
+    duration: 0.5,
+    ease: 'power3.out',
+    onComplete: () => {
+      ghostVisible.value = false;
+      ghostImageUrl.value = null;
+    },
+  });
+};
+
+// Watch for expansion to trigger ghost animation
+watch(expandedProject, (newVal) => {
+  if (newVal && ghostVisible.value) {
+    animateGhostToDetail();
+  }
+});
+
+/**
+ * [HANDLE] :: CLOSE_DETAIL
+ * Maneja el cierre del detalle.
+ */
+const handleCloseDetail = () => {
+  expandedProject.value = null;
+  expandedImageRect.value = null;
+  ghostVisible.value = false;
+};
 
 // =====================================================================
 // [SECTION] :: ANIMATION LOGIC
@@ -105,6 +222,10 @@ watch(
 watch(
   () => props.tech,
   async () => {
+    // Close any expanded project when tech changes
+    expandedProject.value = null;
+    expandedImageRect.value = null;
+    
     // If we have data, animate it. If pending, the 'projects' watcher will handle it.
     if (!pending.value && projects.value?.length) {
       await nextTick();
@@ -156,11 +277,38 @@ onMounted(async () => {
         :key="project.id"
         class="project-row-wrapper opacity-0" 
       >
+        <!-- ProjectRow (hidden when expanded) -->
         <ProjectRow 
+          v-if="expandedProject?.id !== project.id"
           :project="project" 
-          :index="index" 
+          :index="index"
+          :is-expanded="expandedProject?.id === project.id"
+          @expand="handleExpand"
+        />
+        
+        <!-- Expanded ProjectDetail (replaces the row) -->
+        <ProjectDetail
+          v-else
+          :project="expandedProject"
+          :image-rect="expandedImageRect"
+          @close="handleCloseDetail"
         />
       </div>
     </div>
   </div>
+
+  <!-- Ghost Image for FLIP animation (Teleported to body) -->
+  <Teleport to="body">
+    <div
+      v-if="ghostVisible && ghostImageUrl"
+      class="ghost-image"
+      :style="ghostImageStyle"
+    >
+      <nuxt-img
+        :src="ghostImageUrl"
+        alt="Ghost transition"
+        class="w-full h-full object-cover"
+      />
+    </div>
+  </Teleport>
 </template>

@@ -32,18 +32,44 @@ const MARQUEE_ITEMS_COUNT = 12;
 // [SECTION] :: COMPONENT INTERFACES
 // =====================================================================
 
+interface LocalizedText {
+  en: string;
+  es: string;
+}
+
+interface Origin {
+  is_course?: boolean;
+  name?: string;
+  author?: string;
+  url?: string;
+}
+
 interface Project {
   id: string;
   title: string;
+  tagline?: LocalizedText;
+  description?: LocalizedText;
+  tech_stack?: string[];
+  primary_tech?: string;
   img_url?: string | null;
+  repo_url?: string;
+  demo_url?: string | null;
+  origin?: Origin | null;
 }
 
 interface Props {
   project: Project;
   index: number;
+  isExpanded?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  isExpanded: false,
+});
+
+const emit = defineEmits<{
+  expand: [project: Project, imageRect: DOMRect | null];
+}>();
 
 // =====================================================================
 // [SECTION] :: COMPONENT STATE & COMPUTED
@@ -98,6 +124,9 @@ const updateImagePosition = () => {
  * Activa los efectos de hover y dispara la animación de entrada.
  */
 const handleMouseEnter = async () => {
+  // Don't show hover when expanded
+  if (props.isExpanded) return;
+  
   // Kill any previous animation to prevent glitches
   if (activeTimeline) {
     activeTimeline.kill();
@@ -184,6 +213,28 @@ const handleMouseMove = (event: MouseEvent) => {
 // [SECTION] :: LIFECYCLE
 // =====================================================================
 
+/**
+ * [HANDLE] :: ON_CLICK
+ * Emite el evento de expansión con los datos del proyecto y la posición de la imagen.
+ */
+const handleClick = () => {
+  // Capture image rect before closing hover
+  let imageRect: DOMRect | null = null;
+  if (imageRef.value && isHovering.value) {
+    imageRect = imageRef.value.getBoundingClientRect();
+  }
+  
+  // Close hover immediately
+  if (activeTimeline) {
+    activeTimeline.kill();
+    activeTimeline = null;
+  }
+  isHovering.value = false;
+  
+  // Emit expand with full project data and image rect
+  emit("expand", props.project as Project, imageRect);
+};
+
 onUnmounted(() => {
   if (activeTimeline) {
     activeTimeline.kill();
@@ -199,6 +250,7 @@ onUnmounted(() => {
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
     @mousemove="handleMouseMove"
+    @click="handleClick"
   >
     <!-- Content layer (index + title) -->
     <div class="flex items-center gap-12 pl-2 relative z-10">
