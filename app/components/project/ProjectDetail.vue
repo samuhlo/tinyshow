@@ -67,15 +67,7 @@ const localizedDescription = computed(() => {
   return desc[locale.value as keyof LocalizedTextType] || desc.en || "";
 });
 
-/**
- * [COMPUTED] :: ORIGIN_TEXT
- * Genera el texto de origen en formato de comentario.
- */
-const originText = computed(() => {
-  const origin = props.project.origin;
-  if (!origin?.name) return null;
-  return `// ORIGIN : ${origin.name}${origin.author ? ` by ${origin.author}` : ""}`;
-});
+
 
 // =====================================================================
 // [SECTION] :: ANIMATION LOGIC
@@ -265,21 +257,23 @@ onMounted(() => {
             {{ localizedDescription }}
           </p>
 
-          <div class="space-y-4 mb-5">
           <!-- Tech Pills -->
           <div class="content-item flex flex-wrap gap-2 mb-5">
             <UiTechPill v-for="tech in project.tech_stack" :key="tech" :text="tech" theme="dark" />
           </div>
-            <!-- Origin -->
-          <p v-if="originText" class="content-item font-mono text-xs text-light/30">
-            {{ originText }}
-          </p>
 
-        </div>
+          <!-- Origin Info -->
+          <div class="content-item">
+            <ProjectOrigin
+              v-if="project.origin"
+              :origin="project.origin as OriginType"
+              class="mb-3"
+            />
+          </div>
 
         <!-- Footer -->
-        
-        
+
+
           <!-- Action Links -->
           <div class="content-item flex items-center gap-6 justify-end ">
             <UiActionLink v-if="project.repo_url" :href="project.repo_url" label="GITHUB" icon="mdi:github" />

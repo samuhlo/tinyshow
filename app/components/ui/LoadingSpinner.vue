@@ -11,18 +11,6 @@
  */
 
 // =====================================================================
-// [SECTION] :: DESIGN TOKENS
-// =====================================================================
-
-const SIZE_SM = 24;
-const SIZE_MD = 36;
-const SIZE_LG = 48;
-
-const BORDER_SM = 3;
-const BORDER_MD = 4;
-const BORDER_LG = 5;
-
-// =====================================================================
 // [SECTION] :: COMPONENT PROPS
 // =====================================================================
 
@@ -44,75 +32,36 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // =====================================================================
-// [SECTION] :: COMPUTED STYLES
+// [SECTION] :: COMPUTED CLASSES
 // =====================================================================
 
-const sizeMap = {
-  sm: SIZE_SM,
-  md: SIZE_MD,
-  lg: SIZE_LG,
+const sizeClasses = {
+  sm: 'w-6 h-6 border-[3px]',
+  md: 'w-9 h-9 border-4',
+  lg: 'w-12 h-12 border-[5px]',
 };
 
-const borderMap = {
-  sm: BORDER_SM,
-  md: BORDER_MD,
-  lg: BORDER_LG,
+const colorClasses = {
+  dark: 'border-dark',
+  light: 'border-light',
+  accent: 'border-accent',
 };
 
-const colorMap = {
-  dark: 'var(--color-dark)',
-  light: 'var(--color-light)',
-  accent: 'var(--color-accent)',
-};
-
-const spinnerStyle = computed(() => ({
-  width: `${sizeMap[props.size]}px`,
-  height: `${sizeMap[props.size]}px`,
-  borderWidth: `${borderMap[props.size]}px`,
-  borderColor: colorMap[props.color],
-  borderBottomColor: 'transparent',
-}));
+const spinnerClasses = computed(() => {
+  return [
+    'inline-block rounded-full border-solid animate-spin border-b-transparent box-border',
+    sizeClasses[props.size],
+    colorClasses[props.color],
+  ];
+});
 </script>
 
 <template>
   <span 
-    class="brutal-spinner"
-    :style="spinnerStyle"
+    :class="spinnerClasses"
     role="status"
     aria-label="Loading"
   >
     <span class="sr-only">Loading...</span>
   </span>
 </template>
-
-<style scoped>
-.brutal-spinner {
-  border-style: solid;
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-}
-
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Screen reader only */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-</style>
