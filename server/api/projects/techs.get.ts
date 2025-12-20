@@ -34,7 +34,27 @@ export default defineCachedEventHandler(
       });
 
       // Extract just the strings
-      return groups.map((g) => g.primary_tech);
+      const allTechs = groups.map((g) => g.primary_tech);
+
+      // Verify that each tech actually has visible projects using the same criteria as the list API
+      const validTechs: string[] = [];
+
+      for (const tech of allTechs) {
+        const count = await prisma.project.count({
+          where: {
+            primary_tech: {
+              equals: tech,
+              mode: "insensitive",
+            },
+          },
+        });
+
+        if (count > 0) {
+          validTechs.push(tech);
+        }
+      }
+
+      return validTechs;
     } catch (error: any) {
       console.error("[API] :: projects/techs :: Error fetching techs", error);
       throw createError({
