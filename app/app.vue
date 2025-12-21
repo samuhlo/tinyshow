@@ -12,6 +12,13 @@
  */
 
 // =====================================================================
+// [SECTION] :: COMPOSABLES
+// =====================================================================
+
+/** Intercambio dinámico del título de la pestaña. */
+useTitleSwap()
+
+// =====================================================================
 // [SECTION] :: INITIAL LOADING STATE
 // =====================================================================
 
@@ -23,41 +30,15 @@
 const isLoading = ref(true)
 
 // =====================================================================
-// [SECTION] :: TAB TITLE SWAP
-// =====================================================================
-
-let originalTitle = 'TinyShow'
-
-const handleBlur = () => {
-  originalTitle = document.title
-  document.title = 'Show must go ON !!!'
-}
-
-const handleFocus = () => {
-  if (originalTitle) {
-    document.title = originalTitle
-  }
-}
-
-// =====================================================================
 // [SECTION] :: LIFECYCLE
 // =====================================================================
 
 onMounted(() => {
-  // Tab title swap listeners
-  window.addEventListener('blur', handleBlur)
-  window.addEventListener('focus', handleFocus)
-  
   // Hide loading overlay after mount (hydration complete)
   // Small delay to ensure fonts are loaded
   setTimeout(() => {
     isLoading.value = false
   }, 100)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('blur', handleBlur)
-  window.removeEventListener('focus', handleFocus)
 })
 </script>
 

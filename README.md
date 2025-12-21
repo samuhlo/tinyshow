@@ -112,8 +112,7 @@ tinyshow/
 │   ├── plugins/         # Plugins de Nuxt
 │   └── assets/          # CSS global
 ├── server/              # Backend
-│   ├── api/             # Endpoints de API
-│   ├── webhooks/        # Handlers de webhooks
+│   ├── api/             # Endpoints de API y webhooks
 │   └── utils/           # Utilidades del servidor
 ├── prisma/              # Esquema y migraciones
 ├── seed/                # Scripts de seeding
@@ -145,7 +144,7 @@ Cada proyecto contiene:
 
 TinyShow puede recibir webhooks de GitHub para actualizar proyectos automáticamente. Cuando se hace push a un README:
 
-1. GitHub envía evento push al endpoint `/webhooks/github`
+1. GitHub envía evento push al endpoint `/api/webhooks/github`
 2. Se valida la firma del webhook
 3. Se detecta si el README fue modificado
 4. Se re-procesa el repositorio afectado
