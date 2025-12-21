@@ -209,21 +209,10 @@ onMounted(() => {
   <div ref="detailRef" class="project-detail overflow-hidden bg-dark">
     <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
       <!-- Close Button -->
-      <button class="
-      absolute
-      top-6
-      right-6
-      z-10
-      text-accent
-      text-4xl
-      transition-transform
-      duration-200
-      hover:scale-110
-      hover:rotate-90
-      flex items-center justify-center origin-center
-    " aria-label="Close" @click="handleClose">
-        <Icon name="material-symbols:close" />
-      </button>
+      <UiCloseButton
+        class="absolute top-6 right-6 z-10"
+        @click="handleClose"
+      />
 
       <!-- Image Section -->
       <div class="project-detail-image relative aspect-video overflow-hidden rounded-lg">

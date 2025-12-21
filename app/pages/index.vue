@@ -15,6 +15,27 @@ import TechMenu from "~/components/home/TechMenu.vue";
 import ProjectList from "~/components/project/ProjectList.vue";
 
 // =====================================================================
+// [SECTION] :: SEO META
+// =====================================================================
+
+/**
+ * [SEO] :: META_TAGS
+ * Configura los metadatos para OpenGraph y Twitter Cards.
+ */
+useSeoMeta({
+  title: "TinyShow",
+  description: "Una colección seleccionada de proyectos organizados por tecnología. Explora el show y descubre lo que he aprendido.",
+  ogTitle: "TinyShow",
+  ogDescription: "Una colección seleccionada de proyectos organizados por tecnología. Explora el show y descubre lo que he aprendido.",
+  ogImage: "/og-tinyshow.png",
+  ogType: "website",
+  twitterTitle: "TinyShow",
+  twitterDescription: "Una colección seleccionada de proyectos organizados por tecnología. Explora el show y descubre lo que he aprendido.",
+  twitterImage: "/og-tinyshow.png",
+  twitterCard: "summary_large_image",
+});
+
+// =====================================================================
 // [SECTION] :: REMOTE DATA
 // =====================================================================
 

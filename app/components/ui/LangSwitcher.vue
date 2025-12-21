@@ -33,7 +33,7 @@ const toggleLocale = () => {
 <template>
   <button
     @click="toggleLocale"
-    class="font-sans text-sm uppercase tracking-widest group"
+    class="font-sans text-sm uppercase tracking-widest group cursor-pointer"
     aria-label="Toggle Language"
   >
     <span
