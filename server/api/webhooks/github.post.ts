@@ -11,7 +11,12 @@
 
 import { Octokit } from "octokit";
 import crypto from "crypto";
-import { ingestProject, saveProject } from "../../utils/ingest";
+import {
+  ingestProject,
+  saveProject,
+  deleteProject,
+  type IngestResult,
+} from "../../utils/ingest";
 
 // =====================================================================
 // [SECTION] :: CONFIGURATION
@@ -35,6 +40,34 @@ const HTTP_BAD_REQUEST = 400;
 const HASH_ALGO = "sha256";
 const REF_PREFIX = "refs/heads/";
 const README_FILE = "README.md";
+
+// =====================================================================
+// [SECTION] :: CACHE INVALIDATION
+// =====================================================================
+
+async function invalidateProjectCache(): Promise<void> {
+  try {
+    const storage = useStorage("cache");
+    const keys = await storage.getKeys("nitro:handlers:_");
+    const projectKeys = keys.filter(
+      (k) =>
+        k.includes("projects-list") ||
+        k.includes("project-detail") ||
+        k.includes("projects-techs")
+    );
+
+    for (const key of projectKeys) {
+      await storage.removeItem(key);
+    }
+    console.log(
+      `[CACHE] >> INVALIDATED   :: count: ${
+        projectKeys.length
+      } | keys: ${projectKeys.join(", ")}`
+    );
+  } catch (err) {
+    console.error("[CACHE] :: ERROR         :: Failed to clear cache", err);
+  }
+}
 
 // =====================================================================
 // [SECTION] :: EVENT HANDLER
@@ -122,41 +155,52 @@ export default defineEventHandler(async (event) => {
   // Instantiate Octokit
   const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-  // Ingest
-  const project = await ingestProject(owner, repoName, octokit, branch);
+  // Ingest and get result with action
+  const result: IngestResult = await ingestProject(
+    owner,
+    repoName,
+    octokit,
+    branch
+  );
 
-  if (project) {
-    await saveProject(project);
-
-    // [STEP 6] :: INVALIDATE_CACHE
-    // Remove cached entries to ensure freshness
-    try {
-      const storage = useStorage("cache");
-      const keys = await storage.getKeys("nitro:handlers:_");
-      const projectKeys = keys.filter(
-        (k) =>
-          k.includes("projects-list") ||
-          k.includes("project-detail") ||
-          k.includes("projects-techs")
-      );
-
-      for (const key of projectKeys) {
-        await storage.removeItem(key);
+  // [STEP 6] :: HANDLE ACTION
+  switch (result.action) {
+    case "save":
+      if (result.project) {
+        await saveProject(result.project);
+        await invalidateProjectCache();
+        return {
+          status: "success",
+          action: "saved",
+          project: result.project.title,
+        };
       }
-      console.log(
-        `[CACHE] >> INVALIDATED   :: count: ${
-          projectKeys.length
-        } | keys: ${projectKeys.join(", ")}`
-      );
-    } catch (err) {
-      console.error("[CACHE] :: ERROR         :: Failed to clear cache", err);
-    }
+      return { status: "error", message: "Save action but no project data" };
 
-    return { status: "success", project: project.title };
-  } else {
-    return {
-      status: "skipped",
-      message: "Ingestion failed or returned null (see server logs)",
-    };
+    case "delete":
+      const deleted = await deleteProject(result.projectId);
+      if (deleted) {
+        await invalidateProjectCache();
+        return {
+          status: "success",
+          action: "deleted",
+          projectId: result.projectId,
+          reason: result.reason,
+        };
+      }
+      return {
+        status: "skipped",
+        action: "delete_not_needed",
+        projectId: result.projectId,
+        message: "Project was not in database",
+      };
+
+    case "skip":
+    default:
+      return {
+        status: "skipped",
+        projectId: result.projectId,
+        reason: result.reason || "Ingestion returned skip action",
+      };
   }
 });

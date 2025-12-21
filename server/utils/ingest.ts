@@ -4,6 +4,21 @@ import { extractProjectData } from "./ai";
 import { prisma } from "./prisma";
 
 // =====================================================================
+// [SECTION] :: TYPES
+// =====================================================================
+
+/**
+ * [TYPE] :: INGEST_RESULT
+ * Resultado de la ingesta con acción a tomar.
+ */
+export type IngestResult = {
+  action: "save" | "delete" | "skip";
+  project: Project | null;
+  projectId: string;
+  reason?: string;
+};
+
+// =====================================================================
 // [SECTION] :: PROJECT INGESTION
 // =====================================================================
 
@@ -28,7 +43,7 @@ import { prisma } from "./prisma";
  * @param branch     - (Optional) Rama objetivo (default: 'main').
  * @param strictMode - (Optional) Si es true, requiere demo e imagen.
  *
- * @returns Proyecto procesado o null si falla.
+ * @returns IngestResult con la acción a tomar y el proyecto procesado.
  */
 const DEFAULT_BRANCH = "main";
 const FALLBACK_BRANCH = "master";
@@ -43,7 +58,9 @@ export async function ingestProject(
   octokit: Octokit,
   branch: string = DEFAULT_BRANCH,
   strictModeOverride?: boolean
-): Promise<Project | null> {
+): Promise<IngestResult> {
+  const projectId = repo; // Project ID is the repo name
+
   // Read from env var, fallback to explicit override, fallback to true
   const envStrictMode = process.env.NUXT_STRICT_MODE !== "false";
   const strictMode = strictModeOverride ?? envStrictMode;
@@ -76,7 +93,12 @@ export async function ingestProject(
 
       if (e.status === 404) {
         console.warn(`[WARN]  :: NO_README     :: Skipping ingestion.`);
-        return null;
+        return {
+          action: "skip",
+          project: null,
+          projectId,
+          reason: "No README found",
+        };
       }
       throw e;
     }
@@ -85,7 +107,12 @@ export async function ingestProject(
       console.warn(
         `[WARN]  :: SHORT_README  :: size: ${readmeContent.length} chars (min: 50). Skipping.`
       );
-      return null;
+      return {
+        action: "skip",
+        project: null,
+        projectId,
+        reason: "README too short",
+      };
     }
 
     // 2. AI Extraction
@@ -104,18 +131,23 @@ export async function ingestProject(
 
       if (strictMode) {
         console.warn(
-          `[DATA]  :: SKIP_STRICT   :: Missing assets: ${missing.join(", ")}`
+          `[DATA]  :: SKIP_STRICT   :: Missing assets: ${missing.join(
+            ", "
+          )} -> Will DELETE if exists`
         );
-        return null;
+        // In strict mode, signal deletion so existing projects get removed
+        return {
+          action: "delete",
+          project: null,
+          projectId,
+          reason: `Missing required assets: ${missing.join(", ")}`,
+        };
       } else {
         console.warn(
           `[DATA]  :: WARN_ALLOW    :: Missing assets: ${missing.join(
             ", "
           )} (Allowed by non-strict mode)`
         );
-        // Fallback default image if missing? Or just leave null?
-        // System seems to expect them, but user wants to allow missing.
-        // Let's proceed with what we have.
       }
     }
 
@@ -126,11 +158,10 @@ export async function ingestProject(
       `[DATA]  ++ EXTRACTED     :: title: "${projectData.title}"${courseInfo}`
     );
 
-    return projectData;
+    return { action: "save", project: projectData, projectId };
   } catch (err: any) {
     console.error(`[ERR]   :: EXTRACT_FAIL  :: ${err.message}`);
-    // We strictly return null on failure to allow caller to continue
-    return null;
+    return { action: "skip", project: null, projectId, reason: err.message };
   }
 }
 // =====================================================================
@@ -175,4 +206,33 @@ export async function saveProject(project: Project): Promise<void> {
     },
   });
   console.log(`[DB]    ++ SAVED         :: id: ${project.id}`);
+}
+
+/**
+ * [DELETE] :: DELETE_PROJECT
+ * Elimina un proyecto de la base de datos.
+ *
+ * @param projectId - ID del proyecto a eliminar.
+ *
+ * @returns true si se eliminó, false si no existía.
+ */
+export async function deleteProject(projectId: string): Promise<boolean> {
+  console.log(`[DB]    >> DELETING      :: project: '${projectId}'`);
+
+  try {
+    await prisma.project.delete({
+      where: { id: projectId },
+    });
+    console.log(`[DB]    -- DELETED       :: id: ${projectId}`);
+    return true;
+  } catch (err: any) {
+    // P2025 = Record not found (Prisma error code)
+    if (err.code === "P2025") {
+      console.log(
+        `[DB]    :: NOT_FOUND     :: id: ${projectId} (nothing to delete)`
+      );
+      return false;
+    }
+    throw err;
+  }
 }
