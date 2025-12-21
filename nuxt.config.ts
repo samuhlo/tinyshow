@@ -14,6 +14,11 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxtjs/i18n",
   ],
+
+  runtimeConfig: {
+    neonDatabaseUrl: process.env.NEON_DATABASE_URL,
+  },
+
   srcDir: "app",
   i18n: {
     locales: [

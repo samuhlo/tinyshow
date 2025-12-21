@@ -17,10 +17,13 @@ import { PrismaPg } from "@prisma/adapter-pg";
 // [SECTION] :: DATABASE CONNECTION
 // =====================================================================
 
-const connectionString = process.env.NEON_DATABASE_URL;
+// Use runtime config to get the database URL
+// This allows Nuxt to handle env vars (NUXT_NEON_DATABASE_URL or NEON_DATABASE_URL if mapped)
+const config = useRuntimeConfig();
+const connectionString = config.neonDatabaseUrl;
 
 if (!connectionString) {
-  throw new Error("NEON_DATABASE_URL is not defined in .env");
+  throw new Error("NEON_DATABASE_URL is not defined in runtime config");
 }
 
 // Neon requires SSL. Ensure it's enabled.
