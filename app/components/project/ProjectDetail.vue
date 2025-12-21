@@ -254,7 +254,6 @@ onMounted(() => {
           <!-- Origin Info -->
           <div class="content-item">
             <ProjectOrigin
-              v-if="project.origin"
               :origin="project.origin as OriginType"
               class="mb-3"
             />

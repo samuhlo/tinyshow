@@ -235,7 +235,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div ref="listRef" class="project-list w-full pt-32 pb-12">
+  <div ref="listRef" class="project-list w-full pt-60 pb-12"> 
     <!-- Header -->
     <header class="mb-12 overflow-hidden">
       <h2 
