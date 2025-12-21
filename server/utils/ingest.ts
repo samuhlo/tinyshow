@@ -103,6 +103,20 @@ export async function ingestProject(
       throw e;
     }
 
+    // 2. Check for HIDDEN marker (before AI to save tokens)
+    const HIDDEN_MARKER = "<!-- tinyshow:hidden -->";
+    if (readmeContent.includes(HIDDEN_MARKER)) {
+      console.log(
+        `[DATA]  :: HIDDEN_MARKER :: Found "${HIDDEN_MARKER}" -> Will DELETE if exists`
+      );
+      return {
+        action: "delete",
+        project: null,
+        projectId,
+        reason: "Project marked as hidden via README marker",
+      };
+    }
+
     if (!readmeContent || readmeContent.length < MIN_README_LENGTH) {
       console.warn(
         `[WARN]  :: SHORT_README  :: size: ${readmeContent.length} chars (min: 50). Skipping.`
