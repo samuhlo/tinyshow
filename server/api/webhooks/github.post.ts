@@ -17,6 +17,7 @@ import {
   deleteProject,
   type IngestResult,
 } from "../../utils/ingest";
+import { invalidateAllProjectCaches } from "../../utils/cache";
 
 // =====================================================================
 // [SECTION] :: CONFIGURATION
@@ -40,34 +41,6 @@ const HTTP_BAD_REQUEST = 400;
 const HASH_ALGO = "sha256";
 const REF_PREFIX = "refs/heads/";
 const README_FILE = "README.md";
-
-// =====================================================================
-// [SECTION] :: CACHE INVALIDATION
-// =====================================================================
-
-async function invalidateProjectCache(): Promise<void> {
-  try {
-    const storage = useStorage("cache");
-    const keys = await storage.getKeys("nitro:handlers:_");
-    const projectKeys = keys.filter(
-      (k) =>
-        k.includes("projects-list") ||
-        k.includes("project-detail") ||
-        k.includes("projects-techs")
-    );
-
-    for (const key of projectKeys) {
-      await storage.removeItem(key);
-    }
-    console.log(
-      `[CACHE] >> INVALIDATED   :: count: ${
-        projectKeys.length
-      } | keys: ${projectKeys.join(", ")}`
-    );
-  } catch (err) {
-    console.error("[CACHE] :: ERROR         :: Failed to clear cache", err);
-  }
-}
 
 // =====================================================================
 // [SECTION] :: EVENT HANDLER
@@ -168,7 +141,7 @@ export default defineEventHandler(async (event) => {
     case "save":
       if (result.project) {
         await saveProject(result.project);
-        await invalidateProjectCache();
+        await invalidateAllProjectCaches();
         return {
           status: "success",
           action: "saved",
@@ -180,7 +153,7 @@ export default defineEventHandler(async (event) => {
     case "delete":
       const deleted = await deleteProject(result.projectId);
       if (deleted) {
-        await invalidateProjectCache();
+        await invalidateAllProjectCaches();
         return {
           status: "success",
           action: "deleted",
