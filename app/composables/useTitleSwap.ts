@@ -15,7 +15,7 @@
  *
  * @param swapTitle - Título a mostrar cuando la pestaña pierde el foco.
  */
-export function useTitleSwap(swapTitle: string = "Show must go ON !!!") {
+export function useTitleSwap(swapTitle: string = "Show must go ON !!! 🎶") {
   // =====================================================================
   // [SECTION] :: STATE
   // =====================================================================

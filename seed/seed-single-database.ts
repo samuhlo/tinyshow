@@ -103,7 +103,7 @@ async function main() {
     }
 
     // [STEP 2] :: TRIGGER_INGESTION
-    const project = await ingestProject(
+    const result = await ingestProject(
       owner,
       repo,
       OCTOKIT,
@@ -111,13 +111,17 @@ async function main() {
       strictMode
     );
 
-    if (!project) {
-      console.error("[ERR]   :: INGEST_FAIL   :: See logs above.");
+    if (result.action !== "save" || !result.project) {
+      console.error(
+        `[ERR]   :: INGEST_FAIL   :: action: ${result.action} | reason: ${
+          result.reason || "No project data"
+        }`
+      );
       process.exit(1);
     }
 
     // [STEP 3] :: PERSIST_DATA
-    await saveProject(project);
+    await saveProject(result.project);
 
     console.log(`\n[DONE]  :: SEED_COMPLETE :: Project saved successfully.`);
   } catch (err) {

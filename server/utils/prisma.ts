@@ -17,14 +17,36 @@ import { PrismaPg } from "@prisma/adapter-pg";
 // [SECTION] :: DATABASE CONNECTION
 // =====================================================================
 
-// Use runtime config to get the database URL
-// This allows Nuxt to handle env vars (NUXT_NEON_DATABASE_URL or NEON_DATABASE_URL if mapped)
-const config = useRuntimeConfig();
-const connectionString = config.neonDatabaseUrl;
+/**
+ * Get connection string from either Nuxt runtime config or process.env.
+ * This allows the client to work both inside Nuxt server and in standalone scripts.
+ */
+function getConnectionString(): string {
+  // Try Nuxt runtime config first (server context)
+  try {
+    if (typeof useRuntimeConfig === "function") {
+      const config = useRuntimeConfig();
+      if (config?.neonDatabaseUrl) {
+        return config.neonDatabaseUrl;
+      }
+    }
+  } catch {
+    // Not in Nuxt context, fall through to env vars
+  }
 
-if (!connectionString) {
-  throw new Error("NEON_DATABASE_URL is not defined in runtime config");
+  // Fallback to process.env for standalone scripts
+  const envUrl =
+    process.env.NEON_DATABASE_URL || process.env.NUXT_NEON_DATABASE_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+
+  throw new Error(
+    "Database URL not found. Set NEON_DATABASE_URL in .env or NUXT_NEON_DATABASE_URL in nuxt.config.ts"
+  );
 }
+
+const connectionString = getConnectionString();
 
 // Neon requires SSL. Ensure it's enabled.
 const pool = new Pool({

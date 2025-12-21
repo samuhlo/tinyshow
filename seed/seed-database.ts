@@ -78,7 +78,7 @@ async function main() {
 
     // [STEP 2] :: PROCESS_SEQUENCE
     for (const repo of sources) {
-      const project = await ingestProject(
+      const result = await ingestProject(
         USERNAME,
         repo.name,
         OCTOKIT,
@@ -86,8 +86,8 @@ async function main() {
         strictMode
       );
 
-      if (project) {
-        projects.push(project);
+      if (result.action === "save" && result.project) {
+        projects.push(result.project);
       }
     }
 

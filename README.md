@@ -106,6 +106,10 @@ NUXT_STRICT_MODE            # true para modo estricto (no permite proyectos sin 
 tinyshow/
 ├── app/                 # Código fuente de Nuxt
 │   ├── components/      # Componentes Vue
+│   │   ├── home/        # Componentes de la página principal
+│   │   ├── project/     # Componentes de proyectos
+│   │   ├── layout/      # Header, Footer
+│   │   └── ui/          # Componentes UI reutilizables
 │   ├── composables/     # Composables reutilizables
 │   ├── layouts/         # Layouts de la app
 │   ├── pages/           # Páginas/rutas
@@ -148,6 +152,8 @@ TinyShow puede recibir webhooks de GitHub para actualizar proyectos automáticam
 2. Se valida la firma del webhook
 3. Se detecta si el README fue modificado
 4. Se re-procesa el repositorio afectado
+
+**NOTA:** Si no quieres que aparezca un proyecto agrega al README un comentario oculto con "<!- - tinyshow:hidden -->".
 
 ---
 
