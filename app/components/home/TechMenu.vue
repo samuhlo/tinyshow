@@ -30,24 +30,26 @@ const EASE_POWER2_OUT = "power2.out";
 
 
 // =====================================================================
-// [SECTION] :: COMPONENT PROPS & STORE
+// [SECTION] :: STORES
 // =====================================================================
 
 import { storeToRefs } from "pinia";
 import { useShowcaseStore } from "~/composables/stores/useShowcaseStore";
-
-interface Props {
-  technologies: string[];
-}
-
-const props = defineProps<Props>();
+import { useDataStore } from "~/composables/stores/useDataStore";
 
 /**
  * [STORE] :: SHOWCASE_STORE
  * Accede al estado centralizado para viewMode y activeTech.
  */
-const store = useShowcaseStore();
-const { viewMode, activeTech } = storeToRefs(store);
+const showcaseStore = useShowcaseStore();
+const { viewMode, activeTech } = storeToRefs(showcaseStore);
+
+/**
+ * [STORE] :: DATA_STORE
+ * Accede a las tecnologías cacheadas.
+ */
+const dataStore = useDataStore();
+const { technologies } = storeToRefs(dataStore);
 
 // =====================================================================
 // [SECTION] :: COMPONENT REFS
@@ -78,7 +80,7 @@ const setButtonRef = (el: HTMLElement | null, index: number) => {
 const animateIndicator = () => {
   if (!indicatorRef.value || !activeTech.value || viewMode.value !== VIEW_SIDEBAR) return;
 
-  const activeIndex = props.technologies.indexOf(activeTech.value);
+  const activeIndex = technologies.value.indexOf(activeTech.value);
   if (activeIndex === -1) return;
 
   const activeButton = buttonRefs.value[activeIndex];
@@ -221,7 +223,7 @@ onMounted(() => {
       v-for="(tech, index) in technologies"
       :key="tech"
       :ref="(el) => setButtonRef(el as HTMLElement, index)"
-      @click="store.selectTech(tech)"
+      @click="showcaseStore.selectTech(tech)"
       class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
       :class="[
         viewMode === VIEW_HERO

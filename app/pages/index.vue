@@ -13,6 +13,7 @@
 
 import { storeToRefs } from "pinia";
 import { useShowcaseStore } from "~/composables/stores/useShowcaseStore";
+import { useDataStore } from "~/composables/stores/useDataStore";
 import TechMenu from "~/components/home/TechMenu.vue";
 import ProjectList from "~/components/project/ProjectList.vue";
 
@@ -38,19 +39,7 @@ useSeoMeta({
 });
 
 // =====================================================================
-// [SECTION] :: REMOTE DATA
-// =====================================================================
-
-/**
- * [DATA] :: TECHNOLOGIES
- * Lista de tecnologías obtenidas de la API para el menú principal.
- */
-const { data: technologies, pending: techPending } = await useFetch<string[]>("/api/projects/techs", {
-  default: () => [],
-});
-
-// =====================================================================
-// [SECTION] :: STORE
+// [SECTION] :: STORES
 // =====================================================================
 
 const VIEW_HERO = "hero";
@@ -60,8 +49,18 @@ const VIEW_SIDEBAR = "sidebar";
  * [STORE] :: SHOWCASE_STORE
  * Store centralizado para gestionar viewMode y activeTech.
  */
-const store = useShowcaseStore();
-const { viewMode, activeTech } = storeToRefs(store);
+const showcaseStore = useShowcaseStore();
+const { viewMode } = storeToRefs(showcaseStore);
+
+/**
+ * [STORE] :: DATA_STORE
+ * Store centralizado para tecnologías y proyectos cacheados.
+ */
+const dataStore = useDataStore();
+const { technologies, technologiesLoading } = storeToRefs(dataStore);
+
+// Fetch technologies on mount (cached by store)
+await dataStore.fetchTechnologies();
 </script>
 
 <template>
@@ -84,14 +83,11 @@ const { viewMode, activeTech } = storeToRefs(store);
         ]"
       >
         <!-- Loading State -->
-        <div v-if="techPending" class="flex items-center justify-center py-12">
+        <div v-if="technologiesLoading" class="flex items-center justify-center py-12">
           <UiLoadingSpinner size="lg" color="dark" />
         </div>
         
-        <TechMenu
-          v-else
-          :technologies="technologies || []"
-        />
+        <TechMenu v-else />
       </aside>
 
       <!-- Content Area (Only visible in sidebar mode) -->

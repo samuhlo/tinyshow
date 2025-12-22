@@ -27,32 +27,45 @@ const LOADING_TEXT = "LOADING_DATA...";
 
 
 // =====================================================================
-// [SECTION] :: STORE
+// [SECTION] :: STORES
 // =====================================================================
 
 import { storeToRefs } from "pinia";
 import { useShowcaseStore } from "~/composables/stores/useShowcaseStore";
+import { useDataStore } from "~/composables/stores/useDataStore";
 import type { Project } from "~~/shared/types";
 
 /**
  * [STORE] :: SHOWCASE_STORE
  * Accede al estado centralizado para activeTech y expandedProject.
  */
-const store = useShowcaseStore();
-const { activeTech, expandedProject, expandedImageRect } = storeToRefs(store);
+const showcaseStore = useShowcaseStore();
+const { activeTech, expandedProject, expandedImageRect } = storeToRefs(showcaseStore);
 
-// =====================================================================
-// [SECTION] :: DATA FETCHING
-// =====================================================================
+/**
+ * [STORE] :: DATA_STORE
+ * Accede a los proyectos cacheados por tecnología.
+ */
+const dataStore = useDataStore();
+const { projectsLoading } = storeToRefs(dataStore);
 
-// Fetch projects based on active tech from store
-const { data: projects, pending, refresh } = await useFetch("/api/projects", {
-  query: computed(() => ({
-    primary_tech: activeTech.value,
-    limit: PROJECT_LIMIT,
-  })),
-  watch: [activeTech],
-});
+/**
+ * [COMPUTED] :: PROJECTS
+ * Obtiene los proyectos cacheados para la tecnología activa.
+ */
+const projects = computed(() => 
+  activeTech.value ? dataStore.getProjectsForTech(activeTech.value) : []
+);
+
+/**
+ * [WATCH] :: FETCH_PROJECTS_ON_TECH_CHANGE
+ * Carga proyectos cuando cambia la tecnología activa.
+ */
+watch(activeTech, async (newTech) => {
+  if (newTech) {
+    await dataStore.fetchProjects(newTech);
+  }
+}, { immediate: true });
 
 // =====================================================================
 // [SECTION] :: GHOST IMAGE STATE
@@ -72,7 +85,7 @@ const detailImageRef = ref<HTMLElement | null>(null);
 const handleExpand = (project: Project, imageRect: DOMRect | null) => {
   // If same project, toggle via store
   if (expandedProject.value?.id === project.id) {
-    store.collapseProject();
+    showcaseStore.collapseProject();
     return;
   }
   
@@ -94,7 +107,7 @@ const handleExpand = (project: Project, imageRect: DOMRect | null) => {
   }
   
   // Expand new project via store
-  store.expandProject(project, imageRect);
+  showcaseStore.expandProject(project, imageRect);
 };
 
 /**
@@ -147,7 +160,7 @@ watch(expandedProject, (newVal) => {
  * Maneja el cierre del detalle.
  */
 const handleCloseDetail = () => {
-  store.collapseProject();
+  showcaseStore.collapseProject();
   ghostVisible.value = false;
 };
 
@@ -209,10 +222,10 @@ watch(
   activeTech,
   async () => {
     // Close any expanded project when tech changes
-    store.collapseProject();
+    showcaseStore.collapseProject();
     
     // If we have data, animate it. If pending, the 'projects' watcher will handle it.
-    if (!pending.value && projects.value?.length) {
+    if (!projectsLoading.value && projects.value?.length) {
       await nextTick();
       animateEntrance();
     }
@@ -244,7 +257,7 @@ onMounted(async () => {
     </header>
 
     <!-- Loading State -->
-    <div v-if="pending" class="py-12 flex justify-center">
+    <div v-if="projectsLoading" class="py-12 flex justify-center">
       <UiLoadingSpinner size="md" color="dark" />
     </div>
 
