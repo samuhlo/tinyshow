@@ -198,6 +198,49 @@ watch(
   }
 );
 
+// =====================================================================
+// [SECTION] :: SWIPE NAVIGATION (Mobile)
+// =====================================================================
+
+const touchStartX = ref(0);
+const SWIPE_THRESHOLD = 50; // Minimum px to register as swipe
+
+const handleTouchStart = (e: TouchEvent) => {
+  const firstTouch = e.touches[0];
+  if (firstTouch) {
+    touchStartX.value = firstTouch.clientX;
+  }
+};
+
+const handleTouchEnd = (e: TouchEvent) => {
+  const endTouch = e.changedTouches[0];
+  if (!endTouch) return;
+  
+  const touchEndX = endTouch.clientX;
+  const deltaX = touchEndX - touchStartX.value;
+
+  if (Math.abs(deltaX) < SWIPE_THRESHOLD) return; // Not a swipe
+
+  const currentIndex = props.technologies.indexOf(props.activeTech || '');
+  if (currentIndex === -1) return;
+
+  if (deltaX > 0) {
+    // Swiped RIGHT -> go to PREVIOUS tech
+    const prevIndex = currentIndex - 1;
+    const prevTech = props.technologies[prevIndex];
+    if (prevIndex >= 0 && prevTech) {
+      emit('select', prevTech);
+    }
+  } else {
+    // Swiped LEFT -> go to NEXT tech
+    const nextIndex = currentIndex + 1;
+    const nextTech = props.technologies[nextIndex];
+    if (nextIndex < props.technologies.length && nextTech) {
+      emit('select', nextTech);
+    }
+  }
+};
+
 // Inicial setup cuando el componente se monta
 onMounted(() => {
   // Inicializa el indicador como invisible
@@ -255,7 +298,9 @@ onMounted(() => {
     <!-- [MOBILE SIDEBAR] :: DOWNBAR -->
     <div 
       v-else
-      class="fixed bottom-0 left-0 w-full bg-light  p-4 pb-6 z-50 flex flex-col gap-4"
+      class="fixed bottom-0 left-0 w-full bg-light p-4 pb-6 z-50 flex flex-col gap-4"
+      @touchstart="handleTouchStart"
+      @touchend="handleTouchEnd"
     >
       <!-- Active Tech Title -->
       <div class="text-center">
