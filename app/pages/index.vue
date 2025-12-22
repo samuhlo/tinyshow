@@ -67,7 +67,7 @@ await dataStore.fetchTechnologies();
   <NuxtLayout name="default">
     <!-- Dynamic Layout Container -->
     <div
-      class="min-h-[calc(100vh-6rem)] md:min-h-[80vh] transition-all duration-500"
+      class="min-h-[calc(100vh-6rem)] md:min-h-[80vh]"
       :class="[
         viewMode === VIEW_HERO
           ? 'flex flex-col items-center justify-center'
@@ -84,7 +84,7 @@ await dataStore.fetchTechnologies();
       >
         <!-- Loading State -->
         <div 
-          class="transition-all duration-700 ease-out"
+          class="transition-[opacity,transform] duration-700 ease-out"
           :class="showcaseStore.isIntroAnimating ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0 delay-75'"
         >
           <div v-if="technologiesLoading" class="flex items-center justify-center py-12">

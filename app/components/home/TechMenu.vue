@@ -59,6 +59,9 @@ const menuRef = ref<HTMLElement | null>(null);
 const indicatorRef = ref<HTMLElement | null>(null);
 const buttonRefs = ref<HTMLElement[]>([]);
 
+// Estado manual para capturar Flip antes del cambio de ruta/store
+let manualFlipState: Flip.FlipState | null = null;
+
 // =====================================================================
 // [SECTION] :: ANIMATION LOGIC
 // =====================================================================
@@ -116,6 +119,33 @@ const hideIndicator = () => {
   });
 };
 
+/**
+ * [INTERACTION] :: HANDLE_TECH_CLICK
+ * Maneja el clic en una tecnología para asegurar la animación FLIP correcta.
+ * Captura el estado ANTES de que el store cambie y afecte al layout padre.
+ */
+const handleTechClick = async (tech: string) => {
+  if (!menuRef.value) return;
+
+  // 1. Capture State (Hero / Current) BEFORE any change
+  const buttons = menuRef.value.querySelectorAll(".tech-btn");
+  manualFlipState = Flip.getState(buttons, {
+    props: "fontSize,lineHeight,letterSpacing",
+  });
+
+  // Debug
+  const firstBtn = buttons[0];
+  if (firstBtn) {
+    const r = firstBtn.getBoundingClientRect();
+    console.log('[TechMenu] Manual Capture (Click):', { x: r.x, y: r.y });
+  }
+
+  // 2. Change State (This triggers Parent re-layout via store -> index.vue)
+  showcaseStore.selectTech(tech);
+
+  // 3. The watcher will handle the animation using manualFlipState
+};
+
 // =====================================================================
 // [SECTION] :: WATCHERS & LIFECYCLE
 // =====================================================================
@@ -126,14 +156,34 @@ watch(
   async (newMode, oldMode) => {
     if (!menuRef.value) return;
 
-    // Captura el estado antes del cambio (sin color para evitar glitch)
+    // Elementos a animar
     const buttons = menuRef.value.querySelectorAll(".tech-btn");
-    const state = Flip.getState(buttons, {
-      props: "fontSize,lineHeight,letterSpacing",
-    });
+
+    // Si tenemos un estado manual capturado (desde click), usémoslo.
+    // Si no, intentamos capturar ahora (fallback para Back navigation/Browser history)
+    let state = manualFlipState;
+    
+    if (!state) {
+        // Captura fallback
+        state = Flip.getState(buttons, {
+          props: "fontSize,lineHeight,letterSpacing",
+        });
+    }
+
+    // Limpia el estado manual para la próxima
+    manualFlipState = null;
 
     // Espera a que Vue actualice el DOM
     await nextTick();
+
+    const firstBtnAfter = menuRef.value.querySelector(".tech-btn");
+    if (firstBtnAfter) {
+      const r = firstBtnAfter.getBoundingClientRect();
+      console.log('[TechMenu] Target State (Sidebar):', { x: r.x, y: r.y, mode: viewMode.value });
+    }
+
+    // Debug
+    console.log('[TechMenu] ViewMode Changed:', { oldMode, newMode });
 
     // Crea un timeline para coordinar las animaciones
     const tl = gsap.timeline();
@@ -223,7 +273,7 @@ onMounted(() => {
       v-for="(tech, index) in technologies"
       :key="tech"
       :ref="(el) => setButtonRef(el as HTMLElement, index)"
-      @click="showcaseStore.selectTech(tech)"
+      @click="handleTechClick(tech)"
       class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
       :class="[
         viewMode === VIEW_HERO

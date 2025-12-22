@@ -179,13 +179,17 @@ const listRef = ref<HTMLElement | null>(null);
 const animateEntrance = (delay: number = 0) => {
   if (!listRef.value) return;
   
-  // Select all rows within the list
+  // Select header and rows
+  const header = listRef.value.querySelector(".project-list-header");
   const rows = listRef.value.querySelectorAll(".project-row-wrapper");
   
-  if (rows.length === 0) return;
+  // Combine elements to animate sequentially (Header -> Rows)
+  const elements = [header, ...Array.from(rows)].filter(el => el !== null);
+
+  if (elements.length === 0) return;
 
   gsap.fromTo(
-    rows,
+    elements,
     {
       y: ANIM_INITIAL_Y_OFFSET,
       opacity: 0,
@@ -211,7 +215,7 @@ watch(
   async (newProjects) => {
     if (newProjects && newProjects.length > 0) {
       await nextTick();
-      animateEntrance();
+      animateEntrance(FLIP_SYNC_DELAY);
     }
   },
   { immediate: true }
@@ -224,10 +228,19 @@ watch(
     // Close any expanded project when tech changes
     showcaseStore.collapseProject();
     
+    // [FIX] :: FLICKER_PREVENTION
+    // Immediately hide header to prevent showing new text before animation starts
+    if (listRef.value) {
+      const header = listRef.value.querySelector(".project-list-header");
+      if (header) {
+        gsap.set(header, { opacity: 0, y: ANIM_INITIAL_Y_OFFSET });
+      }
+    }
+
     // If we have data, animate it. If pending, the 'projects' watcher will handle it.
     if (!projectsLoading.value && projects.value?.length) {
       await nextTick();
-      animateEntrance();
+      animateEntrance(FLIP_SYNC_DELAY);
     }
   }
 );
@@ -246,7 +259,10 @@ onMounted(async () => {
 <template>
   <div ref="listRef" class="project-list w-full pt-60 pb-12"> 
     <!-- Header -->
-    <header class="mb-12 overflow-hidden">
+    <header 
+      :key="activeTech || 'unknown'"
+      class="project-list-header opacity-0 mb-12 overflow-hidden"
+    >
       <h2 
         class="font-sans font-black uppercase tracking-tighter text-dark mb-4 text-5xl md:text-7xl"
         v-if="activeTech"
