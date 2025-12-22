@@ -67,7 +67,7 @@ await dataStore.fetchTechnologies();
   <NuxtLayout name="default">
     <!-- Dynamic Layout Container -->
     <div
-      class="min-h-[80vh] transition-all duration-500"
+      class="min-h-[calc(100vh-6rem)] md:min-h-[80vh] transition-all duration-500"
       :class="[
         viewMode === VIEW_HERO
           ? 'flex flex-col items-center justify-center'

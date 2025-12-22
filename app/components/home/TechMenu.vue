@@ -227,7 +227,7 @@ onMounted(() => {
       class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
       :class="[
         viewMode === VIEW_HERO
-          ? 'font-sans font-black uppercase text-6xl md:text-8xl tracking-tighter text-dark hover:text-accent ' 
+          ? 'font-sans font-black uppercase text-5xl md:text-8xl tracking-tighter text-dark hover:text-accent ' 
           : 'font-sans text-2xl text-left ',
         viewMode === VIEW_SIDEBAR && activeTech === tech
           ? 'text-dark'

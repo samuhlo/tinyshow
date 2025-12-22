@@ -136,10 +136,26 @@ const startSequence = () => {
 // [SECTION] :: LIFECYCLE
 // =====================================================================
 
+
+
+/**
+ * [COMPUTED] :: IS_READY
+ * Determina si la carga inicial de datos ha completado realmente.
+ * Evita falsos positivos cuando el store inicializa con loading=false pero sin datos.
+ */
+const isReady = computed(() => {
+  const hasData = dataStore.technologies.length > 0;
+  const hasError = !!dataStore.technologiesError;
+  const hasFetched = !!dataStore.lastTechFetch;
+  
+  // Estamos listos si NO está cargando Y (tenemos datos O error O ya se intentó fetch)
+  return !dataStore.technologiesLoading && (hasData || hasError || hasFetched);
+});
+
 watch(
-  () => dataStore.technologiesLoading,
-  (loading) => {
-    if (!loading && stage.value === 'loading') {
+  isReady,
+  (ready) => {
+    if (ready && stage.value === 'loading') {
       startSequence();
     }
   },
@@ -165,15 +181,20 @@ watch(
     </Transition>
 
     <!-- Logo: Visible after loading -->
-    <div 
-      v-if="stage !== 'loading'"
-      ref="logoRef"
-      class="relative z-10"
+    <Transition
+      enter-active-class="transition-opacity duration-700 ease-out"
+      enter-from-class="opacity-0"
     >
+      <div 
+        v-if="stage !== 'loading'"
+        ref="logoRef"
+        class="relative z-10"
+      >
       <!-- Logo wrapper -->
       <div>
         <AppLogo :force-animation="true" />
       </div>
-    </div>
+      </div>
+    </Transition>
   </div>
 </template>
