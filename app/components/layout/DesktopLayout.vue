@@ -1,0 +1,27 @@
+<script setup lang="ts">
+/**
+ * [COMPONENT] :: DESKTOP_LAYOUT
+ * ----------------------------------------------------------------------
+ * Layout específico para la versión de escritorio.
+ * Contiene el Header y Footer originales.
+ *
+ * @module    components/layout/DesktopLayout
+ * @architect Samuh Lo
+ * ----------------------------------------------------------------------
+ */
+
+import Header from "~/components/layout/Header.vue";
+import Footer from "~/components/layout/Footer.vue";
+</script>
+
+<template>
+  <div class="max-w-screen-2xl mx-auto min-h-screen bg-light text-dark font-mono relative flex flex-col">
+    <Header />
+
+    <main class="w-full flex-1 pt-32 px-6 md:px-10">
+      <slot />
+    </main>
+
+    <Footer />
+  </div>
+</template>

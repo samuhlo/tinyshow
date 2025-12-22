@@ -21,33 +21,9 @@ const ANIM_DELAY = 0;
 const ANIM_EASE_OUT = "power3.out";
 
 const FLIP_SYNC_DELAY = 0.3;
-const PROJECT_LIMIT = 50;
 const LOADING_TEXT = "LOADING_DATA...";
 
-
-
-// =====================================================================
-// [SECTION] :: COMPONENT PROPS
-// =====================================================================
-
-interface Props {
-  tech: string | null;
-}
-
-const props = defineProps<Props>();
-
-// =====================================================================
-// [SECTION] :: DATA FETCHING
-// =====================================================================
-
-// Fetch projects based on active tech
-const { data: projects, pending, refresh } = await useFetch("/api/projects", {
-  query: computed(() => ({
-    primary_tech: props.tech,
-    limit: PROJECT_LIMIT,
-  })),
-  watch: [() => props.tech],
-});
+const showcaseStore = useShowcaseStore();
 
 // =====================================================================
 // [SECTION] :: EXPANDED STATE
@@ -195,40 +171,32 @@ const animateEntrance = (delay: number = 0) => {
 // [SECTION] :: WATCHERS & LIFECYCLE
 // =====================================================================
 
-// Watch for data availability to trigger animation
+// Watch for store projects to trigger animation
 watch(
-  projects,
+  () => showcaseStore.projects,
   async (newProjects) => {
     if (newProjects && newProjects.length > 0) {
+      expandedProject.value = null; // Reset expansion on new data
       await nextTick();
       animateEntrance();
     }
   },
-  { immediate: true }
+  { deep: true }
 );
 
-// Re-trigger animation when tech changes (even if data is cached/fast)
+// Watch for tech changes to reset internal state if needed
 watch(
-  () => props.tech,
-  async () => {
-    // Close any expanded project when tech changes
+  () => showcaseStore.activeTech,
+  () => {
     expandedProject.value = null;
     expandedImageRect.value = null;
-    
-    // If we have data, animate it. If pending, the 'projects' watcher will handle it.
-    if (!pending.value && projects.value?.length) {
-      await nextTick();
-      animateEntrance();
-    }
   }
 );
 
 // Ensure animation runs on mount if data is already available
 onMounted(async () => {
-  if (projects.value && projects.value.length > 0) {
-    // Wait for a tick to ensure DOM is ready
+  if (showcaseStore.projects.length > 0) {
     await nextTick();
-    // Add delay to sync with TechMenu FLIP animation (0.8s)
     animateEntrance(FLIP_SYNC_DELAY);
   }
 });
@@ -240,29 +208,29 @@ onMounted(async () => {
     <header class="mb-12 overflow-hidden">
       <h2 
         class="font-sans font-black uppercase tracking-tighter text-dark mb-4 text-5xl md:text-7xl"
-        v-if="tech"
+        v-if="showcaseStore.activeTech"
       >
-        {{ tech }}
+        {{ showcaseStore.activeTech }}
       </h2>
       <div class="h-px bg-dark w-full"></div>
     </header>
 
     <!-- Loading State -->
-    <div v-if="pending" class="py-12 flex justify-center">
+    <div v-if="showcaseStore.isProjectsLoading" class="py-12 flex justify-center">
       <UiLoadingSpinner size="md" color="dark" />
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!projects || projects.length === 0" class="py-12">
+    <div v-else-if="!showcaseStore.projects || showcaseStore.projects.length === 0" class="py-12">
       <p class="text-mono-sm text-gray-400">
-        // NO_PROJECTS_FOUND_FOR :: {{ tech }}
+        // NO_PROJECTS_FOUND_FOR :: {{ showcaseStore.activeTech }}
       </p>
     </div>
 
     <!-- List -->
     <div v-else class="flex flex-col">
       <div 
-        v-for="(project, index) in projects" 
+        v-for="(project, index) in showcaseStore.projects" 
         :key="project.id"
         class="project-row-wrapper opacity-0" 
       >

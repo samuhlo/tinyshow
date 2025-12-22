@@ -18,6 +18,12 @@
 /** Intercambio dinámico del título de la pestaña. */
 useTitleSwap()
 
+const uiStore = useUiStore()
+
+onMounted(() => {
+  uiStore.checkDevice()
+})
+
 // =====================================================================
 // [SECTION] :: INITIAL LOADING STATE
 // =====================================================================
@@ -33,14 +39,16 @@ const isLoading = ref(true)
 // [SECTION] :: LIFECYCLE
 // =====================================================================
 
-const isAppMounted = useState('is-app-mounted', () => false)
+// =====================================================================
+// [SECTION] :: LIFECYCLE
+// =====================================================================
 
 onMounted(() => {
   // Hide loading overlay after mount (hydration complete)
   // Small delay to ensure fonts are loaded
   setTimeout(() => {
     isLoading.value = false
-    isAppMounted.value = true
+    uiStore.setAppMounted(true)
   }, 100)
 })
 </script>

@@ -29,12 +29,13 @@ const EASING_CUBIC = "cubic-bezier(0.34,1.56,0.64,1)";
 // [SECTION] :: COMPONENT STATE
 // =====================================================================
 
+const uiStore = useUiStore();
 const strip = ref<string[]>([]);
 const mounted = ref(false);
-const hasAnimated = useState<boolean>(STATE_ANIMATED_KEY, () => false);
 
-// Persist selection across navigations
-const activeChar = useState<string>(STATE_CHAR_KEY, () => "");
+// Use store state for persistence
+const hasAnimated = computed(() => uiStore.logoState.hasAnimated);
+const activeChar = computed(() => uiStore.logoState.activeChar);
 
 // =====================================================================
 // [SECTION] :: LOGIC UTILS
@@ -51,18 +52,16 @@ const getRandomChar = (): string => CHARS_ALPHABET[Math.floor(Math.random() * CH
 // [SECTION] :: LIFECYCLE
 // =====================================================================
 
-const isAppMounted = useState('is-app-mounted', () => false);
-
 const runAnimation = () => {
   mounted.value = true;
   setTimeout(() => {
-    hasAnimated.value = true;
+    uiStore.setLogoAnimated(true);
   }, ANIMATION_DURATION_MS);
 };
 
 onMounted(() => {
   if (!activeChar.value) {
-    activeChar.value = getRandomChar();
+    uiStore.setLogoChar(getRandomChar());
   }
   
   const target = activeChar.value;
@@ -78,10 +77,10 @@ onMounted(() => {
     strip.value = [buffer, target, ...randoms];
 
     // Wait for app mount (splash screen hidden)
-    if (isAppMounted.value) {
+    if (uiStore.isAppMounted) {
       requestAnimationFrame(runAnimation);
     } else {
-      const unwatch = watch(isAppMounted, (newVal) => {
+      const unwatch = watch(() => uiStore.isAppMounted, (newVal) => {
         if (newVal) {
           requestAnimationFrame(runAnimation);
           unwatch();
