@@ -51,6 +51,15 @@ const getRandomChar = (): string => CHARS_ALPHABET[Math.floor(Math.random() * CH
 // [SECTION] :: LIFECYCLE
 // =====================================================================
 
+const isAppMounted = useState('is-app-mounted', () => false);
+
+const runAnimation = () => {
+  mounted.value = true;
+  setTimeout(() => {
+    hasAnimated.value = true;
+  }, ANIMATION_DURATION_MS);
+};
+
 onMounted(() => {
   if (!activeChar.value) {
     activeChar.value = getRandomChar();
@@ -68,12 +77,17 @@ onMounted(() => {
     const randoms = Array.from({ length: REEL_LENGTH }, () => getRandomChar());
     strip.value = [buffer, target, ...randoms];
 
-    requestAnimationFrame(() => {
-      mounted.value = true;
-      setTimeout(() => {
-        hasAnimated.value = true;
-      }, ANIMATION_DURATION_MS);
-    });
+    // Wait for app mount (splash screen hidden)
+    if (isAppMounted.value) {
+      requestAnimationFrame(runAnimation);
+    } else {
+      const unwatch = watch(isAppMounted, (newVal) => {
+        if (newVal) {
+          requestAnimationFrame(runAnimation);
+          unwatch();
+        }
+      });
+    }
   }
 });
 </script>

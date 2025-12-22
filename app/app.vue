@@ -33,11 +33,14 @@ const isLoading = ref(true)
 // [SECTION] :: LIFECYCLE
 // =====================================================================
 
+const isAppMounted = useState('is-app-mounted', () => false)
+
 onMounted(() => {
   // Hide loading overlay after mount (hydration complete)
   // Small delay to ensure fonts are loaded
   setTimeout(() => {
     isLoading.value = false
+    isAppMounted.value = true
   }, 100)
 })
 </script>
