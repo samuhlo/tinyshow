@@ -13,6 +13,8 @@
 
 import TechMenu from "~/components/home/TechMenu.vue";
 import ProjectList from "~/components/project/ProjectList.vue";
+import { useShowcaseStore } from "~/stores/useShowcaseStore";
+import { useUiStore } from "~/stores/useUiStore";
 
 // =====================================================================
 // [SECTION] :: SEO META
@@ -40,6 +42,7 @@ useSeoMeta({
 // =====================================================================
 
 const showcaseStore = useShowcaseStore()
+const uiStore = useUiStore()
 
 // Initialize store data
 await showcaseStore.init()
@@ -97,7 +100,10 @@ const handleSelect = (tech: string) => {
         v-if="showcaseStore.viewMode === 'sidebar'"
         class="md:col-start-5 md:col-span-8 lg:col-start-5 lg:col-span-8 pt-0"
       >
-        <ProjectList />
+        <!-- Hide ProjectList on Mobile for now -->
+        <ClientOnly>
+          <ProjectList v-if="!uiStore.isMobile" />
+        </ClientOnly>
       </section>
     </div>
   </NuxtLayout>

@@ -66,8 +66,9 @@ const animateLogoEntry = () => {
     { scale: 0.8, opacity: 0 },
     { scale: 1.5, opacity: 1, duration: 0.8, ease: "back.out(1.7)" }
   )
-  // 3. Wait for Slot Machine (1.5s)
-  .to({}, { duration: 1.5 }) 
+  // 3. Wait for Slot Machine
+  // [ADJUST] Change duration here to control how long it waits before moving
+  .to({}, { duration: 0.3 }) 
   
   // 4. Move to Header
   .call(() => {
@@ -118,7 +119,7 @@ const revealContent = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-light text-dark font-mono relative flex flex-col overflow-hidden">
+  <div class="h-screen bg-light text-dark font-mono relative flex flex-col overflow-hidden">
     
     <!-- [OVERLAY] :: INTRO SPINNER & LOGO -->
     <div v-if="introPhase !== 'complete'" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none bg-light">
@@ -141,9 +142,9 @@ const revealContent = () => {
     <!-- [LAYOUT] :: HEADER -->
     <header 
       ref="headerRef"
-      class="p-4 border-b border-transparent transition-colors duration-500 relative z-40"
+      class="p-4 border-b border-transparent transition-colors duration-500 relative z-40 shrink-0"
     >
-      <div class="flex items-center justify-between min-h-[48px]"> <!-- min-h ensures consistent height -->
+      <div class="flex items-center justify-between min-h-12"> <!-- min-h ensures consistent height -->
          <!-- Header Logo Placeholder (Final Destination) -->
          <div ref="headerLogoRef" class="opacity-0" :class="{ 'opacity-100': introPhase === 'complete' }">
            <AppLogo />
@@ -159,7 +160,7 @@ const revealContent = () => {
     <!-- [LAYOUT] :: CONTENT -->
     <main 
       ref="contentRef"
-      class="w-full flex-1 p-4 opacity-0"
+      class="w-full flex-1 p-4 pb-32 opacity-0 overflow-y-auto"
     >
       <slot />
     </main>

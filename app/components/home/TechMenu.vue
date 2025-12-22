@@ -4,6 +4,7 @@
  * ----------------------------------------------------------------------
  * Menú de navegación principal basado en tecnologías.
  * Implementa animaciones FLIP para transicionar entre estados Hero y Sidebar.
+ * Soporta modo 'Downbar' para móviles.
  *
  * @module    components/home
  * @architect Samuh Lo
@@ -12,6 +13,7 @@
 
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
+import { useUiStore } from "~/stores/useUiStore";
 
 gsap.registerPlugin(Flip);
 
@@ -49,6 +51,7 @@ const emit = defineEmits<{
 // [SECTION] :: COMPONENT STATE & REFS
 // =====================================================================
 
+const uiStore = useUiStore();
 const menuRef = ref<HTMLElement | null>(null);
 const indicatorRef = ref<HTMLElement | null>(null);
 const buttonRefs = ref<HTMLElement[]>([]);
@@ -69,9 +72,12 @@ const setButtonRef = (el: HTMLElement | null, index: number) => {
 
 /**
  * [ANIM] :: ANIMATE_INDICATOR
- * Desplaza el indicador visual hacia el botón de la tecnología activa.
+ * Desplaza el indicador visual hacia el botón de la tecnología activa (Desktop).
  */
 const animateIndicator = () => {
+  // Mobile Downbar handles active state differently (rectangles)
+  if (uiStore.isMobile) return;
+  
   if (!indicatorRef.value || !props.activeTech || props.viewMode !== VIEW_SIDEBAR) return;
 
   const activeIndex = props.technologies.indexOf(props.activeTech);
@@ -119,6 +125,15 @@ watch(
   () => props.viewMode,
   async (newMode, oldMode) => {
     if (!menuRef.value) return;
+
+    // Mobile: Handle specific transitions if needed, but FLIP might be overkill 
+    // for list -> downbar. We might just fade list out and slide downbar up.
+    // For now, let's keep it simple for desktop, and skip FLIP on mobile if switch to downbar
+    
+    if (uiStore.isMobile && newMode === VIEW_SIDEBAR) {
+       // Mobile transition handled by CSS/Vue transition mostly
+       return; 
+    }
 
     // Captura el estado antes del cambio (sin color para evitar glitch)
     const buttons = menuRef.value.querySelectorAll(".tech-btn");
@@ -196,41 +211,74 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav
-    ref="menuRef"
-    class="flex flex-col relative"
-    :class="[
-      viewMode === 'hero'
-        ? 'items-center justify-center gap-6'
-        : 'items-start justify-start gap-4 mt-0 pl-6',
-    ]"
-  >
-    <!-- Indicador flotante - estilo brutalista (rectangular) -->
-    <span
-      ref="indicatorRef"
-      class="absolute left-0 w-1 h-8 bg-accent origin-center"
-      :class="viewMode === VIEW_SIDEBAR ? 'block' : 'hidden'"
-      style="top: 0"
-    ></span>
-
-    <button
-      v-for="(tech, index) in technologies"
-      :key="tech"
-      :ref="(el) => setButtonRef(el as HTMLElement, index)"
-      @click="emit('select', tech)"
-      class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
+  <div>
+    <!-- [DESKTOP/MOBILE HERO] :: STANDARD LIST -->
+    <nav
+      v-if="!uiStore.isMobile || viewMode === VIEW_HERO"
+      ref="menuRef"
+      class="flex flex-col relative"
       :class="[
-        viewMode === VIEW_HERO
-          ? 'font-sans font-black uppercase text-6xl md:text-8xl tracking-tighter text-dark hover:text-accent ' 
-          : 'font-sans text-2xl text-left ',
-        viewMode === VIEW_SIDEBAR && activeTech === tech
-          ? 'text-dark'
-          : viewMode === VIEW_SIDEBAR
-          ? 'text-gray-400 hover:text-dark'
-          : '',
+        viewMode === 'hero'
+          ? 'items-center justify-center gap-6'
+          : 'items-start justify-start gap-4 mt-0 pl-6',
       ]"
     >
-      {{ tech }}
-    </button>
-  </nav>
+      <!-- Indicador flotante - estilo brutalista (rectangular) -->
+      <span
+        ref="indicatorRef"
+        class="absolute left-0 w-1 h-8 bg-accent origin-center"
+        :class="viewMode === VIEW_SIDEBAR ? 'block' : 'hidden'"
+        style="top: 0"
+      ></span>
+
+      <button
+        v-for="(tech, index) in technologies"
+        :key="tech"
+        :ref="(el) => setButtonRef(el as HTMLElement, index)"
+        @click="emit('select', tech)"
+        class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
+        :class="[
+          viewMode === VIEW_HERO
+            ? 'font-sans font-black uppercase text-6xl md:text-8xl tracking-tighter text-dark hover:text-accent ' 
+            : 'font-sans text-2xl text-left ',
+          viewMode === VIEW_SIDEBAR && activeTech === tech
+            ? 'text-dark'
+            : viewMode === VIEW_SIDEBAR
+            ? 'text-gray-400 hover:text-dark'
+            : '',
+        ]"
+      >
+        {{ tech }}
+      </button>
+    </nav>
+
+    <!-- [MOBILE SIDEBAR] :: DOWNBAR -->
+    <div 
+      v-else
+      class="fixed bottom-0 left-0 w-full bg-light  p-4 pb-6 z-50 flex flex-col gap-4"
+    >
+      <!-- Active Tech Title -->
+      <div class="text-center">
+        <h2 class="font-sans font-black text-4xl uppercase tracking-tighter text-dark leading-none">
+          {{ activeTech }}
+        </h2>
+      </div>
+
+      <!-- Navigation Rectangles -->
+      <div class="flex items-end justify-between gap-1 w-full px-4 h-3">
+        <button
+          v-for="tech in technologies"
+          :key="tech"
+          @click="emit('select', tech)"
+          class="flex-1 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          :class="[
+            activeTech === tech 
+              ? 'bg-accent h-full' 
+              : 'bg-dark h-1.5'
+          ]"
+          :aria-label="tech"
+        ></button>
+      </div>
+    </div>
+  </div>
 </template>
