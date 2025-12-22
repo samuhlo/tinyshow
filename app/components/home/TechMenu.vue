@@ -55,6 +55,7 @@ const uiStore = useUiStore();
 const menuRef = ref<HTMLElement | null>(null);
 const indicatorRef = ref<HTMLElement | null>(null);
 const buttonRefs = ref<HTMLElement[]>([]);
+const downbarRectsRef = ref<HTMLElement | null>(null);
 
 // =====================================================================
 // [SECTION] :: ANIMATION LOGIC
@@ -241,6 +242,47 @@ const handleTouchEnd = (e: TouchEvent) => {
   }
 };
 
+// =====================================================================
+// [SECTION] :: MOBILE HERO TO DOWNBAR TRANSITION
+// =====================================================================
+
+/**
+ * [ANIM] :: HANDLE_MOBILE_SELECT
+ * Simple fadeout transition from Hero list to Downbar on mobile.
+ * @param tech - The selected technology.
+ * @param index - Index of the selected tech in the list.
+ */
+const handleMobileSelect = async (tech: string, index: number) => {
+  if (!uiStore.isMobile || props.viewMode !== VIEW_HERO) {
+    // Desktop or already in sidebar: just emit
+    emit('select', tech);
+    return;
+  }
+
+  // Fade out all Hero buttons
+  const allButtons = buttonRefs.value;
+  await gsap.to(allButtons, {
+    opacity: 0,
+    y: -20,
+    duration: 0.3,
+    stagger: 0.03,
+    ease: EASE_POWER2_IN,
+  });
+
+  // Emit select to trigger viewMode change to sidebar
+  emit('select', tech);
+
+  // Animate rectangles sliding up
+  await nextTick();
+  if (downbarRectsRef.value) {
+    const rects = downbarRectsRef.value.querySelectorAll('button');
+    gsap.fromTo(rects, 
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: EASE_POWER2_OUT }
+    );
+  }
+};
+
 // Inicial setup cuando el componente se monta
 onMounted(() => {
   // Inicializa el indicador como invisible
@@ -278,7 +320,7 @@ onMounted(() => {
         v-for="(tech, index) in technologies"
         :key="tech"
         :ref="(el) => setButtonRef(el as HTMLElement, index)"
-        @click="emit('select', tech)"
+        @click="handleMobileSelect(tech, index)"
         class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
         :class="[
           viewMode === VIEW_HERO
@@ -297,7 +339,7 @@ onMounted(() => {
 
     <!-- [MOBILE SIDEBAR] :: DOWNBAR -->
     <div 
-      v-else
+      v-if="uiStore.isMobile && viewMode === VIEW_SIDEBAR"
       class="fixed bottom-0 left-0 w-full bg-light p-4 pb-6 z-50 flex flex-col gap-4"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
@@ -310,7 +352,7 @@ onMounted(() => {
       </div>
 
       <!-- Navigation Rectangles -->
-      <div class="flex items-end justify-between gap-1 w-full px-4 h-3">
+      <div ref="downbarRectsRef" class="flex items-end justify-between gap-1 w-full px-4 h-3">
         <button
           v-for="tech in technologies"
           :key="tech"
