@@ -20,8 +20,8 @@ Un enfoque moderno, Type-Safe y orientado a la excelencia en movimiento (Motion-
 
 | Capa | Tecnología | Descripción |
 | :--- | :--- | :--- |
-| **Frontend** | Nuxt 3 | Vue.js Composition API. |
-| **Estilos** | Tailwind CSS | Sistema de diseño atómico y utilitario. |
+| **Frontend** | Nuxt 4 | Vue.js Composition API. |
+| **Estilos** | Tailwind CSS v4 | Sistema de diseño atómico y utilitario. |
 | **Motion** | GSAP + Lenis | Coreografías complejas y scroll suave obligatorio. |
 | **Backend** | Nitro Engine | Server Routes para API y Webhooks. |
 | **AI Brain** | DeepSeek (V3) | Procesamiento de READMEs (Bilingüe EN/ES) y extracción de valor técnico. |
@@ -55,7 +55,7 @@ tinyshow/
 ├── app/                              # srcDir: Tu código fuente Vue
 │   ├── assets/
 │   │   ├── css/
-│   │   │   └──main.css            # Tailwind + Font Faces
+│   │   │   └──main.css            # Tailwind v4 + Font Faces (@theme)
 │   │   └── fonts/                 # Fuentes locales (Bariol Icons)
 │   ├── components/
 │   │   ├── ui/                       # Elementos básicos (ActionBtn, TechPill, LangSwitcher)
@@ -78,7 +78,8 @@ tinyshow/
 │   └── utils/
 │       ├── ai.ts                     # Cliente AI (DeepSeek V3)
 │       ├── ingest.ts                 # Lógica de ingesta
-│       └── prisma.ts                 # Cliente Prisma
+│       ├── prisma.ts                 # Cliente Prisma
+│       └── cache.ts                  # Cache Utils
 ├── seed/                             # Scripts de Base de Datos
 │   ├── seed-database.ts              # Carga masiva (Clean & Seed)
 │   └── seed-single-database.ts       # Carga unitaria
@@ -89,9 +90,9 @@ tinyshow/
 │           └── test-ai.ts            # Script de prueba AI
 ├── prisma/
 │   ├── schema.prisma                 # Definición de modelo
+│   ├── prisma.config.ts              # Configuración Prisma
 │   └── migrations/                   # Historial de cambios
 ├── nuxt.config.ts                    # Configuración Nuxt
-├── tailwind.config.ts                # Configuración Tailwind
 ├── tsconfig.json                     # Configuración TypeScript
 └── package.json                      # Dependencias
 ```

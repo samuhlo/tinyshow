@@ -18,9 +18,9 @@ Este documento define la estructura técnica, patrones y convenciones para "Tiny
 
 | Capa | Tecnología | Propósito |
 |------------|---------|-----------|
-| **Core** | Nuxt 3 (Latest) | Framework Full-stack |
-| **UI Engine** | Vue 3.4+ | Composition API |
-| **Styling** | Tailwind CSS | Utility-first, Configuración Brutalista |
+| **Core** | Nuxt 4 (Latest) | Framework Full-stack |
+| **UI Engine** | Vue 3.5+ | Composition API |
+| **Styling** | Tailwind CSS v4 | Utility-first, Configuración Brutalista (Vite) |
 | **Motion** | GSAP + VueUse | Animaciones complejas & Interacciones de Mouse |
 | **Database** | PostgreSQL (Neon) | Serverless DB |
 | **ORM** | Prisma | Gestión de esquemas y queries |
@@ -35,27 +35,30 @@ Adoptamos una estructura **Domain-Driven** dentro de las carpetas estándar de N
 
 ```
 tinyshow/
-├── assets/
-│   ├── css/
-│   │   └── main.css          # Tailwind directives + Fuentes Custom
-│   └── fonts/                # Archivo Black & Space Mono
-├── components/               # 🟢 ORGANIZADO POR DOMINIO (Ver abajo)
-├── composables/              # Lógica reutilizable (useLang, useProject)
-├── layouts/                  # default.vue (App Shell)
-├── pages/                    # Rutas basadas en archivos
-│   ├── index.vue             # SPA principal (Hero + List)
-│   └── project/
-│       └── [id].vue          # (Opcional) Si decidimos ruta dedicada
+├── app/                      # 🟢 NUXY 4 SRCDIR
+│   ├── assets/
+│   │   ├── css/
+│   │   │   └── main.css      # Tailwind v4 directives + Fuentes Custom
+│   │   └── fonts/            # Archivo Black & Space Mono
+│   ├── components/           # 🟢 ORGANIZADO POR DOMINIO (Ver abajo)
+│   ├── composables/          # Lógica reutilizable (useLang, useProject)
+│   ├── layouts/              # default.vue (App Shell)
+│   ├── pages/                # Rutas basadas en archivos
+│   ├── plugins/              # Plugins (Lenis, etc)
+│   ├── utils/                # Utilidades cliente
+│   ├── app.vue               # Root Component
+│   └── error.vue             # Error handling
 ├── server/                   # 🟠 BACKEND (Nitro)
 │   ├── api/                  # Endpoints (Webhook)
 │   ├── utils/                # Lógica compartida Server-side (AI, DB)
 │   └── database/             # Schemas extra si necesario
 ├── prisma/
-│   └── schema.prisma         # La verdad de la Base de Datos
-├── types/                    # Definiciones TypeScript compartidas (Zod)
+│   ├── schema.prisma         # La verdad de la Base de Datos
+│   └── prisma.config.ts      # Configuración Prisma
 ├── scripts/                  # Scripts de mantenimiento (Seed)
 ├── i18n/                     # Archivos de traducción (locales)
-└── nuxt.config.ts            # Configuración global
+├── nuxt.config.ts            # Configuración global
+└── package.json              # Dependencias
 ```
 
 ---
@@ -91,6 +94,7 @@ El backend debe ser modular. No escribir lógica en los handlers de API.
 * `server/utils/prisma.ts` → Singleton de DB.
 * `server/utils/ai.ts` → Cliente DeepSeek y lógica de prompts.
 * `server/utils/ingest.ts` → Orquestador (Recibe README → Valida Zod → Guarda DB).
+* `server/utils/cache.ts` → Utilidades de cache (si aplica).
 
 ---
 

@@ -1,7 +1,7 @@
 # 🎨 TinyShow v2 - Frontend Guidelines
 **Role:** Creative Developer / Design Engineer
-**Framework:** Nuxt 3 (Vue 3 + TypeScript)
-**Styling:** Tailwind CSS (Utility-first)
+**Framework:** Nuxt 4 (Vue 3.5+ + TypeScript)
+**Styling:** Tailwind CSS v4 (Utility-first)
 
 ## 1. Visual Language (The Brutalist Vibe)
 Our design philosophy is "Structural & Raw". We expose the grid, use high contrast, and treat typography as the main graphical element.
