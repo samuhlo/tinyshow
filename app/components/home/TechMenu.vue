@@ -30,23 +30,27 @@ const EASE_POWER2_OUT = "power2.out";
 
 
 // =====================================================================
-// [SECTION] :: COMPONENT PROPS & EMITS
+// [SECTION] :: COMPONENT PROPS & STORE
 // =====================================================================
+
+import { storeToRefs } from "pinia";
+import { useShowcaseStore } from "~/composables/stores/useShowcaseStore";
 
 interface Props {
   technologies: string[];
-  activeTech: string | null;
-  viewMode: "hero" | "sidebar";
 }
 
 const props = defineProps<Props>();
 
-const emit = defineEmits<{
-  (e: "select", tech: string): void;
-}>();
+/**
+ * [STORE] :: SHOWCASE_STORE
+ * Accede al estado centralizado para viewMode y activeTech.
+ */
+const store = useShowcaseStore();
+const { viewMode, activeTech } = storeToRefs(store);
 
 // =====================================================================
-// [SECTION] :: COMPONENT STATE & REFS
+// [SECTION] :: COMPONENT REFS
 // =====================================================================
 
 const menuRef = ref<HTMLElement | null>(null);
@@ -72,9 +76,9 @@ const setButtonRef = (el: HTMLElement | null, index: number) => {
  * Desplaza el indicador visual hacia el botón de la tecnología activa.
  */
 const animateIndicator = () => {
-  if (!indicatorRef.value || !props.activeTech || props.viewMode !== VIEW_SIDEBAR) return;
+  if (!indicatorRef.value || !activeTech.value || viewMode.value !== VIEW_SIDEBAR) return;
 
-  const activeIndex = props.technologies.indexOf(props.activeTech);
+  const activeIndex = props.technologies.indexOf(activeTech.value);
   if (activeIndex === -1) return;
 
   const activeButton = buttonRefs.value[activeIndex];
@@ -116,7 +120,7 @@ const hideIndicator = () => {
 
 // Watch para cambios de viewMode - FLIP Animation
 watch(
-  () => props.viewMode,
+  viewMode,
   async (newMode, oldMode) => {
     if (!menuRef.value) return;
 
@@ -174,9 +178,9 @@ watch(
 
 // Watch para cambios del activeTech - Indicador flotante
 watch(
-  () => props.activeTech,
+  activeTech,
   async (newTech, oldTech) => {
-    if (props.viewMode !== VIEW_SIDEBAR || !newTech) return;
+    if (viewMode.value !== VIEW_SIDEBAR || !newTech) return;
 
     await nextTick();
     animateIndicator();
@@ -217,7 +221,7 @@ onMounted(() => {
       v-for="(tech, index) in technologies"
       :key="tech"
       :ref="(el) => setButtonRef(el as HTMLElement, index)"
-      @click="emit('select', tech)"
+      @click="store.selectTech(tech)"
       class="tech-btn relative group flex items-center origin-left transition-colors duration-300 cursor-crosshair"
       :class="[
         viewMode === VIEW_HERO

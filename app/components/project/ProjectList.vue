@@ -27,38 +27,38 @@ const LOADING_TEXT = "LOADING_DATA...";
 
 
 // =====================================================================
-// [SECTION] :: COMPONENT PROPS
+// [SECTION] :: STORE
 // =====================================================================
 
-interface Props {
-  tech: string | null;
-}
+import { storeToRefs } from "pinia";
+import { useShowcaseStore } from "~/composables/stores/useShowcaseStore";
+import type { Project } from "~~/shared/types";
 
-const props = defineProps<Props>();
+/**
+ * [STORE] :: SHOWCASE_STORE
+ * Accede al estado centralizado para activeTech y expandedProject.
+ */
+const store = useShowcaseStore();
+const { activeTech, expandedProject, expandedImageRect } = storeToRefs(store);
 
 // =====================================================================
 // [SECTION] :: DATA FETCHING
 // =====================================================================
 
-// Fetch projects based on active tech
+// Fetch projects based on active tech from store
 const { data: projects, pending, refresh } = await useFetch("/api/projects", {
   query: computed(() => ({
-    primary_tech: props.tech,
+    primary_tech: activeTech.value,
     limit: PROJECT_LIMIT,
   })),
-  watch: [() => props.tech],
+  watch: [activeTech],
 });
 
 // =====================================================================
-// [SECTION] :: EXPANDED STATE
+// [SECTION] :: GHOST IMAGE STATE
 // =====================================================================
 
-import type { Project } from "~~/shared/types";
-
-const expandedProject = ref<Project | null>(null);
-const expandedImageRect = ref<DOMRect | null>(null);
-
-// Ghost image for FLIP animation
+// Ghost image for FLIP animation (component-local, animation-specific)
 const ghostImageUrl = ref<string | null>(null);
 const ghostImageStyle = ref<Record<string, string>>({});
 const ghostVisible = ref(false);
@@ -70,10 +70,9 @@ const detailImageRef = ref<HTMLElement | null>(null);
  * Inicia la animación FLIP del ghost image.
  */
 const handleExpand = (project: Project, imageRect: DOMRect | null) => {
-  // If same project, close it
+  // If same project, toggle via store
   if (expandedProject.value?.id === project.id) {
-    expandedProject.value = null;
-    expandedImageRect.value = null;
+    store.collapseProject();
     return;
   }
   
@@ -94,9 +93,8 @@ const handleExpand = (project: Project, imageRect: DOMRect | null) => {
     ghostVisible.value = true;
   }
   
-  // Expand new project
-  expandedProject.value = project;
-  expandedImageRect.value = imageRect;
+  // Expand new project via store
+  store.expandProject(project, imageRect);
 };
 
 /**
@@ -149,8 +147,7 @@ watch(expandedProject, (newVal) => {
  * Maneja el cierre del detalle.
  */
 const handleCloseDetail = () => {
-  expandedProject.value = null;
-  expandedImageRect.value = null;
+  store.collapseProject();
   ghostVisible.value = false;
 };
 
@@ -209,11 +206,10 @@ watch(
 
 // Re-trigger animation when tech changes (even if data is cached/fast)
 watch(
-  () => props.tech,
+  activeTech,
   async () => {
     // Close any expanded project when tech changes
-    expandedProject.value = null;
-    expandedImageRect.value = null;
+    store.collapseProject();
     
     // If we have data, animate it. If pending, the 'projects' watcher will handle it.
     if (!pending.value && projects.value?.length) {
@@ -240,9 +236,9 @@ onMounted(async () => {
     <header class="mb-12 overflow-hidden">
       <h2 
         class="font-sans font-black uppercase tracking-tighter text-dark mb-4 text-5xl md:text-7xl"
-        v-if="tech"
+        v-if="activeTech"
       >
-        {{ tech }}
+        {{ activeTech }}
       </h2>
       <div class="h-px bg-dark w-full"></div>
     </header>
@@ -255,7 +251,7 @@ onMounted(async () => {
     <!-- Empty State -->
     <div v-else-if="!projects || projects.length === 0" class="py-12">
       <p class="text-mono-sm text-gray-400">
-        // NO_PROJECTS_FOUND_FOR :: {{ tech }}
+        // NO_PROJECTS_FOUND_FOR :: {{ activeTech }}
       </p>
     </div>
 

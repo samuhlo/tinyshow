@@ -11,6 +11,8 @@
  * ----------------------------------------------------------------------
  */
 
+import { storeToRefs } from "pinia";
+import { useShowcaseStore } from "~/composables/stores/useShowcaseStore";
 import TechMenu from "~/components/home/TechMenu.vue";
 import ProjectList from "~/components/project/ProjectList.vue";
 
@@ -48,46 +50,18 @@ const { data: technologies, pending: techPending } = await useFetch<string[]>("/
 });
 
 // =====================================================================
-// [SECTION] :: COMPONENT STATE
+// [SECTION] :: STORE
 // =====================================================================
 
-/**
- * [STATE] :: VIEW_MODE
- * Controla el layout actual de la página (hero | sidebar).
- */
 const VIEW_HERO = "hero";
 const VIEW_SIDEBAR = "sidebar";
 
 /**
- * [STATE] :: VIEW_MODE
- * Controla el layout actual de la página (hero | sidebar).
+ * [STORE] :: SHOWCASE_STORE
+ * Store centralizado para gestionar viewMode y activeTech.
  */
-const viewMode = ref<typeof VIEW_HERO | typeof VIEW_SIDEBAR>(VIEW_HERO);
-
-/**
- * [STATE] :: ACTIVE_TECH
- * Tecnología actualmente seleccionada por el usuario.
- */
-const activeTech = ref<string | null>(null);
-
-// =====================================================================
-// [SECTION] :: LOGIC HANDLERS
-// =====================================================================
-
-/**
- * [HANDLE] :: SELECT_TECH
- * Procesa la selección de una tecnología en el menú.
- * Transiciona la vista de 'hero' a 'sidebar' si es necesario.
- *
- * @param tech - Nombre de la tecnología seleccionada.
- */
-const handleSelect = (tech: string) => {
-  activeTech.value = tech;
-  
-  if (viewMode.value === VIEW_HERO) {
-    viewMode.value = VIEW_SIDEBAR;
-  }
-};
+const store = useShowcaseStore();
+const { viewMode, activeTech } = storeToRefs(store);
 </script>
 
 <template>
@@ -117,9 +91,6 @@ const handleSelect = (tech: string) => {
         <TechMenu
           v-else
           :technologies="technologies || []"
-          :active-tech="activeTech"
-          :view-mode="viewMode"
-          @select="handleSelect"
         />
       </aside>
 
@@ -128,7 +99,7 @@ const handleSelect = (tech: string) => {
         v-if="viewMode === VIEW_SIDEBAR"
         class="md:col-start-5 md:col-span-8 lg:col-start-5 lg:col-span-8 pt-0"
       >
-        <ProjectList :tech="activeTech" />
+        <ProjectList />
       </section>
     </div>
   </NuxtLayout>
