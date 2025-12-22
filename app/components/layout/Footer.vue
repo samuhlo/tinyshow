@@ -100,7 +100,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <footer class="w-full py-6 px-6 md:px-10 flex items-center justify-between text-xs text-dark/60 font-mono">
+  <footer class="hidden md:flex w-full py-6 px-6 md:px-10 items-center justify-between text-xs text-dark/60 font-mono">
     <span>
       created by 
       <a 

@@ -29,6 +29,7 @@ interface ShowcaseState {
   expandedProject: Project | null;
   expandedImageRect: DOMRect | null;
   isAnimating: boolean;
+  isIntroAnimating: boolean;
 }
 
 // =====================================================================
@@ -54,6 +55,9 @@ export const useShowcaseStore = defineStore("showcase", {
 
     /** Lock global para prevenir race conditions durante animaciones */
     isAnimating: false,
+
+    /** Estado de la animación de introducción en móvil */
+    isIntroAnimating: true,
   }),
 
   // -------------------------------------------------------------------
@@ -138,6 +142,16 @@ export const useShowcaseStore = defineStore("showcase", {
      */
     setAnimating(value: boolean): void {
       this.isAnimating = value;
+    },
+
+    /**
+     * [ACTION] :: SET_INTRO_ANIMATING
+     * Controla el estado de la animación de introducción móvil.
+     *
+     * @param value - true si la intro está en curso.
+     */
+    setIntroAnimating(value: boolean): void {
+      this.isIntroAnimating = value;
     },
 
     /**

@@ -29,6 +29,10 @@ const EASING_CUBIC = "cubic-bezier(0.34,1.56,0.64,1)";
 // [SECTION] :: COMPONENT STATE
 // =====================================================================
 
+const props = defineProps<{
+  forceAnimation?: boolean;
+}>();
+
 const strip = ref<string[]>([]);
 const mounted = ref(false);
 const hasAnimated = useState<boolean>(STATE_ANIMATED_KEY, () => false);
@@ -56,6 +60,9 @@ const isAppMounted = useState('is-app-mounted', () => false);
 const runAnimation = () => {
   mounted.value = true;
   setTimeout(() => {
+    // Only update global state if not forced (or update it anyway?)
+    // If forced, we don't care about global state consistency as much, 
+    // but better to set it to true so future instances skip.
     hasAnimated.value = true;
   }, ANIMATION_DURATION_MS);
 };
@@ -68,18 +75,21 @@ onMounted(() => {
   const target = activeChar.value;
   const buffer = getRandomChar();
 
-  if (hasAnimated.value) {
-    // Skip animation if already played in this session
-    strip.value = [buffer, target];
-    mounted.value = true;
-  } else {
-    // Initial reveal animation
+  // If forced OR hasn't animated yet
+  if (props.forceAnimation || !hasAnimated.value) {
+     // Initial reveal animation
     const randoms = Array.from({ length: REEL_LENGTH }, () => getRandomChar());
     strip.value = [buffer, target, ...randoms];
 
     // Wait for app mount (splash screen hidden)
+    // For forced animation (MobileIntro), we usually want to run ASAP but need a tick for the strip to render at initial position
     if (isAppMounted.value) {
-      requestAnimationFrame(runAnimation);
+      if (props.forceAnimation) {
+         // Force a double tick to ensure initial position (translateY negative) is applied before switching to final
+         requestAnimationFrame(() => requestAnimationFrame(runAnimation));
+      } else {
+         requestAnimationFrame(runAnimation);
+      }
     } else {
       const unwatch = watch(isAppMounted, (newVal) => {
         if (newVal) {
@@ -88,8 +98,13 @@ onMounted(() => {
         }
       });
     }
+  } else {
+    // Skip animation
+    strip.value = [buffer, target];
+    mounted.value = true;
   }
 });
+
 </script>
 
 <template>

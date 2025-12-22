@@ -53,10 +53,44 @@ onMounted(() => {
 onUnmounted(() => {
   dataStore.stopAutoRefresh()
 })
+
+// =====================================================================
+// [SECTION] :: MOBILE INTRO
+// =====================================================================
+
+import { useMediaQuery } from '@vueuse/core'
+import MobileIntro from '~/components/mobile/MobileIntro.vue'
+import { useShowcaseStore } from '~/composables/stores/useShowcaseStore'
+
+const showcaseStore = useShowcaseStore()
+const isMobile = useMediaQuery('(max-width: 768px)')
+
+// [LOGIC] :: DESKTOP_BYPASS
+// If not on mobile, disable intro immediately to prevent blank screen
+onMounted(() => {
+  // Use timeout to ensure hydration match but fast enough
+  if (!isMobile.value) {
+    showcaseStore.setIntroAnimating(false)
+  }
+})
+
+// Watch for resize/orientation changes
+watch(isMobile, (isMobileDevice) => {
+  if (!isMobileDevice) {
+    showcaseStore.setIntroAnimating(false)
+  }
+})
+
+
 </script>
 
 <template>
   <div>
+    <!-- Mobile Intro Sequence -->
+    <ClientOnly>
+      <MobileIntro v-if="isMobile && showcaseStore.isIntroAnimating" />
+    </ClientOnly>
+
     <!-- Initial Loading Overlay ( styled with inline CSS for maximum compatibility when changing styles) -->
     <Transition
       enter-active-class="transition-opacity duration-300 ease-out"

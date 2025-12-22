@@ -83,11 +83,16 @@ await dataStore.fetchTechnologies();
         ]"
       >
         <!-- Loading State -->
-        <div v-if="technologiesLoading" class="flex items-center justify-center py-12">
-          <UiLoadingSpinner size="lg" color="dark" />
+        <div 
+          class="transition-all duration-700 ease-out"
+          :class="showcaseStore.isIntroAnimating ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0 delay-75'"
+        >
+          <div v-if="technologiesLoading" class="flex items-center justify-center py-12">
+            <UiLoadingSpinner size="lg" color="dark" />
+          </div>
+          
+          <TechMenu v-else />
         </div>
-        
-        <TechMenu v-else />
       </aside>
 
       <!-- Content Area (Only visible in sidebar mode) -->
