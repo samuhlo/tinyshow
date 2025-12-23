@@ -23,7 +23,7 @@ import type { Project } from "~~/shared/types";
 const SWIPE_THRESHOLD = 50;
 const ANIM_DURATION = 0.6;
 const ANIM_EASE = "power3.out";
-const MAX_VISIBLE_ROWS = 2; // Max rows above/below the detail
+const MAX_VISIBLE_ROWS = 1; // Only show 1 row above/below the detail
 
 // =====================================================================
 // [SECTION] :: COMPONENT STATE
@@ -73,7 +73,7 @@ const projectsAbove = computed(() => {
 
 /**
  * [COMPUTED] :: PROJECTS_BELOW
- * ProjectRows to show below the detail (max 2).
+ * ProjectRows to show below the detail (max 1).
  */
 const projectsBelow = computed(() => {
   const startIdx = activeIndex.value + 1;
@@ -82,6 +82,24 @@ const projectsBelow = computed(() => {
     project: p,
     originalIndex: startIdx + i,
   }));
+});
+
+/**
+ * [COMPUTED] :: VISIBLE_ROW_ABOVE
+ * The single row to show above the detail (if any).
+ */
+const visibleRowAbove = computed(() => {
+  if (projectsAbove.value.length === 0) return null;
+  return projectsAbove.value[projectsAbove.value.length - 1];
+});
+
+/**
+ * [COMPUTED] :: VISIBLE_ROW_BELOW
+ * The single row to show below the detail (if any).
+ */
+const visibleRowBelow = computed(() => {
+  if (projectsBelow.value.length === 0) return null;
+  return projectsBelow.value[0];
 });
 
 /**
@@ -100,48 +118,15 @@ const canGoNext = computed(() => activeIndex.value < projects.value.length - 1);
 
 /**
  * [ACTION] :: GO_TO_PROJECT
- * Navigate to a specific project index with slot machine animation.
+ * Navigate to a specific project index (instant, no animation).
  */
-const goToProject = async (targetIndex: number) => {
+const goToProject = (targetIndex: number) => {
   if (isTransitioning.value) return;
   if (targetIndex < 0 || targetIndex >= projects.value.length) return;
   if (targetIndex === activeIndex.value) return;
 
-  isTransitioning.value = true;
-
-  const direction = targetIndex > activeIndex.value ? 'down' : 'up';
-  
-  // Animate the transition
-  if (containerRef.value && detailRef.value) {
-    const tl = gsap.timeline({
-      onComplete: () => {
-        activeIndex.value = targetIndex;
-        isTransitioning.value = false;
-      },
-    });
-
-    // Slide detail out
-    tl.to(detailRef.value, {
-      y: direction === 'down' ? -100 : 100,
-      opacity: 0,
-      duration: ANIM_DURATION * 0.5,
-      ease: ANIM_EASE,
-    });
-
-    // Update index and slide new detail in
-    tl.add(() => {
-      activeIndex.value = targetIndex;
-    });
-
-    tl.fromTo(
-      detailRef.value,
-      { y: direction === 'down' ? 100 : -100, opacity: 0 },
-      { y: 0, opacity: 1, duration: ANIM_DURATION * 0.5, ease: ANIM_EASE }
-    );
-  } else {
-    activeIndex.value = targetIndex;
-    isTransitioning.value = false;
-  }
+  // Simply change the index - no animation needed
+  activeIndex.value = targetIndex;
 };
 
 /**
@@ -234,22 +219,34 @@ watch(
 
 /**
  * [LIFECYCLE] :: LOCK_BODY_SCROLL
- * Prevents body from scrolling when mobile project list is active.
+ * Prevents body and html from scrolling when mobile project list is active.
  */
 onMounted(() => {
   if (import.meta.client) {
+    // Lock both html and body
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.position = 'fixed';
+    document.documentElement.style.width = '100%';
+    document.documentElement.style.height = '100%';
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
+    document.body.style.height = '100%';
     document.body.style.top = '0';
   }
 });
 
 onUnmounted(() => {
   if (import.meta.client) {
+    // Restore both html and body
+    document.documentElement.style.overflow = '';
+    document.documentElement.style.position = '';
+    document.documentElement.style.width = '';
+    document.documentElement.style.height = '';
     document.body.style.overflow = '';
     document.body.style.position = '';
     document.body.style.width = '';
+    document.body.style.height = '';
     document.body.style.top = '';
   }
 });
@@ -258,79 +255,82 @@ onUnmounted(() => {
 <template>
   <div 
     ref="containerRef"
-    class="mobile-project-list fixed inset-x-0 top-16 bottom-28 overflow-hidden bg-light touch-none"
+    class="mobile-project-list fixed inset-x-0 top-12 bottom-28 overflow-hidden bg-light touch-none"
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
     @touchmove.prevent
   >
-
     <!-- Loading State -->
-    <div v-if="showcaseStore.isProjectsLoading" class="flex justify-center py-12">
+    <div v-if="showcaseStore.isProjectsLoading" class="h-full flex items-center justify-center">
       <UiLoadingSpinner size="md" color="dark" />
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!projects || projects.length === 0" class="py-12 px-4">
+    <div v-else-if="!projects || projects.length === 0" class="h-full flex items-center justify-center px-4">
       <p class="text-mono-sm text-gray-400">
         // NO_PROJECTS_FOUND_FOR :: {{ showcaseStore.activeTech }}
       </p>
     </div>
 
-    <!-- Projects Container -->
-    <div v-else class="flex flex-col">
-      <!-- Navigation Arrow Up -->
-      <div 
-        v-if="canGoPrevious" 
-        class="flex justify-center py-2 cursor-pointer"
-        @click="goToPrevious"
-      >
-        <Icon name="material-symbols:keyboard-arrow-up" class="text-3xl text-dark/50" />
-      </div>
-
-      <!-- ProjectRows ABOVE (collapsed) -->
-      <div>
+    <!-- Projects Layout - Absolute Positioned Zones -->
+    <div v-else class="relative h-full">
+      
+      <!-- ZONE: Top - Rows Above (occupies top 10%) -->
+      <div class="absolute top-0 left-0 right-0 bottom-[90%] bg-light flex flex-col justify-end">
+        <!-- Arrow Up -->
+        <div 
+          v-if="canGoPrevious" 
+          class="flex justify-center py-1 cursor-pointer"
+          @click="goToPrevious"
+        >
+          <Icon name="material-symbols:keyboard-arrow-up" class="text-2xl text-dark/40" />
+        </div>
+        
+        <!-- ProjectRow ABOVE -->
         <MobileProjectRow
-          v-for="item in projectsAbove"
-          :key="item.project.id"
-          :project="item.project"
-          :index="item.originalIndex"
-          @expand="() => handleRowClick(item.project, item.originalIndex)"
+          v-if="visibleRowAbove"
+          :project="visibleRowAbove.project"
+          :index="visibleRowAbove.originalIndex"
+          @expand="() => handleRowClick(visibleRowAbove!.project, visibleRowAbove!.originalIndex)"
         />
       </div>
 
-      <!-- ProjectDetail (active/expanded) -->
-      <div ref="detailRef" class="my-2">
-        <MobileProjectDetail
-          v-if="activeProject"
-          :project="activeProject"
-        />
+      <!-- ZONE: Center - Fixed Detail (occupies middle 80%) -->
+      <div class="absolute inset-x-0 top-[10%] bottom-[10%] overflow-hidden">
+        <div ref="detailRef" class="w-full h-full">
+          <MobileProjectDetail
+            v-if="activeProject"
+            :key="activeProject.id"
+            :project="activeProject"
+          />
+        </div>
       </div>
 
-      <!-- ProjectRows BELOW (collapsed) -->
-      <div>
+      <!-- ZONE: Bottom - Rows Below (occupies bottom 10%) -->
+      <div class="absolute top-[90%] left-0 right-0 bottom-0 bg-light flex flex-col justify-start">
+        <!-- ProjectRow BELOW -->
         <MobileProjectRow
-          v-for="item in projectsBelow"
-          :key="item.project.id"
-          :project="item.project"
-          :index="item.originalIndex"
-          @expand="() => handleRowClick(item.project, item.originalIndex)"
+          v-if="visibleRowBelow"
+          :project="visibleRowBelow.project"
+          :index="visibleRowBelow.originalIndex"
+          @expand="() => handleRowClick(visibleRowBelow!.project, visibleRowBelow!.originalIndex)"
         />
+        
+        <!-- Arrow Down -->
+        <div 
+          v-if="canGoNext" 
+          class="flex justify-center py-1 cursor-pointer"
+          @click="goToNext"
+        >
+          <Icon name="material-symbols:keyboard-arrow-down" class="text-2xl text-dark/40" />
+        </div>
       </div>
-
-      <!-- Navigation Arrow Down -->
-      <div 
-        v-if="canGoNext" 
-        class="flex justify-center py-2 cursor-pointer"
-        @click="goToNext"
-      >
-        <Icon name="material-symbols:keyboard-arrow-down" class="text-3xl text-dark/50" />
-      </div>
+      
     </div>
   </div>
 </template>
 
 <style scoped>
-.project-row-mobile {
-  cursor: pointer;
-}
+/* No animations needed - instant transitions look cleaner */
 </style>
+

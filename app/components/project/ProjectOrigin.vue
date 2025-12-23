@@ -12,15 +12,23 @@ import type { OriginType } from "~~/shared/types";
 
 interface Props {
   origin: OriginType;
+  size?: 'xs' | 'inherit';
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  size: 'xs',
+});
 
 const { locale } = useI18n();
+
+// Computed class para el tamaño del texto
+const textSizeClass = computed(() => 
+  props.size === 'inherit' ? 'text-inherit' : 'text-xs'
+);
 </script>
 
 <template>
-  <div class="font-mono text-xs opacity-60 flex flex-wrap gap-1">
+  <div :class="['font-mono opacity-60 flex flex-wrap gap-1', textSizeClass]">
     <span class="text-light/50 mr-1">// ORIGIN :</span>
     
     <template v-if="origin">

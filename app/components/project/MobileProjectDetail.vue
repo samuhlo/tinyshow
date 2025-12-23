@@ -2,8 +2,9 @@
 /**
  * [COMPONENT] :: MOBILE_PROJECT_DETAIL
  * ----------------------------------------------------------------------
- * Versión compacta del ProjectDetail para móvil.
- * Layout vertical, imagen más pequeña, todo visible sin scroll.
+ * Versión RESPONSIVE del ProjectDetail para móvil.
+ * TODAS las alturas y tamaños se calculan dinámicamente basándose
+ * en la altura del viewport para adaptarse a cualquier dispositivo.
  *
  * @module    components/project
  * @architect Samuh Lo
@@ -28,8 +29,68 @@ const props = defineProps<Props>();
 
 const { locale } = useI18n();
 
+// Container ref for measuring
+const containerRef = ref<HTMLElement | null>(null);
+const containerHeight = ref(0);
+
 // =====================================================================
-// [SECTION] :: COMPUTED
+// [SECTION] :: DYNAMIC SIZING
+// =====================================================================
+
+/**
+ * [COMPUTED] :: DYNAMIC_STYLES
+ * Calcula estilos basados en la altura disponible del contenedor.
+ * Esto asegura que el layout se adapte a cualquier tamaño de pantalla.
+ */
+const dynamicStyles = computed(() => {
+  const h = containerHeight.value;
+  
+  // Si no tenemos altura, usar defaults seguros
+  if (h === 0) {
+    return {
+      imageHeight: '120px',
+      contentPadding: '12px',
+      titleSize: '18px',
+      taglineSize: '12px',
+      descriptionSize: '11px',
+      originSize: '8px',
+      pillSize: '10px',
+      descriptionLines: 3,
+    };
+  }
+  
+  // Calcular proporciones basadas en altura disponible
+  // Imagen: porcentaje dinámico - más pequeño en pantallas pequeñas
+  const imagePercent = h > 450 ? 0.50 : h > 350 ? 0.40 : 0.30;
+  const imageHeight = Math.min(Math.max(h * imagePercent, 80), 280);
+  
+  // Padding del contenido: proporcional a la altura
+  const contentPadding = Math.min(Math.max(h * 0.025, 8), 16);
+  
+  // Tamaños de fuente: escalan con la altura
+  const titleSize = Math.min(Math.max(h * 0.04, 16), 24);
+  const taglineSize = Math.min(Math.max(h * 0.025, 10), 14);
+  const descriptionSize = Math.min(Math.max(h * 0.022, 10), 13);
+  const pillSize = Math.min(Math.max(h * 0.02, 9), 12);
+  const originSize = Math.min(Math.max(h * 0.018, 8), 11);
+  
+  // Líneas de descripción: sin límite, mostrar toda la descripción
+  const descriptionLines = 99;
+  
+  return {
+    imageHeight: `${imageHeight}px`,
+    contentPadding: `${contentPadding}px`,
+    titleSize: `${titleSize}px`,
+    taglineSize: `${taglineSize}px`,
+    descriptionSize: `${descriptionSize}px`,
+    pillSize: `${pillSize}px`,
+    originSize: `${originSize}px`,
+    descriptionLines,
+  };
+});
+
+// =====================================================================
+// [SECTION] :: COMPUTED TEXT
 // =====================================================================
 
 /**
@@ -43,19 +104,65 @@ const localizedDescription = computed(() => {
 
 /**
  * [COMPUTED] :: TRUNCATED_DESCRIPTION
- * Limita la descripción a ~150 caracteres para móvil.
+ * Trunca basándose en líneas disponibles.
  */
 const truncatedDescription = computed(() => {
   const desc = localizedDescription.value;
-  if (desc.length <= 150) return desc;
-  return desc.slice(0, 150).trim() + "...";
+  const maxChars = dynamicStyles.value.descriptionLines * 50; // ~50 chars per line
+  if (desc.length <= maxChars) return desc;
+  return desc.slice(0, maxChars).trim() + "...";
+});
+
+// =====================================================================
+// [SECTION] :: LIFECYCLE
+// =====================================================================
+
+/**
+ * [LIFECYCLE] :: MEASURE_CONTAINER
+ * Mide la altura del contenedor después de montarse.
+ */
+onMounted(() => {
+  if (containerRef.value) {
+    containerHeight.value = containerRef.value.clientHeight;
+  }
+  
+  // Re-measure on resize
+  if (import.meta.client) {
+    window.addEventListener('resize', measureContainer);
+  }
+});
+
+onUnmounted(() => {
+  if (import.meta.client) {
+    window.removeEventListener('resize', measureContainer);
+  }
+});
+
+const measureContainer = () => {
+  if (containerRef.value) {
+    containerHeight.value = containerRef.value.clientHeight;
+  }
+};
+
+// Watch for container changes
+watch(containerRef, () => {
+  nextTick(() => {
+    measureContainer();
+  });
 });
 </script>
 
 <template>
-  <div class="mobile-project-detail bg-dark overflow-hidden">
-    <!-- Image Section (compact) -->
-    <div class="relative aspect-video overflow-hidden">
+  <!-- RESPONSIVE CONTAINER - fills available space, measures itself -->
+  <div 
+    ref="containerRef"
+    class="mobile-project-detail bg-dark overflow-hidden h-full flex flex-col"
+  >
+    <!-- Image Section (dynamic height) -->
+    <div 
+      class="relative overflow-hidden shrink-0"
+      :style="{ height: dynamicStyles.imageHeight }"
+    >
       <nuxt-img
         v-if="project.img_url"
         :src="project.img_url"
@@ -69,48 +176,73 @@ const truncatedDescription = computed(() => {
       <div class="absolute inset-0 bg-dark opacity-[0.05] pointer-events-none"></div>
     </div>
 
-    <!-- Content Section (compact) -->
-    <div class="p-4 space-y-3">
-      <!-- Title -->
-      <h3 class="font-display text-xl uppercase tracking-tight text-light leading-tight">
-        {{ project.title }}
-      </h3>
+    <!-- Content Section (dynamic padding, flex to push buttons down) -->
+    <div 
+      class="flex-1 overflow-y-auto flex flex-col"
+      :style="{ padding: dynamicStyles.contentPadding }"
+    >
+      <!-- Title + Subtitle -->
+      <div class="mb-1">
+        <h3 
+          class="font-display uppercase tracking-tight text-light leading-none"
+          :style="{ fontSize: dynamicStyles.titleSize }"
+        >
+          {{ project.title }}
+        </h3>
+        <p 
+          class="font-mono text-light/50 mt-0.5"
+          :style="{ fontSize: dynamicStyles.taglineSize }"
+        >
+          {{ project.primary_tech }} + GSAP Showcase
+        </p>
+      </div>
 
-      <!-- Subtitle -->
-      <p class="text-mono-xs text-light/50">
-        {{ project.primary_tech }} + GSAP Showcase
-      </p>
-
-      <!-- Description (truncated) -->
-      <p class="font-mono text-xs text-light/70 leading-relaxed">
+      <!-- Description (dynamic size and clipping) -->
+      <p 
+        class="font-mono text-light/70 leading-snug my-2"
+        :style="{ 
+          fontSize: dynamicStyles.descriptionSize,
+          display: '-webkit-box',
+          WebkitLineClamp: dynamicStyles.descriptionLines,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden'
+        }"
+      >
         {{ truncatedDescription }}
       </p>
 
-      <!-- Tech Pills (compact) -->
-      <div class="flex flex-wrap gap-1.5">
-        <UiTechPill
-          v-for="tech in project.tech_stack?.slice(0, 4)"
-          :key="tech"
-          :text="tech"
-          theme="dark"
-          size="sm"
-        />
+      <!-- Tech Pills (dynamic size) -->
+      <div class="flex flex-wrap gap-1 my-2">
         <span
-          v-if="project.tech_stack && project.tech_stack.length > 4"
-          class="text-mono-xs text-light/40"
+          v-for="tech in project.tech_stack?.slice(0, 3)"
+          :key="tech"
+          class="font-mono text-light/80 border border-light/30 rounded px-1.5 py-0.5"
+          :style="{ fontSize: dynamicStyles.pillSize }"
         >
-          +{{ project.tech_stack.length - 4 }}
+          {{ tech }}
+        </span>
+        <span
+          v-if="project.tech_stack && project.tech_stack.length > 3"
+          class="font-mono text-light/40 px-1"
+          :style="{ fontSize: dynamicStyles.pillSize }"
+        >
+          +{{ project.tech_stack.length - 3 }}
         </span>
       </div>
 
-      <!-- Origin Info (compact) -->
-      <ProjectOrigin
-        :origin="project.origin as OriginType"
-        size="sm"
-      />
+      <!-- Origin Info (full, with links, dynamic size) -->
+      <div :style="{ fontSize: dynamicStyles.originSize }">
+        <ProjectOrigin
+          :origin="project.origin as OriginType"
+          size="inherit"
+        />
+      </div>
 
-      <!-- Action Links -->
-      <div class="flex items-center gap-4 justify-end pt-1">
+      <!-- Spacer to push buttons to bottom -->
+      <div class="flex-1"></div>
+
+      <!-- Action Links (always at bottom) -->
+      <div class="flex items-center gap-4 justify-end pt-2">
         <UiActionLink
           v-if="project.repo_url"
           :href="project.repo_url"
