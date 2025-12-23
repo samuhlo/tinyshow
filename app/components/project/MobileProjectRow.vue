@@ -76,7 +76,7 @@ const handleClick = () => {
 
     <!-- Arrow icon (dynamic based on position) -->
     <div>
-      <Icon :name="arrowIcon" class="text-lg text-dark/40" />
+      <Icon :name="arrowIcon" class="text-lg text-dark/50" />
     </div>
   </article>
 </template>

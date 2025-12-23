@@ -46,6 +46,7 @@ El contenido se adapta, la esencia permanece.
 |------|------------|
 | Framework | Nuxt 4 |
 | UI | Vue 3 + Composition API |
+| Estado | Pinia |
 | Estilos | Tailwind CSS 4 |
 | Animaciones | GSAP |
 | Base de datos | Neon (PostgreSQL) |
@@ -125,6 +126,8 @@ tinyshow/
 │   ├── layouts/         # Layouts de la app
 │   ├── pages/           # Páginas/rutas
 │   ├── plugins/         # Plugins de Nuxt
+│   ├── stores/          # Stores de Pinia
+│   ├── utils/           # Utilidades
 │   └── assets/          # CSS global
 ├── server/              # Backend
 │   ├── api/             # Endpoints de API y webhooks
