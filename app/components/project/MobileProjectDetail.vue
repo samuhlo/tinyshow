@@ -79,8 +79,8 @@ const dynamicStyles = computed(() => {
   const titleSize = Math.min(Math.max(h * 0.04, 16), 24);
   const taglineSize = Math.min(Math.max(h * 0.025, 10), 14);
   const descriptionSize = Math.min(Math.max(h * 0.022, 10), 13);
-  const pillSize = Math.min(Math.max(h * 0.02, 9), 12);
-  const originSize = Math.min(Math.max(h * 0.018, 8), 11);
+  const pillSize = Math.min(Math.max(h * 0.02, 10), 12);
+  const originSize = Math.min(Math.max(h * 0.018, 9), 11);
   
   // Líneas de descripción: sin límite, mostrar toda la descripción
   const descriptionLines = 99;

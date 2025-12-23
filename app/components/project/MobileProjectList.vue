@@ -272,12 +272,11 @@ onUnmounted(() => {
       </p>
     </div>
 
-    <!-- Projects Layout - Absolute Positioned Zones -->
-    <div v-else class="relative h-full">
+    <!-- Projects Layout - Flex Positioned Zones -->
+    <div v-else class="h-full flex flex-col">
       
-      <!-- ZONE: Top - Rows Above (occupies top 10%) -->
-      <div class="absolute top-0 left-0 right-0 bottom-[90%] bg-light flex flex-col justify-end">
-        <!-- ProjectRow ABOVE -->
+      <!-- ZONE: Top - Row Above (shrink-0, natural height) -->
+      <div class="shrink-0 bg-light">
         <MobileProjectRow
           v-if="visibleRowAbove"
           :project="visibleRowAbove.project"
@@ -287,8 +286,8 @@ onUnmounted(() => {
         />
       </div>
 
-      <!-- ZONE: Center - Fixed Detail (occupies middle 80%) -->
-      <div class="absolute inset-x-0 top-[10%] bottom-[10%] overflow-hidden">
+      <!-- ZONE: Center - Detail (flex-1, fills remaining space) -->
+      <div class="flex-1 min-h-0 overflow-hidden">
         <div ref="detailRef" class="w-full h-full">
           <MobileProjectDetail
             v-if="activeProject"
@@ -298,9 +297,8 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- ZONE: Bottom - Rows Below (occupies bottom 10%) -->
-      <div class="absolute top-[90%] left-0 right-0 bottom-0 bg-light flex flex-col justify-start">
-        <!-- ProjectRow BELOW -->
+      <!-- ZONE: Bottom - Row Below (shrink-0, natural height) -->
+      <div class="shrink-0 bg-light">
         <MobileProjectRow
           v-if="visibleRowBelow"
           :project="visibleRowBelow.project"

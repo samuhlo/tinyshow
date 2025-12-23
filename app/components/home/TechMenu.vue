@@ -346,7 +346,7 @@ onMounted(() => {
     >
       <!-- Active Tech Title -->
       <div class="text-center">
-        <h2 class="font-sans font-black text-4xl uppercase tracking-tighter text-dark leading-none">
+        <h2 class="font-sans font-black text-3xl uppercase tracking-tighter text-dark leading-none">
           {{ activeTech }}
         </h2>
       </div>

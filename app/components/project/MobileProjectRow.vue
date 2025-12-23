@@ -58,7 +58,7 @@ const handleClick = () => {
 
 <template>
   <article
-    class="mobile-project-row flex items-center justify-between py-3 px-4 border-b border-dark/10 cursor-pointer active:bg-dark/5"
+    class="mobile-project-row flex items-center justify-between py-3 px-4 border-y border-dark/10 cursor-pointer active:bg-dark/5"
     @click="handleClick"
   >
     <!-- Content (index + title) -->
