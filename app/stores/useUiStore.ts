@@ -10,21 +10,21 @@
  */
 
 export const useUiStore = defineStore("ui", () => {
-  // [STATE]
+  // [ESTADO]
   const isMobile = ref(false);
   const viewMode = ref<"desktop" | "mobile">("desktop");
   const isAppMounted = ref(false);
 
-  // Logo state persistence
+  // Persistencia de estado del logo
   const logoState = reactive({
     hasAnimated: false,
     activeChar: "",
   });
 
-  // [ACTIONS]
+  // [ACCIONES]
   const checkDevice = () => {
-    // Basic mobile check using window width
-    // Tailwind 'md' breakpoint is 768px
+    // Verificación móvil básica usando ancho de ventana
+    // Breakpoint 'md' de Tailwind es 768px
     if (import.meta.client) {
       isMobile.value = window.innerWidth < 768;
       viewMode.value = isMobile.value ? "mobile" : "desktop";
@@ -43,11 +43,11 @@ export const useUiStore = defineStore("ui", () => {
     logoState.activeChar = char;
   };
 
-  // [INIT]
-  // Initialize device check if on client
+  // [INICIO]
+  // Inicializar verificación de dispositivo si está en cliente
   if (import.meta.client) {
     checkDevice();
-    // Optional: Add resize listener here or in app.vue
+    // Opcional: Agregar listener de resize aquí o en app.vue
     window.addEventListener("resize", checkDevice);
   }
 

@@ -50,7 +50,7 @@ const imageRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const isAnimating = ref(false);
 
-// i18n locale
+// Idioma i18n
 const { locale } = useI18n();
 
 // =====================================================================
@@ -134,7 +134,7 @@ const animateEnter = async () => {
       "<0.1"
     );
   } else if (imageRef.value) {
-    // Fallback: simple fade in
+    // Fallback: desvanecimiento simple
     tl.fromTo(
       imageRef.value,
       { opacity: 0, scale: 0.9 },
@@ -176,7 +176,7 @@ const animateExit = () => {
     },
   });
 
-  // 1. Fade out contenido
+  // 1. Desvanecer contenido
   if (contentRef.value) {
     const contentElements = contentRef.value.querySelectorAll(".content-item");
     tl.to(contentElements, {
@@ -218,50 +218,50 @@ onMounted(() => {
 <template>
   <div ref="detailRef" class="project-detail overflow-hidden bg-dark">
     <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-      <!-- Close Button -->
+      <!-- Botón de Cerrar -->
       <UiCloseButton
         class="absolute top-6 right-6 z-10"
         @click="handleClose"
       />
 
-      <!-- Image Section -->
+      <!-- Sección de Imagen -->
       <div class="project-detail-image relative aspect-video overflow-hidden rounded-lg">
         <div v-if="project.img_url" ref="imageRef" class="w-full h-full">
           <nuxt-img :src="project.img_url" :alt="project.title" class="w-full h-full object-cover" />
-          <!-- Dark overlay for uniformity -->
+          <!-- Capa oscura para uniformidad -->
           <div class="absolute inset-0 bg-dark opacity-[0.05] pointer-events-none" />
         </div>
-        <!-- Fallback when no image -->
+        <!-- Fallback cuando no hay imagen -->
         <div v-else class="w-full h-full flex items-center justify-center bg-dark/50">
           <span class="text-mono-sm text-light/30">// NO_PREVIEW</span>
         </div>
       </div>
 
-      <!-- Content Section -->
+      <!-- Sección de Contenido -->
       <div ref="contentRef" class="flex flex-col justify-between py-2 mr-8">
-        <!-- Header -->
+        <!-- Cabecera -->
         <div>
-          <!-- Title -->
+          <!-- Título -->
           <h3 class="content-item font-display text-2xl md:text-3xl uppercase tracking-tight text-light mb-1">
             {{ project.title }}
           </h3>
 
-          <!-- Subtitle (Tagline) -->
+          <!-- Subtítulo (Tagline) -->
           <p class="content-item text-mono-xs text-light/60 mb-7">
             {{ localizedTagline }}
           </p>
 
-          <!-- Description -->
+          <!-- Descripción -->
           <p class="content-item font-mono text-sm text-light/80 leading-relaxed mb-5 ">
             {{ localizedDescription }}
           </p>
 
-          <!-- Tech Pills -->
+          <!-- Pills de Tecnología -->
           <div class="content-item flex flex-wrap gap-2 mb-5">
             <UiTechPill v-for="tech in project.tech_stack" :key="tech" :text="tech" theme="dark" />
           </div>
 
-          <!-- Origin Info -->
+          <!-- Info de Origen -->
           <div class="content-item">
             <ProjectOrigin
               :origin="project.origin as OriginType"
@@ -269,10 +269,10 @@ onMounted(() => {
             />
           </div>
 
-        <!-- Footer -->
+        <!-- Pie -->
 
 
-          <!-- Action Links -->
+          <!-- Enlaces de Acción -->
           <div class="content-item flex items-center gap-6 justify-end ">
             <UiActionLink v-if="project.repo_url" :href="project.repo_url" label="GITHUB" icon="mdi:github" />
             <UiActionLink v-if="project.demo_url" :href="project.demo_url" label="DEMO"

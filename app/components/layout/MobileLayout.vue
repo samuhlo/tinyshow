@@ -31,46 +31,46 @@ const headerRef = ref<HTMLElement | null>(null);
 // [SECTION] :: ANIMATION SEQUENCE
 // =====================================================================
 
-// Reset animation state so the Slot Machine effect always runs on mount
+// Reiniciar estado de animación para que el efecto Slot Machine corra siempre al montar
 if (import.meta.client) {
   uiStore.setLogoAnimated(false);
 }
 
 onMounted(() => {
-  // 1. Loading Phase
+  // 1. Fase de Carga
   setTimeout(() => {
-    // Fade out spinner
+    // Desvanecer spinner
     gsap.to('.intro-spinner', {
       opacity: 0,
       duration: 0.5,
       onComplete: () => {
-        // Ensure strictly fresh state for the animation
+        // Asegurar estado estrictamente fresco para la animación
         uiStore.setLogoAnimated(false);
-        uiStore.setAppMounted(true); // Ensure it's ready to go
+        uiStore.setAppMounted(true); // Asegurar que está listo
         
-        introPhase.value = 'logo'; // This will now TRIGGER mount due to v-if
+        introPhase.value = 'logo'; // Esto ACTIVARÁ el montaje debido al v-if
         
         nextTick().then(() => {
           animateLogoEntry();
         });
       }
     });
-  }, 1000); // Initial load wait
+  }, 1000); // Espera de carga inicial
 });
 
 const animateLogoEntry = () => {
   const tl = gsap.timeline();
   
-  // 2. Logo Reveal (Center) - Slightly smaller (1.5)
+  // 2. Revelado de Logo (Centro) - Ligeramente más pequeño (1.5)
   tl.fromTo('.intro-logo', 
     { scale: 0.8, opacity: 0 },
     { scale: 1.5, opacity: 1, duration: 0.8, ease: "back.out(1.7)" }
   )
-  // 3. Wait for Slot Machine
-  // [ADJUST] Change duration here to control how long it waits before moving
+  // 3. Esperar al Slot Machine
+  // [AJUSTE] Cambiar duración aquí para controlar cuánto espera antes de moverse
   .to({}, { duration: 0.3 }) 
   
-  // 4. Move to Header
+  // 4. Mover al Header
   .call(() => {
     moveLogoToHeader();
   });
@@ -79,18 +79,18 @@ const animateLogoEntry = () => {
 const moveLogoToHeader = () => {
   if (!centerLogoRef.value || !headerLogoRef.value) return;
 
-  // Manual FLIP - Align Centers
+  // FLIP Manual - Alinear Centros
   const startState = centerLogoRef.value.getBoundingClientRect();
   const endState = headerLogoRef.value.getBoundingClientRect();
 
-  // Calculate center points
+  // Calcular puntos centrales
   const startCenterX = startState.left + startState.width / 2;
   const startCenterY = startState.top + startState.height / 2;
   
   const endCenterX = endState.left + endState.width / 2;
   const endCenterY = endState.top + endState.height / 2;
 
-  // Calculate delta based on centers
+  // Calcular delta basado en centros
   const x = endCenterX - startCenterX;
   const y = endCenterY - startCenterY;
   
@@ -108,8 +108,8 @@ const moveLogoToHeader = () => {
 };
 
 const revealContent = () => {
-  // Reveal Language Selector and Main Content
-  // Header border remains transparent as requested
+  // Revelar Selector de Idioma y Contenido Principal
+  // El borde del header permanece transparente según lo solicitado
   
   gsap.fromTo([contentRef.value, '.header-actions'],
     { opacity: 0, y: 20 },
@@ -121,7 +121,7 @@ const revealContent = () => {
 <template>
   <div class="h-dvh bg-light text-dark font-mono relative flex flex-col overflow-hidden">
     
-    <!-- [OVERLAY] :: INTRO SPINNER & LOGO -->
+    <!-- [OVERLAY] :: SPINNER DE INTRODUCCIÓN Y LOGO -->
     <div v-if="introPhase !== 'complete'" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none bg-light">
       
       <!-- Spinner -->
@@ -129,7 +129,7 @@ const revealContent = () => {
         <LoadingSpinner size="lg" color="dark" />
       </div>
 
-      <!-- Center Logo (The one that moves) -->
+      <!-- Logo Central (El que se mueve) -->
       <div 
         ref="centerLogoRef"
         v-if="introPhase === 'logo'"
@@ -139,25 +139,25 @@ const revealContent = () => {
       </div>
     </div>
 
-    <!-- [LAYOUT] :: HEADER -->
+    <!-- [LAYOUT] :: CABECERA -->
     <header 
       ref="headerRef"
       class="p-4 pb-0 border-b border-transparent transition-colors duration-500 relative z-40 shrink-0"
     >
-      <div class="flex items-center justify-between min-h-12"> <!-- min-h ensures consistent height -->
-         <!-- Header Logo Placeholder (Final Destination) -->
+      <div class="flex items-center justify-between min-h-12"> <!-- min-h asegura altura consistente -->
+         <!-- Marcador del Logo en Header (Destino Final) -->
          <div ref="headerLogoRef" class="opacity-0" :class="{ 'opacity-100': introPhase === 'complete' }">
            <AppLogo />
          </div>
 
-         <!-- Language Selector -->
+         <!-- Selector de Idioma -->
          <div class="header-actions opacity-0">
            <LangSwitcher />
          </div>
       </div>
     </header>
 
-    <!-- [LAYOUT] :: CONTENT -->
+    <!-- [LAYOUT] :: CONTENIDO -->
     <main 
       ref="contentRef"
       class="w-full flex-1 min-h-0 p-4 pt-0 opacity-0 overflow-hidden"
@@ -165,7 +165,7 @@ const revealContent = () => {
       <slot />
     </main>
     
-    <!-- [LAYOUT] :: DOWNBAR (Future) or Hidden Footer -->
-    <!-- Footer removed as requested -->
+    <!-- [LAYOUT] :: BARRA INFERIOR (Futuro) o Footer Oculto -->
+    <!-- Footer eliminado según solicitud -->
   </div>
 </template>

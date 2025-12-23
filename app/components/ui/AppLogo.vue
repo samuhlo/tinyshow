@@ -31,7 +31,7 @@ const uiStore = useUiStore();
 const strip = ref<string[]>([]);
 const mounted = ref(false);
 
-// Use store state for persistence
+// Usa el estado del store para persistencia
 const hasAnimated = computed(() => uiStore.logoState.hasAnimated);
 const activeChar = computed(() => uiStore.logoState.activeChar);
 
@@ -66,15 +66,15 @@ onMounted(() => {
   const buffer = getRandomChar();
 
   if (hasAnimated.value) {
-    // Skip animation if already played in this session
+    // Omitir animación si ya se reprodujo en esta sesión
     strip.value = [buffer, target];
     mounted.value = true;
   } else {
-    // Initial reveal animation
+    // Animación de revelado inicial
     const randoms = Array.from({ length: REEL_LENGTH }, () => getRandomChar());
     strip.value = [buffer, target, ...randoms];
 
-    // Wait for app mount (splash screen hidden)
+    // Esperar a que la app se monte (splash screen oculto)
     if (uiStore.isAppMounted) {
       requestAnimationFrame(runAnimation);
     } else {

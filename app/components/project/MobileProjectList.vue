@@ -23,7 +23,7 @@ import type { Project } from "~~/shared/types";
 const SWIPE_THRESHOLD = 50;
 const ANIM_DURATION = 0.6;
 const ANIM_EASE = "power3.out";
-const MAX_VISIBLE_ROWS = 1; // Only show 1 row above/below the detail
+const MAX_VISIBLE_ROWS = 1; // Mostrar solo 1 fila arriba/abajo del detalle
 
 // =====================================================================
 // [SECTION] :: COMPONENT STATE
@@ -31,14 +31,14 @@ const MAX_VISIBLE_ROWS = 1; // Only show 1 row above/below the detail
 
 const showcaseStore = useShowcaseStore();
 
-// Active project index
+// Índice del proyecto activo
 const activeIndex = ref(0);
 
-// Touch tracking
+// Rastreo táctil
 const touchStartY = ref(0);
 const isTransitioning = ref(false);
 
-// Container ref
+// Referencia del contenedor
 const containerRef = ref<HTMLElement | null>(null);
 const detailRef = ref<HTMLElement | null>(null);
 
@@ -48,19 +48,19 @@ const detailRef = ref<HTMLElement | null>(null);
 
 /**
  * [COMPUTED] :: PROJECTS
- * Gets filtered projects from store.
+ * Obtiene proyectos filtrados desde el store.
  */
 const projects = computed(() => showcaseStore.projects);
 
 /**
  * [COMPUTED] :: ACTIVE_PROJECT
- * The currently expanded project.
+ * El proyecto expandido actualmente.
  */
 const activeProject = computed(() => projects.value[activeIndex.value] || null);
 
 /**
  * [COMPUTED] :: PROJECTS_ABOVE
- * ProjectRows to show above the detail (max 2).
+ * Filas de proyecto a mostrar encima del detalle (max 2).
  */
 const projectsAbove = computed(() => {
   const startIdx = Math.max(0, activeIndex.value - MAX_VISIBLE_ROWS);
@@ -73,7 +73,7 @@ const projectsAbove = computed(() => {
 
 /**
  * [COMPUTED] :: PROJECTS_BELOW
- * ProjectRows to show below the detail (max 1).
+ * Filas de proyecto a mostrar debajo del detalle (max 1).
  */
 const projectsBelow = computed(() => {
   const startIdx = activeIndex.value + 1;
@@ -86,7 +86,7 @@ const projectsBelow = computed(() => {
 
 /**
  * [COMPUTED] :: VISIBLE_ROW_ABOVE
- * The single row to show above the detail (if any).
+ * La única fila visible encima del detalle (si hay).
  */
 const visibleRowAbove = computed(() => {
   if (projectsAbove.value.length === 0) return null;
@@ -95,7 +95,7 @@ const visibleRowAbove = computed(() => {
 
 /**
  * [COMPUTED] :: VISIBLE_ROW_BELOW
- * The single row to show below the detail (if any).
+ * La única fila visible debajo del detalle (si hay).
  */
 const visibleRowBelow = computed(() => {
   if (projectsBelow.value.length === 0) return null;
@@ -104,11 +104,13 @@ const visibleRowBelow = computed(() => {
 
 /**
  * [COMPUTED] :: CAN_GO_PREVIOUS
+ * Indica si es posible navegar al anterior.
  */
 const canGoPrevious = computed(() => activeIndex.value > 0);
 
 /**
  * [COMPUTED] :: CAN_GO_NEXT
+ * Indica si es posible navegar al siguiente.
  */
 const canGoNext = computed(() => activeIndex.value < projects.value.length - 1);
 
@@ -118,19 +120,20 @@ const canGoNext = computed(() => activeIndex.value < projects.value.length - 1);
 
 /**
  * [ACTION] :: GO_TO_PROJECT
- * Navigate to a specific project index (instant, no animation).
+ * Navega a un índice de proyecto específico (instantáneo, sin animación).
  */
 const goToProject = (targetIndex: number) => {
   if (isTransitioning.value) return;
   if (targetIndex < 0 || targetIndex >= projects.value.length) return;
   if (targetIndex === activeIndex.value) return;
 
-  // Simply change the index - no animation needed
+  // Simplemente cambiar el índice - no se necesita animación
   activeIndex.value = targetIndex;
 };
 
 /**
  * [ACTION] :: GO_TO_PREVIOUS
+ * Navega al proyecto anterior si existe.
  */
 const goToPrevious = () => {
   if (canGoPrevious.value) {
@@ -140,6 +143,7 @@ const goToPrevious = () => {
 
 /**
  * [ACTION] :: GO_TO_NEXT
+ * Navega al proyecto siguiente si existe.
  */
 const goToNext = () => {
   if (canGoNext.value) {
@@ -149,7 +153,7 @@ const goToNext = () => {
 
 /**
  * [HANDLE] :: ROW_CLICK
- * When a ProjectRow is clicked, navigate to that project.
+ * Navega al proyecto cuando se hace click en una fila.
  */
 const handleRowClick = (project: Project, originalIndex: number) => {
   goToProject(originalIndex);
@@ -157,10 +161,10 @@ const handleRowClick = (project: Project, originalIndex: number) => {
 
 /**
  * [HANDLE] :: CLOSE_DETAIL
- * No-op for mobile - we always show one project open.
+ * No hace nada en móvil - siempre mostramos un proyecto abierto.
  */
 const handleCloseDetail = () => {
-  // In mobile, we don't close - just ignore
+  // En móvil no cerramos - simplemente ignorar
 };
 
 // =====================================================================
@@ -169,6 +173,7 @@ const handleCloseDetail = () => {
 
 /**
  * [HANDLE] :: TOUCH_START
+ * Inicia el rastreo del gesto táctil.
  */
 const handleTouchStart = (e: TouchEvent) => {
   if (isTransitioning.value) return;
@@ -180,6 +185,7 @@ const handleTouchStart = (e: TouchEvent) => {
 
 /**
  * [HANDLE] :: TOUCH_END
+ * Finaliza el gesto y determina si hubo swipe.
  */
 const handleTouchEnd = (e: TouchEvent) => {
   if (isTransitioning.value) return;
@@ -191,11 +197,11 @@ const handleTouchEnd = (e: TouchEvent) => {
 
   if (Math.abs(deltaY) < SWIPE_THRESHOLD) return;
 
-  // Swipe DOWN (positive) -> go PREVIOUS (scroll up to see earlier projects)
+  // Swipe ABAJO (positivo) -> ir al ANTERIOR (scroll arriba para ver proyectos anteriores)
   if (deltaY > 0) {
     goToPrevious();
   }
-  // Swipe UP (negative) -> go NEXT (scroll down to see later projects)
+  // Swipe ARRIBA (negativo) -> ir al SIGUIENTE (scroll abajo para ver proyectos posteriores)
   else {
     goToNext();
   }
@@ -207,7 +213,7 @@ const handleTouchEnd = (e: TouchEvent) => {
 
 /**
  * [WATCH] :: ACTIVE_TECH
- * Reset to first project when tech changes.
+ * Reinicia al primer proyecto cuando cambia la tecnología.
  */
 watch(
   () => showcaseStore.activeTech,
@@ -219,11 +225,11 @@ watch(
 
 /**
  * [LIFECYCLE] :: LOCK_BODY_SCROLL
- * Prevents body and html from scrolling when mobile project list is active.
+ * Previene el scroll del body y html cuando la lista móvil está activa.
  */
 onMounted(() => {
   if (import.meta.client) {
-    // Lock both html and body
+    // Bloquear tanto html como body
     document.documentElement.style.overflow = 'hidden';
     document.documentElement.style.position = 'fixed';
     document.documentElement.style.width = '100%';
@@ -238,7 +244,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (import.meta.client) {
-    // Restore both html and body
+    // Restaurar tanto html como body
     document.documentElement.style.overflow = '';
     document.documentElement.style.position = '';
     document.documentElement.style.width = '';
@@ -260,22 +266,22 @@ onUnmounted(() => {
     @touchend="handleTouchEnd"
     @touchmove.prevent
   >
-    <!-- Loading State -->
+    <!-- Estado de Carga -->
     <div v-if="showcaseStore.isProjectsLoading" class="h-full flex items-center justify-center">
       <UiLoadingSpinner size="md" color="dark" />
     </div>
 
-    <!-- Empty State -->
+    <!-- Estado Vacío -->
     <div v-else-if="!projects || projects.length === 0" class="h-full flex items-center justify-center px-4">
       <p class="text-mono-sm text-gray-400">
         // NO_PROJECTS_FOUND_FOR :: {{ showcaseStore.activeTech }}
       </p>
     </div>
 
-    <!-- Projects Layout - Flex Positioned Zones -->
+    <!-- Layout de Proyectos - Zonas Posicionadas con Flex -->
     <div v-else class="h-full flex flex-col">
       
-      <!-- ZONE: Top - Row Above (shrink-0, natural height) -->
+      <!-- ZONA: Arriba - Fila Superior (shrink-0, altura natural) -->
       <div class="shrink-0 bg-light">
         <MobileProjectRow
           v-if="visibleRowAbove"
@@ -286,7 +292,7 @@ onUnmounted(() => {
         />
       </div>
 
-      <!-- ZONE: Center - Detail (flex-1, fills remaining space) -->
+      <!-- ZONA: Centro - Detalle (flex-1, llena espacio restante) -->
       <div class="flex-1 min-h-0 overflow-hidden">
         <div ref="detailRef" class="w-full h-full">
           <MobileProjectDetail
@@ -297,7 +303,7 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- ZONE: Bottom - Row Below (shrink-0, natural height) -->
+      <!-- ZONA: Abajo - Fila Inferior (shrink-0, altura natural) -->
       <div class="shrink-0 bg-light">
         <MobileProjectRow
           v-if="visibleRowBelow"
@@ -313,6 +319,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* No animations needed - instant transitions look cleaner */
+/* No se necesitan animaciones - transiciones instantáneas se ven más limpias */
 </style>
 

@@ -16,7 +16,7 @@ import LangSwitcher from "~/components/ui/LangSwitcher.vue";
 
 <template>
   <header
-    class="fixed top-0 left-0 right-0 w-full max-w-screen-2xl mx-auto z-50 flex items-center justify-between p-6 md:p-10"
+    class="fixed top-0 left-0 right-0 w-full max-w-screen-2xl mx-auto z-50 flex items-center justify-between p-6 md:p-10 bg-light"
   >
     <AppLogo />
     <LangSwitcher />

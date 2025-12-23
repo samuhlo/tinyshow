@@ -44,8 +44,8 @@ const isLoading = ref(true)
 // =====================================================================
 
 onMounted(() => {
-  // Hide loading overlay after mount (hydration complete)
-  // Small delay to ensure fonts are loaded
+  // Ocultar overlay de carga tras montar (hidratación completa)
+  // Pequeño retraso para asegurar carga de fuentes
   setTimeout(() => {
     isLoading.value = false
     uiStore.setAppMounted(true)
@@ -55,7 +55,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <!-- Initial Loading Overlay -->
+    <!-- Overlay de Carga Inicial -->
     <Transition
       enter-active-class="transition-opacity duration-300 ease-out"
       leave-active-class="transition-opacity duration-300 ease-out"

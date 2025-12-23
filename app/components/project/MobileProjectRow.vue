@@ -38,8 +38,11 @@ const formattedIndex = computed(() => {
 
 /**
  * [COMPUTED] :: ARROW_ICON
- * Shows direction: down arrow when row is above (tap to go down),
- * up arrow when row is below (tap to go up).
+ * Determina qué icono de flecha mostrar basado en la posición relativa.
+ * - 'above': Flecha hacia arriba (el proyecto está antes/arriba).
+ * - 'below': Flecha hacia abajo (el proyecto está después/abajo).
+ *
+ * @returns Nombre del icono de Material Symbols.
  */
 const arrowIcon = computed(() => {
   return props.position === 'above' 
@@ -51,6 +54,12 @@ const arrowIcon = computed(() => {
 // [SECTION] :: HANDLERS
 // =====================================================================
 
+/**
+ * [HANDLE] :: CLICK
+ * Emite el evento de expansión con el proyecto actual.
+ *
+ * @returns void
+ */
 const handleClick = () => {
   emit("expand", props.project);
 };
@@ -61,20 +70,20 @@ const handleClick = () => {
     class="mobile-project-row flex items-center justify-between py-3 px-4 border-y border-dark/10 cursor-pointer active:bg-dark/5"
     @click="handleClick"
   >
-    <!-- Content (index + title) -->
+    <!-- Contenido (índice + título) -->
     <div class="flex items-center gap-6">
-      <!-- Index -->
+      <!-- Índice -->
       <span class="text-mono-xs text-dark/50">
         {{ formattedIndex }}
       </span>
 
-      <!-- Title -->
+      <!-- Título -->
       <h3 class="text-base font-sans text-dark">
         {{ project.title }}
       </h3>
     </div>
 
-    <!-- Arrow icon (dynamic based on position) -->
+    <!-- Icono de flecha (dinámico según posición) -->
     <div>
       <Icon :name="arrowIcon" class="text-lg text-dark/50" />
     </div>

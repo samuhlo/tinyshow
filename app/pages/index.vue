@@ -45,7 +45,7 @@ useSeoMeta({
 const showcaseStore = useShowcaseStore()
 const uiStore = useUiStore()
 
-// Initialize store data
+// Inicializar datos del store
 await showcaseStore.init()
 
 // =====================================================================
@@ -65,7 +65,7 @@ const handleSelect = (tech: string) => {
 
 <template>
   <NuxtLayout name="default">
-    <!-- Dynamic Layout Container -->
+    <!-- Contenedor Dinámico del Layout -->
     <div
       class="min-h-[80vh] transition-all duration-500"
       :class="[
@@ -74,7 +74,7 @@ const handleSelect = (tech: string) => {
           : 'grid grid-cols-1 md:grid-cols-12 gap-10 items-start'
       ]"
     >
-      <!-- Navigation Wrapper -->
+      <!-- Contenedor de Navegación -->
       <aside
         :class="[
           showcaseStore.viewMode === 'hero'
@@ -82,7 +82,7 @@ const handleSelect = (tech: string) => {
             : 'md:col-span-3 lg:col-span-2 pt-0 md:sticky md:top-36 md:self-start'
         ]"
       >
-        <!-- Loading State -->
+        <!-- Estado de Carga -->
         <div v-if="showcaseStore.isTechLoading" class="flex items-center justify-center py-12">
           <UiLoadingSpinner size="lg" color="dark" />
         </div>
@@ -96,7 +96,7 @@ const handleSelect = (tech: string) => {
         />
       </aside>
 
-      <!-- Content Area (Only visible in sidebar mode) -->
+      <!-- Área de Contenido (Solo visible en modo sidebar) -->
       <section
         v-if="showcaseStore.viewMode === 'sidebar'"
         :class="[

@@ -10,6 +10,6 @@
  */
 
 export default defineNuxtPlugin((nuxtApp) => {
-  // TODO: Initialize Lenis / GSAP here
+  // TODO: Inicializar Lenis / GSAP aquí
   console.log("Smooth scroll plugin loaded");
 });

@@ -73,10 +73,10 @@ const setButtonRef = (el: HTMLElement | null, index: number) => {
 
 /**
  * [ANIM] :: ANIMATE_INDICATOR
- * Desplaza el indicador visual hacia el botón de la tecnología activa (Desktop).
+ * Desplaza el indicador visual hacia el botón de la tecnología activa (Escritorio).
  */
 const animateIndicator = () => {
-  // Mobile Downbar handles active state differently (rectangles)
+  // El modo Downbar (móvil) gestiona el estado activo de manera diferente
   if (uiStore.isMobile) return;
   
   if (!indicatorRef.value || !props.activeTech || props.viewMode !== VIEW_SIDEBAR) return;
@@ -127,12 +127,13 @@ watch(
   async (newMode, oldMode) => {
     if (!menuRef.value) return;
 
-    // Mobile: Handle specific transitions if needed, but FLIP might be overkill 
-    // for list -> downbar. We might just fade list out and slide downbar up.
-    // For now, let's keep it simple for desktop, and skip FLIP on mobile if switch to downbar
+    // Mobile: Gestiona transiciones específicas si es necesario.
+    // FLIP puede ser excesivo para el cambio list -> downbar.
+    // Simplemente desvanecemos la lista y deslizamos el downbar hacia arriba.
+    // Por ahora, mantenemos simple el desktop y saltamos FLIP en móvil si cambia a downbar.
     
     if (uiStore.isMobile && newMode === VIEW_SIDEBAR) {
-       // Mobile transition handled by CSS/Vue transition mostly
+       // Transición móvil manejada principalmente por CSS/Vue transition
        return; 
     }
 
@@ -204,7 +205,7 @@ watch(
 // =====================================================================
 
 const touchStartX = ref(0);
-const SWIPE_THRESHOLD = 50; // Minimum px to register as swipe
+const SWIPE_THRESHOLD = 50; // Mínimo de px para registrar un swipe
 
 const handleTouchStart = (e: TouchEvent) => {
   const firstTouch = e.touches[0];
@@ -220,20 +221,20 @@ const handleTouchEnd = (e: TouchEvent) => {
   const touchEndX = endTouch.clientX;
   const deltaX = touchEndX - touchStartX.value;
 
-  if (Math.abs(deltaX) < SWIPE_THRESHOLD) return; // Not a swipe
+  if (Math.abs(deltaX) < SWIPE_THRESHOLD) return; // No es un swipe
 
   const currentIndex = props.technologies.indexOf(props.activeTech || '');
   if (currentIndex === -1) return;
 
   if (deltaX > 0) {
-    // Swiped RIGHT -> go to PREVIOUS tech
+    // Swipe DERECHA -> ir a tecnología ANTERIOR
     const prevIndex = currentIndex - 1;
     const prevTech = props.technologies[prevIndex];
     if (prevIndex >= 0 && prevTech) {
       emit('select', prevTech);
     }
   } else {
-    // Swiped LEFT -> go to NEXT tech
+    // Swipe IZQUIERDA -> ir a tecnología SIGUIENTE
     const nextIndex = currentIndex + 1;
     const nextTech = props.technologies[nextIndex];
     if (nextIndex < props.technologies.length && nextTech) {
@@ -248,18 +249,18 @@ const handleTouchEnd = (e: TouchEvent) => {
 
 /**
  * [ANIM] :: HANDLE_MOBILE_SELECT
- * Simple fadeout transition from Hero list to Downbar on mobile.
- * @param tech - The selected technology.
- * @param index - Index of the selected tech in the list.
+ * Transición simple de desvanecimiento desde la lista Hero al Downbar en móvil.
+ * @param tech  - La tecnología seleccionada.
+ * @param index - Índice de la tecnología en la lista.
  */
 const handleMobileSelect = async (tech: string, index: number) => {
   if (!uiStore.isMobile || props.viewMode !== VIEW_HERO) {
-    // Desktop or already in sidebar: just emit
+    // Desktop o ya en sidebar: solo emitir
     emit('select', tech);
     return;
   }
 
-  // Fade out all Hero buttons
+  // Desvanecer todos los botones Hero
   const allButtons = buttonRefs.value;
   await gsap.to(allButtons, {
     opacity: 0,
@@ -269,10 +270,10 @@ const handleMobileSelect = async (tech: string, index: number) => {
     ease: EASE_POWER2_IN,
   });
 
-  // Emit select to trigger viewMode change to sidebar
+  // Emitir select para activar cambio de viewMode a sidebar
   emit('select', tech);
 
-  // Animate rectangles sliding up
+  // Animar rectángulos deslizándose hacia arriba
   await nextTick();
   if (downbarRectsRef.value) {
     const rects = downbarRectsRef.value.querySelectorAll('button');
@@ -297,7 +298,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <!-- [DESKTOP/MOBILE HERO] :: STANDARD LIST -->
+    <!-- [DESKTOP/MOBILE HERO] :: LISTA ESTÁNDAR -->
     <nav
       v-if="!uiStore.isMobile || viewMode === VIEW_HERO"
       ref="menuRef"
@@ -337,21 +338,21 @@ onMounted(() => {
       </button>
     </nav>
 
-    <!-- [MOBILE SIDEBAR] :: DOWNBAR -->
+    <!-- [MOBILE SIDEBAR] :: BARRA INFERIOR (DOWNBAR) -->
     <div 
       v-if="uiStore.isMobile && viewMode === VIEW_SIDEBAR"
       class="fixed bottom-0 left-0 w-full bg-light p-4 pb-6 z-50 flex flex-col gap-4"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
     >
-      <!-- Active Tech Title -->
+      <!-- Título de Tecnología Activa -->
       <div class="text-center">
         <h2 class="font-sans font-black text-3xl uppercase tracking-tighter text-dark leading-none">
           {{ activeTech }}
         </h2>
       </div>
 
-      <!-- Navigation Rectangles -->
+      <!-- Rectángulos de Navegación -->
       <div ref="downbarRectsRef" class="flex items-end justify-between gap-1 w-full px-4 h-3">
         <button
           v-for="tech in technologies"

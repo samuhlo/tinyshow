@@ -15,14 +15,14 @@ import { prisma } from "../../utils/prisma";
 // [SECTION] :: ENDPOINT HANDLER
 // =====================================================================
 
-const CACHE_MAX_AGE = 60 * 60; // 1 hour
+const CACHE_MAX_AGE = 60 * 60; // 1 hora
 const NO_CACHE = 0;
 const HTTP_INTERNAL_ERROR = 500;
 
 export default defineCachedEventHandler(
   async (event) => {
     try {
-      // Group by primary_tech to get unique values efficiently
+      // Agrupar por primary_tech para obtener valores únicos eficientemente
       const groups = await prisma.project.groupBy({
         by: ["primary_tech"],
         _count: {
@@ -33,10 +33,10 @@ export default defineCachedEventHandler(
         },
       });
 
-      // Extract just the strings
+      // Extraer solo las cadenas
       const allTechs = groups.map((g) => g.primary_tech);
 
-      // Verify that each tech actually has visible projects using the same criteria as the list API
+      // Verificar que cada tech tenga proyectos visibles usando el mismo criterio que la lista
       const validTechs: string[] = [];
 
       for (const tech of allTechs) {
@@ -65,8 +65,8 @@ export default defineCachedEventHandler(
     }
   },
   {
-    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hour in prod, 0 in dev
-    swr: !import.meta.dev, // Disable SWR in dev
+    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hora en prod, 0 en dev
+    swr: !import.meta.dev, // Deshabilitar SWR en dev
     name: "projects-techs",
     getKey: () => "techs",
   }

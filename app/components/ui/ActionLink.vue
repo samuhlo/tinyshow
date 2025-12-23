@@ -33,13 +33,13 @@ withDefaults(defineProps<Props>(), {
     :target="external ? '_blank' : undefined"
     :rel="external ? 'noopener noreferrer' : undefined"
   >
-    <!-- Icon (optional) -->
+    <!-- Icono (opcional) -->
     <Icon v-if="icon" :name="icon" class="text-base" />
     
-    <!-- Label with underline effect -->
+    <!-- Etiqueta con efecto de subrayado -->
     <span class="relative">
       {{ label }}
-      <!-- Underline accent -->
+      <!-- Acento de subrayado -->
       <span 
         class="absolute left-0 -bottom-0.5 h-0.5 w-0 bg-accent transition-all duration-300 ease-out group-hover:w-full"
       />

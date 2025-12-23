@@ -28,7 +28,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 'md',
-  color: 'dark', // Default to dark for light backgrounds
+  color: 'dark', // Predeterminado a dark para fondos claros
 });
 
 // =====================================================================

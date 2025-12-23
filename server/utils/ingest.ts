@@ -61,7 +61,7 @@ export async function ingestProject(
 ): Promise<IngestResult> {
   const projectId = repo; // Project ID is the repo name
 
-  // Read from env var, fallback to explicit override, fallback to true
+  // Leer de variable de entorno, fallback a override explícito, fallback a true
   const envStrictMode = process.env.NUXT_STRICT_MODE !== "false";
   const strictMode = strictModeOverride ?? envStrictMode;
 
@@ -70,7 +70,7 @@ export async function ingestProject(
   );
 
   try {
-    // 1. Fetch README
+    // 1. Obtener README
     let readmeContent = "";
     try {
       const { data: readme } = await octokit.request(ENDPOINT_README, {
@@ -83,7 +83,7 @@ export async function ingestProject(
       });
       readmeContent = readme as unknown as string;
     } catch (e: any) {
-      // Fallback: Try 'master' if 'main' failed and we haven't tried it yet
+      // Fallback: Intentar 'master' si 'main' falló y aún no lo hemos probado
       if (branch === DEFAULT_BRANCH && e.status === 404) {
         console.warn(
           `[WARN]  :: BRANCH_404    :: '${DEFAULT_BRANCH}' not found. Retrying with '${FALLBACK_BRANCH}'`
@@ -103,7 +103,7 @@ export async function ingestProject(
       throw e;
     }
 
-    // 2. Check for HIDDEN marker (before AI to save tokens)
+    // 2. Verificar marcador HIDDEN (antes de IA para ahorrar tokens)
     const HIDDEN_MARKER = "<!-- tinyshow:hidden -->";
     if (readmeContent.includes(HIDDEN_MARKER)) {
       console.log(
@@ -129,7 +129,7 @@ export async function ingestProject(
       };
     }
 
-    // 2. AI Extraction
+    // 3. Extracción IA
     const htmlUrl = `${GITHUB_BASE_URL}/${owner}/${repo}`;
     console.log(
       `[ANLZ]  >> README.md     :: size: ${readmeContent.length} chars | status: AI_PROCESSING`
@@ -137,7 +137,7 @@ export async function ingestProject(
 
     const projectData = await extractProjectData(readmeContent, htmlUrl);
 
-    // 3. Quality Filters
+    // 4. Filtros de Calidad
     if (!projectData.demo_url || !projectData.img_url) {
       const missing = [];
       if (!projectData.demo_url) missing.push("demo_url");
@@ -149,7 +149,7 @@ export async function ingestProject(
             ", "
           )} -> Will DELETE if exists`
         );
-        // In strict mode, signal deletion so existing projects get removed
+        // En modo estricto, señalar borrado para eliminar proyectos existentes
         return {
           action: "delete",
           project: null,

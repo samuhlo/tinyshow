@@ -17,7 +17,7 @@ import type { Project, LocalizedTextType, OriginType } from "~~/shared/types";
 // =====================================================================
 
 const DEFAULT_LIMIT = 50;
-const CACHE_MAX_AGE = 60 * 60; // 1 hour
+const CACHE_MAX_AGE = 60 * 60; // 1 hora
 const NO_CACHE = 0;
 
 export default defineCachedEventHandler(
@@ -43,7 +43,7 @@ export default defineCachedEventHandler(
         },
       });
 
-      // Cast JSONB fields to proper types for frontend consumption
+      // Castear campos JSONB a tipos adecuados para consumo frontend
       return projects.map(
         (project): Project => ({
           id: project.id,
@@ -71,8 +71,8 @@ export default defineCachedEventHandler(
     }
   },
   {
-    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hour in prod, 0 in dev
-    swr: !import.meta.dev, // Disable SWR in dev
+    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hora en prod, 0 en dev
+    swr: !import.meta.dev, // Deshabilitar SWR en dev
     name: "projects-list",
     getKey: (event) => {
       const query = getQuery(event);

@@ -51,33 +51,33 @@ const emit = defineEmits<{
 // [SECTION] :: COMPONENT STATE & COMPUTED
 // =====================================================================
 
-// Format index to always be 2 digits (01, 02, etc.)
+// Formatear índice para ser siempre 2 dígitos
 const formattedIndex = computed(() => {
   return (props.index + 1).toString().padStart(2, "0");
 });
 
-// Hover state
+// Estado de hover
 const isHovering = ref(false);
 const rowRef = ref<HTMLElement | null>(null);
 const imageRef = ref<HTMLElement | null>(null);
 
-// Get store for image tracking
+// Obtener store para rastreo de imagen
 const showcaseStore = useShowcaseStore();
 
-// Image loading state - initialize from store
+// Estado de carga de imagen - inicializar desde store
 const imageLoading = ref(true);
 
-// Check if image is already loaded when setting up
+// Verificar si la imagen ya está cargada al configurar
 watchEffect(() => {
   if (props.project.img_url) {
     imageLoading.value = !showcaseStore.isImageLoaded(props.project.img_url);
   }
 });
 
-// Image position (calculated from row position)
+// Posición de imagen (calculada desde posición de fila)
 const imagePosition = ref({ x: 0, y: 0 });
 
-// Calculate marquee duration based on title length for constant speed
+// Calcular duración de marquee basada en largo del título para velocidad constante
 const marqueeDuration = computed(() => {
   const titleLength = props.project.title.length;
   const baseDuration = MARQUEE_BASE_DURATION; // seconds for average title
@@ -85,7 +85,7 @@ const marqueeDuration = computed(() => {
   return Math.max(baseDuration * factor, MARQUEE_MIN_DURATION); // minimum 5s
 });
 
-// Store active timeline to kill on new hover
+// Guardar timeline activo para eliminar en nuevo hover
 let activeTimeline: gsap.core.Timeline | null = null;
 
 // =====================================================================
@@ -110,28 +110,28 @@ const updateImagePosition = () => {
  * Activa los efectos de hover y dispara la animación de entrada.
  */
 const handleMouseEnter = async () => {
-  // Don't show hover when expanded
+  // No mostrar hover cuando está expandido
   if (props.isExpanded) return;
   
-  // Kill any previous animation to prevent glitches
+  // Matar cualquier animación previa para evitar glitches
   if (activeTimeline) {
     activeTimeline.kill();
     activeTimeline = null;
   }
 
-  // Check if image is already loaded from store
+  // Verificar si la imagen ya está cargada desde el store
   if (props.project.img_url) {
     imageLoading.value = !showcaseStore.isImageLoaded(props.project.img_url);
   }
 
-  // Calculate position before showing
+  // Calcular posición antes de mostrar
   updateImagePosition();
   isHovering.value = true;
 
-  // Wait for DOM to update after v-if becomes true
+  // Esperar a actualización del DOM tras v-if
   await nextTick();
 
-  // Only animate the image
+  // Solo animar la imagen
   if (imageRef.value && props.project.img_url) {
     activeTimeline = gsap.timeline();
     activeTimeline.fromTo(
@@ -217,20 +217,20 @@ const handleMouseMove = (event: MouseEvent) => {
  * Emite el evento de expansión con los datos del proyecto y la posición de la imagen.
  */
 const handleClick = () => {
-  // Capture image rect before closing hover
+  // Capturar rect de imagen antes de cerrar hover
   let imageRect: DOMRect | null = null;
   if (imageRef.value && isHovering.value) {
     imageRect = imageRef.value.getBoundingClientRect();
   }
   
-  // Close hover immediately
+  // Cerrar hover inmediatamente
   if (activeTimeline) {
     activeTimeline.kill();
     activeTimeline = null;
   }
   isHovering.value = false;
   
-  // Emit expand with full project data and image rect
+  // Emitir expand con datos completos del proyecto y rect de imagen
   emit("expand", props.project as Project, imageRect);
 };
 
@@ -251,9 +251,9 @@ onUnmounted(() => {
     @mousemove="handleMouseMove"
     @click="handleClick"
   >
-    <!-- Content layer (index + title) -->
+    <!-- Capa de contenido (índice + título) -->
     <div class="flex items-center gap-12 pl-2 relative z-10">
-      <!-- Index -->
+      <!-- Índice -->
       <span
         class="text-mono-sm transition-colors duration-200"
         :class="isHovering ? 'text-light' : 'text-dark'"
@@ -261,7 +261,7 @@ onUnmounted(() => {
         {{ formattedIndex }}
       </span>
 
-      <!-- Title -->
+      <!-- Título -->
       <h3
         class="text-2xl font-sans transition-colors duration-200"
         :class="isHovering ? 'text-light' : 'text-dark'"
@@ -270,7 +270,7 @@ onUnmounted(() => {
       </h3>
     </div>
 
-    <!-- Arrow icon -->
+    <!-- Icono de flecha -->
     <div class="pr-4 overflow-hidden relative z-10">
       <span
         class="inline-block text-2xl transition-all duration-200"
@@ -280,15 +280,15 @@ onUnmounted(() => {
       </span>
     </div>
 
-    <!-- Hover overlay with blur + marquee (appears instantly) -->
+    <!-- Overlay de hover con desenfoque + marquee (aparece al instante) -->
     <div
       v-if="isHovering && project.img_url"
       class="absolute inset-0 z-20 pointer-events-none overflow-hidden"
     >
-      <!-- Dark background + blur overlay -->
+      <!-- Fondo oscuro + overlay desenfocado -->
       <div class="absolute inset-0 backdrop-blur-xs bg-dark/20"></div>
 
-      <!-- Scrolling Marquee -->
+      <!-- Marquee desplazable -->
       <div class="absolute inset-0 flex items-center overflow-hidden">
         <div
           class="marquee-track flex whitespace-nowrap"
@@ -306,7 +306,7 @@ onUnmounted(() => {
     </div>
   </article>
 
-  <!-- Project Image Preview (Teleported to body to escape overflow:hidden) -->
+  <!-- Preview de Imagen (Teleportado al body para escapar de overflow:hidden) -->
   <Teleport to="body">
     <div
       v-if="isHovering && project.img_url"
@@ -320,7 +320,7 @@ onUnmounted(() => {
         opacity: 0,
       }"
     >
-      <!-- Loading Spinner -->
+      <!-- Spinner de Carga -->
       <div 
         v-if="imageLoading" 
         class="absolute inset-0 flex items-center justify-center bg-transparent"
@@ -334,14 +334,14 @@ onUnmounted(() => {
         class="w-full h-full object-cover"
         @load="handleImageLoad"
       />
-      <!-- Dark overlay for uniformity (only show when loaded) -->
+      <!-- Capa oscura para uniformidad (solo mostrar cuando cargado) -->
       <div v-if="!imageLoading" class="absolute inset-0 bg-dark opacity-[0.1] pointer-events-none"></div>
     </div>
   </Teleport>
 </template>
 
 <style scoped>
-/* Marquee animation - duration is set dynamically via inline style */
+/* Animación Marquee - duración configurada dinámicamente vía estilo inline */
 .marquee-track {
   animation: marquee linear infinite;
 }

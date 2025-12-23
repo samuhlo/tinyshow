@@ -40,12 +40,12 @@ export async function invalidateAllProjectCaches(): Promise<number> {
   let deletedCount = 0;
 
   try {
-    // Get ALL keys from cache storage
+    // Obtener TODAS las claves del almacenamiento caché
     const allKeys = await storage.getKeys();
 
     console.log(`[CACHE] :: SCANNING      :: total keys: ${allKeys.length}`);
 
-    // Filter keys that match our project-related caches
+    // Filtrar claves que coinciden con nuestros cachés de proyecto
     const projectKeys = allKeys.filter(
       (key) =>
         CACHE_PREFIXES.some((prefix) => key.includes(prefix)) ||
@@ -53,7 +53,7 @@ export async function invalidateAllProjectCaches(): Promise<number> {
         key.includes("_projects")
     );
 
-    // Delete each matching key
+    // Eliminar cada clave coincidente
     for (const key of projectKeys) {
       await storage.removeItem(key);
       deletedCount++;

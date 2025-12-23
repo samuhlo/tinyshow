@@ -34,7 +34,7 @@ import type { Project } from "~~/shared/types";
 const expandedProject = ref<Project | null>(null);
 const expandedImageRect = ref<DOMRect | null>(null);
 
-// Ghost image for FLIP animation
+// Imagen fantasma para animación FLIP
 const ghostImageUrl = ref<string | null>(null);
 const ghostImageStyle = ref<Record<string, string>>({});
 const ghostVisible = ref(false);
@@ -53,7 +53,7 @@ const handleExpand = (project: Project, imageRect: DOMRect | null) => {
     return;
   }
   
-  // Setup ghost image for FLIP animation
+  // Configurar imagen fantasma para animación FLIP
   if (imageRect && project.img_url) {
     ghostImageUrl.value = project.img_url;
     ghostImageStyle.value = {
@@ -70,7 +70,7 @@ const handleExpand = (project: Project, imageRect: DOMRect | null) => {
     ghostVisible.value = true;
   }
   
-  // Expand new project
+  // Expandir nuevo proyecto
   expandedProject.value = project;
   expandedImageRect.value = imageRect;
 };
@@ -82,7 +82,7 @@ const handleExpand = (project: Project, imageRect: DOMRect | null) => {
 const animateGhostToDetail = async () => {
   await nextTick();
   
-  // Find the detail image element
+  // Encontrar el elemento de imagen de detalle
   const detailImage = document.querySelector('.project-detail-image');
   if (!detailImage || !ghostVisible.value) {
     ghostVisible.value = false;
@@ -91,14 +91,14 @@ const animateGhostToDetail = async () => {
   
   const targetRect = detailImage.getBoundingClientRect();
   
-  // Get the ghost element
+  // Obtener el elemento fantasma
   const ghostEl = document.querySelector('.ghost-image');
   if (!ghostEl) {
     ghostVisible.value = false;
     return;
   }
   
-  // Animate ghost to target position
+  // Animar fantasma a la posición destino
   gsap.to(ghostEl, {
     left: targetRect.left,
     top: targetRect.top,
@@ -145,7 +145,7 @@ const listRef = ref<HTMLElement | null>(null);
 const animateEntrance = (delay: number = 0) => {
   if (!listRef.value) return;
   
-  // Select all rows within the list
+  // Seleccionar todas las filas dentro de la lista
   const rows = listRef.value.querySelectorAll(".project-row-wrapper");
   
   if (rows.length === 0) return;
@@ -171,12 +171,12 @@ const animateEntrance = (delay: number = 0) => {
 // [SECTION] :: WATCHERS & LIFECYCLE
 // =====================================================================
 
-// Watch for store projects to trigger animation
+// Observar proyectos del store para disparar animación
 watch(
   () => showcaseStore.projects,
   async (newProjects) => {
     if (newProjects && newProjects.length > 0) {
-      expandedProject.value = null; // Reset expansion on new data
+      expandedProject.value = null; // Reiniciar expansión con nuevos datos
       await nextTick();
       animateEntrance();
     }
@@ -184,7 +184,7 @@ watch(
   { deep: true }
 );
 
-// Watch for tech changes to reset internal state if needed
+// Observar cambios de tecnología para reiniciar estado interno
 watch(
   () => showcaseStore.activeTech,
   () => {
@@ -193,7 +193,7 @@ watch(
   }
 );
 
-// Ensure animation runs on mount if data is already available
+// Asegurar que la animación corra al montar si ya hay datos
 onMounted(async () => {
   if (showcaseStore.projects.length > 0) {
     await nextTick();
@@ -204,7 +204,7 @@ onMounted(async () => {
 
 <template>
   <div ref="listRef" class="project-list w-full pt-60 pb-12"> 
-    <!-- Header -->
+    <!-- Cabecera -->
     <header class="mb-12 overflow-hidden">
       <h2 
         class="font-sans font-black uppercase tracking-tighter text-dark mb-4 text-5xl md:text-7xl"
@@ -215,26 +215,26 @@ onMounted(async () => {
       <div class="h-px bg-dark w-full"></div>
     </header>
 
-    <!-- Loading State -->
+    <!-- Estado de Carga -->
     <div v-if="showcaseStore.isProjectsLoading" class="py-12 flex justify-center">
       <UiLoadingSpinner size="md" color="dark" />
     </div>
 
-    <!-- Empty State -->
+    <!-- Estado Vacío -->
     <div v-else-if="!showcaseStore.projects || showcaseStore.projects.length === 0" class="py-12">
       <p class="text-mono-sm text-gray-400">
         // NO_PROJECTS_FOUND_FOR :: {{ showcaseStore.activeTech }}
       </p>
     </div>
 
-    <!-- List -->
+    <!-- Lista -->
     <div v-else class="flex flex-col">
       <div 
         v-for="(project, index) in showcaseStore.projects" 
         :key="project.id"
         class="project-row-wrapper opacity-0" 
       >
-        <!-- ProjectRow (hidden when expanded) -->
+        <!-- ProjectRow (oculto cuando expandido) -->
         <ProjectRow 
           v-if="expandedProject?.id !== project.id"
           :project="project" 
@@ -243,7 +243,7 @@ onMounted(async () => {
           @expand="handleExpand"
         />
         
-        <!-- Expanded ProjectDetail (replaces the row) -->
+        <!-- ProjectDetail Expandido (reemplaza la fila) -->
         <ProjectDetail
           v-else
           :project="expandedProject"
@@ -254,7 +254,7 @@ onMounted(async () => {
     </div>
   </div>
 
-  <!-- Ghost Image for FLIP animation (Teleported to body) -->
+  <!-- Imagen Fantasma para animación FLIP (Teleportado al body) -->
   <Teleport to="body">
     <div
       v-if="ghostVisible && ghostImageUrl"

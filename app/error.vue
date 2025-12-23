@@ -37,7 +37,7 @@ const buttonRef = ref<HTMLElement | null>(null)
 onMounted(() => {
   if (!containerRef.value) return
 
-  // Set initial state with GSAP (avoids CSS class conflicts)
+  // Establecer estado inicial con GSAP (evita conflictos de clase CSS)
   gsap.set([codeRef.value, messageRef.value, buttonRef.value], { opacity: 0 })
 
   const tl = gsap.timeline({
@@ -64,16 +64,16 @@ onMounted(() => {
 <template>
   <div ref="containerRef" class="min-h-screen w-full flex flex-col justify-center bg-light text-dark relative overflow-hidden">
     
-    <!-- Header (Simplified) -->
+    <!-- Cabecera (Simplificada) -->
     <header class="absolute top-0 left-0 w-full p-6 md:p-10 flex justify-between items-center z-50">
       <AppLogo />
       <LangSwitcher />
     </header>
     
-    <!-- Main Content -->
+    <!-- Contenido Principal -->
     <main class="grow flex flex-col items-center justify-center p-6 relative z-10">
       <div class="text-center max-w-2xl">
-        <!-- Error Code -->
+        <!-- Código de Error -->
         <h1 
           ref="codeRef" 
           class="font-display text-6xl leading-none tracking-tighter text-accent select-none mix-blend-multiply"
@@ -81,7 +81,7 @@ onMounted(() => {
           {{ error.statusCode }}
         </h1>
 
-        <!-- Error Message -->
+        <!-- Mensaje de Error -->
         <div ref="messageRef" class="space-y-6 mb-5">
           <h2 class="font-mono text-xl md:text-2xl uppercase tracking-widest border-y-2 border-dark py-4 inline-block">
             {{ error.message || 'Unknown Error' }}
@@ -93,7 +93,7 @@ onMounted(() => {
           </p>
         </div>
 
-        <!-- Action Button -->
+        <!-- Botón de Acción -->
         <div ref="buttonRef">
           <button 
             @click="handleError"
@@ -105,7 +105,7 @@ onMounted(() => {
       </div>
     </main>
 
-    <!-- Footer / Context -->
+    <!-- Pie / Contexto -->
     <footer class="w-full text-center pb-10 opacity-30 font-mono text-xs uppercase tracking-widest relative z-10">
       TinyShow System // Error Handler
     </footer>

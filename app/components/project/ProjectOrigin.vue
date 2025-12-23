@@ -32,7 +32,7 @@ const textSizeClass = computed(() =>
     <span class="text-light/50 mr-1">// ORIGIN :</span>
     
     <template v-if="origin">
-      <!-- Course Name -->
+      <!-- Nombre del Curso -->
       <a 
         v-if="origin.course_url" 
         :href="origin.course_url" 
@@ -47,7 +47,7 @@ const textSizeClass = computed(() =>
         {{ origin.name || 'Unknown Course' }}
       </span>
 
-      <!-- Author (Optional) -->
+      <!-- Autor (Opcional) -->
       <template v-if="origin.author">
         <span class="text-light/50 mx-1">by</span>
         
@@ -67,7 +67,7 @@ const textSizeClass = computed(() =>
       </template>
     </template>
     
-    <!-- Own Project Fallback -->
+    <!-- Fallback para Proyecto Propio -->
     <span v-else class="text-light/60">
       {{ locale === 'es' ? 'Pruebas Propias' : 'Own Experiments' }}
     </span>

@@ -18,11 +18,11 @@ import { PrismaPg } from "@prisma/adapter-pg";
 // =====================================================================
 
 /**
- * Get connection string from either Nuxt runtime config or process.env.
- * This allows the client to work both inside Nuxt server and in standalone scripts.
+ * Obtener cadena de conexión desde runtime config o process.env.
+ * Permite que el cliente funcione tanto en servidor Nuxt como en scripts independientes.
  */
 function getConnectionString(): string {
-  // Try Nuxt runtime config first (server context)
+  // Intentar Nuxt runtime config primero (contexto servidor)
   try {
     if (typeof useRuntimeConfig === "function") {
       const config = useRuntimeConfig();
@@ -31,10 +31,10 @@ function getConnectionString(): string {
       }
     }
   } catch {
-    // Not in Nuxt context, fall through to env vars
+    // No en contexto Nuxt, pasar a variables de entorno
   }
 
-  // Fallback to process.env for standalone scripts
+  // Fallback a process.env para scripts independientes
   const envUrl =
     process.env.NEON_DATABASE_URL || process.env.NUXT_NEON_DATABASE_URL;
   if (envUrl) {
@@ -48,7 +48,7 @@ function getConnectionString(): string {
 
 const connectionString = getConnectionString();
 
-// Neon requires SSL. Ensure it's enabled.
+// Neon requiere SSL. Asegurar que esté habilitado.
 const pool = new Pool({
   connectionString,
   ssl: true,

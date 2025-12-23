@@ -31,7 +31,7 @@ export const extractProjectData = async (
   readmeContent: string,
   repoUrl: string = ""
 ): Promise<Project> => {
-  // Support both Nuxt runtime config and direct process.env for scripts
+  // Soporta tanto configuración runtime de Nuxt como process.env directo para scripts
   const config =
     typeof useRuntimeConfig !== "undefined"
       ? useRuntimeConfig()
@@ -99,10 +99,10 @@ CRITICAL: Return ONLY valid JSON. No Markdown code fences.
     const content = completion.choices[0]?.message?.content;
     if (!content) throw new Error("Empty response from DeepSeek");
 
-    // Parse JSON
+    // Parsear JSON
     const rawData = JSON.parse(content);
 
-    // Validate with Zod
+    // Validar con Zod
     return ProjectSchema.parse(rawData);
   } catch (error) {
     console.error("[ERR]   :: DEEPSEEK_FAIL ::", error);

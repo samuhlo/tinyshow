@@ -21,7 +21,7 @@ import type { Project } from "~~/shared/types";
 // [SECTION] :: CONSTANTS
 // =====================================================================
 
-/** Cache TTL in milliseconds (30 minutes) */
+/** TTL de caché en milisegundos (30 minutos) */
 const CACHE_TTL_MS = 30 * 60 * 1000;
 
 export const useShowcaseStore = defineStore("showcase", () => {
@@ -31,55 +31,55 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [STATE] :: TECHNOLOGIES
-   * Available technologies for the main menu.
-   * Loaded once on store initialization.
+   * Tecnologías disponibles para el menú principal.
+   * Cargado una vez al inicializar el store.
    */
   const technologies = ref<string[]>([]);
 
   /**
    * [STATE] :: ALL_PROJECTS_CACHE
-   * Complete project dataset prefetched in background.
-   * "La nevera llena" - Source of truth for all project data.
+   * Dataset completo de proyectos precargado en segundo plano.
+   * "La nevera llena" - Fuente de verdad para todos los datos de proyectos.
    */
   const allProjectsCache = ref<Project[]>([]);
 
   /**
    * [STATE] :: PROJECTS (Reactive Filtered View)
-   * "Lo que servimos en la mesa" - Currently visible projects.
-   * Filtered by active technology.
+   * "Lo que servimos en la mesa" - Proyectos visibles actualmente.
+   * Filtrado por tecnología activa.
    */
   const projects = ref<Project[]>([]);
 
   /**
    * [STATE] :: ACTIVE_TECH
-   * Currently selected technology filter.
+   * Filtro de tecnología seleccionado actualmente.
    */
   const activeTech = ref<string | null>(null);
 
   /**
    * [STATE] :: VIEW_MODE
-   * Current layout mode: 'hero' (landing) or 'sidebar' (navigation).
+   * Modo de diseño actual: 'hero' (landing) o 'sidebar' (navegación).
    */
   const viewMode = ref<"hero" | "sidebar">("hero");
 
   /**
    * [STATE] :: LOADING_FLAGS
-   * Track async operations for UI feedback.
+   * Rastrea operaciones asíncronas para feedback de UI.
    */
   const isTechLoading = ref(false);
   const isProjectsLoading = ref(false);
 
   /**
    * [STATE] :: LOADED_IMAGES
-   * Track which image URLs have been successfully loaded.
-   * Prevents showing spinner for images already in browser cache.
+   * Rastrea qué URLs de imagen han sido cargadas exitosamente.
+   * Previene mostrar spinner para imágenes ya en caché del navegador.
    */
   const loadedImages = ref<Set<string>>(new Set());
 
   /**
    * [STATE] :: LAST_FETCH_TIMESTAMP
-   * Timestamp of last successful data fetch.
-   * Used to validate cache TTL.
+   * Timestamp del último fetch de datos exitoso.
+   * Usado para validar TTL de caché.
    */
   const lastFetchTimestamp = ref<number | null>(null);
 
@@ -89,18 +89,18 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [UTIL] :: IS_CACHE_VALID
-   * Checks if the cached data is still valid based on TTL.
+   * Comprueba si los datos en caché siguen siendo válidos según el TTL.
    *
-   * @returns True if cache is valid and data exists, false otherwise.
+   * @returns Verdadero si la caché es válida y existen datos, falso en c.c.
    */
   const isCacheValid = (): boolean => {
-    // No timestamp = never fetched
+    // Sin timestamp = nunca obtenido
     if (!lastFetchTimestamp.value) return false;
 
-    // No data = cache is empty
+    // Sin datos = caché vacía
     if (technologies.value.length === 0) return false;
 
-    // Check if TTL has expired
+    // Verificar si TTL ha expirado
     const elapsed = Date.now() - lastFetchTimestamp.value;
     return elapsed < CACHE_TTL_MS;
   };
@@ -111,14 +111,14 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [ACTION] :: INIT
-   * Initializes the store with a two-phase loading strategy:
-   * 1. Await technologies (required for UI rendering).
-   * 2. Trigger background prefetch (fire-and-forget, client-only).
+   * Inicializa el store con una estrategia de carga en dos fases:
+   * 1. Esperar tecnologías (requerido para render UI).
+   * 2. Disparar prefetch en segundo plano (fire-and-forget, solo cliente).
    *
-   * @performance Phase 2 runs async without blocking the UI.
+   * @performance La Fase 2 corre asíncronamente sin bloquear la UI.
    */
   const init = async () => {
-    // FAST PATH: Skip fetch if cache is still valid
+    // RUTA RÁPIDA: Omitir fetch si caché sigue válida
     if (isCacheValid()) {
       console.log("[ShowcaseStore] Cache valid, skipping fetch");
       return;
@@ -127,20 +127,20 @@ export const useShowcaseStore = defineStore("showcase", () => {
     isTechLoading.value = true;
 
     try {
-      // PHASE 1: Load technologies
-      // useFetch is fine here because we need reactivity and context
+      // FASE 1: Cargar tecnologías
+      // useFetch está bien aquí porque necesitamos reactividad y contexto
       const { data } = await useFetch<string[]>("/api/projects/techs");
       if (data.value) {
         technologies.value = data.value;
-        // Update timestamp on successful fetch
+        // Actualizar timestamp al obtener fetch exitoso
         lastFetchTimestamp.value = Date.now();
       }
 
-      // PHASE 2: Prefetch projects in background (non-blocking)
-      // CRITICAL: Only run on CLIENT to avoid SSR issues
-      // Server's job is to deliver fast HTML, not to prefetch future data
-      // ALSO check if cache is empty - this handles case where SSR loaded techs
-      // but client needs to still prefetch projects
+      // FASE 2: Projectos prefetch en segundo plano (no bloqueante)
+      // CRÍTICO: Solo ejecutar en CLIENTE para evitar problemas SSR
+      // El trabajo del servidor es entregar HTML rápido, no precargar datos futuros
+      // TAMBIÉN verificar si caché está vacía - maneja caso donde SSR cargó techs
+      // pero cliente necesita prefetch proyectos
       if (import.meta.client && allProjectsCache.value.length === 0) {
         prefetchAllProjects();
       }
@@ -157,16 +157,16 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [ACTION] :: PREFETCH_ALL_PROJECTS
-   * Background task that loads the complete project dataset.
-   * Uses $fetch (pure data, no Vue context needed).
+   * Tarea en segundo plano que carga el dataset completo de proyectos.
+   * Usa $fetch (datos puros, sin necesidad de contexto Vue).
    *
-   * @strategy Fire-and-forget. No await in caller.
-   * @side_effect Populates `allProjectsCache` + preloads images.
+   * @strategy Fire-and-forget. Sin await en el invocador.
+   * @side_effect Puebla `allProjectsCache` + precarga imágenes.
    */
   const prefetchAllProjects = async () => {
     try {
-      // CRITICAL: Use $fetch, not useFetch
-      // $fetch returns raw data, doesn't need Vue context
+      // CRÍTICO: Usar $fetch, no useFetch
+      // $fetch devuelve datos crudos, no necesita contexto Vue
       const data = await $fetch<Project[]>("/api/projects", {
         query: { limit: 100 },
       });
@@ -174,26 +174,26 @@ export const useShowcaseStore = defineStore("showcase", () => {
       if (data) {
         allProjectsCache.value = data;
 
-        // Preload images into browser cache
-        // Safe to call here since we're already inside import.meta.client check
+        // Precargar imágenes en caché del navegador
+        // Seguro de llamar aquí ya que estamos dentro de import.meta.client check
         preloadImages(data);
       }
     } catch (e) {
-      // Silent fail - don't interrupt user experience
+      // Fallo silencioso - no interrumpir experiencia de usuario
       console.warn("[ShowcaseStore] Background prefetch failed:", e);
     }
   };
 
   /**
    * [UTIL] :: PRELOAD_IMAGES
-   * Forces browser to cache project images by creating Image objects.
-   * Only runs on client side (Image API not available on server).
+   * Fuerza al navegador a cachear imágenes de proyecto creando objetos Image.
+   * Solo corre en cliente (API Image no disponible en servidor).
    *
-   * @param projectList - Projects whose images should be preloaded.
-   * @performance Eliminates loading delays when switching technologies.
+   * @param projectList - Proyectos cuyas imágenes deben ser precargadas.
+   * @performance Elimina retrasos de carga al cambiar tecnologías.
    */
   const preloadImages = (projectList: Project[]) => {
-    // Double-check we're on client (defensive programming)
+    // Doble verificación de que estamos en cliente (programación defensiva)
     if (!import.meta.client) return;
 
     projectList.forEach((project) => {
@@ -201,12 +201,12 @@ export const useShowcaseStore = defineStore("showcase", () => {
         const img = new Image();
         img.src = project.img_url;
 
-        // Mark as loaded when complete
+        // Marcar como cargado al completar
         img.onload = () => {
           loadedImages.value.add(project.img_url!);
         };
 
-        // Also mark if already cached (immediate load)
+        // También marcar si ya está en caché (carga inmediata)
         if (img.complete) {
           loadedImages.value.add(project.img_url);
         }
@@ -216,11 +216,11 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [UTIL] :: IS_IMAGE_LOADED
-   * Checks if an image URL has been successfully loaded before.
-   * Used by components to skip showing loading spinners.
+   * Comprueba si una URL de imagen ha sido cargada exitosamente antes.
+   * Usado por componentes para saltar mostrar spinners de carga.
    *
-   * @param url - Image URL to check.
-   * @returns True if image is in cache, false otherwise.
+   * @param url - URL de imagen a comprobar.
+   * @returns Verdadero si imagen está en caché, falso en c.c.
    */
   const isImageLoaded = (url: string | null | undefined): boolean => {
     if (!url) return false;
@@ -229,10 +229,10 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [UTIL] :: MARK_IMAGE_LOADED
-   * Manually mark an image URL as loaded.
-   * Called by components after successful image load.
+   * Marca manualmente una URL de imagen como cargada.
+   * Llamado por componentes tras carga exitosa de imagen.
    *
-   * @param url - Image URL to mark as loaded.
+   * @param url - URL de imagen a marcar como cargada.
    */
   const markImageLoaded = (url: string) => {
     loadedImages.value.add(url);
@@ -244,37 +244,37 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [ACTION] :: SELECT_TECH
-   * Selects a technology and filters projects.
-   * Uses cache if available for instant navigation.
+   * Selecciona una tecnología y filtra proyectos.
+   * Usa caché si está disponible para navegación instantánea.
    *
-   * @param tech - Technology identifier to filter by.
-   * @performance Instant if cache is ready, fallback to API if not.
+   * @param tech - Identificador de tecnología a filtrar.
+   * @performance Instantáneo si caché está lista, fallback a API si no.
    */
   const selectTech = async (tech: string) => {
     activeTech.value = tech;
 
-    // Auto-switch to sidebar view
+    // Cambio automático a vista sidebar
     if (viewMode.value === "hero") {
       viewMode.value = "sidebar";
     }
 
-    // Strategy: Use cache if available (instant), fetch if not
+    // Estrategia: Usar caché si está disponible (instantaneo), fetch si no
     if (allProjectsCache.value.length > 0) {
-      // Filter from cache - instant navigation
+      // Filtrar desde caché - navegación instantánea
       projects.value = allProjectsCache.value.filter(
         (p) => p.primary_tech === tech
       );
     } else {
-      // Fallback: User clicked before prefetch finished
+      // Fallback: Usuario hizo click antes de terminar prefetch,
       await fetchProjects(tech);
     }
   };
 
   /**
    * [ACTION] :: SET_VIEW_MODE
-   * Manually switches between hero and sidebar layouts.
+   * Cambia manualmente entre diseños hero y sidebar.
    *
-   * @param mode - Target view mode.
+   * @param mode - Modo de vista objetivo.
    */
   const setViewMode = (mode: "hero" | "sidebar") => {
     viewMode.value = mode;
@@ -286,16 +286,16 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [ACTION] :: FETCH_PROJECTS (Fallback)
-   * Direct API fetch for projects by technology.
-   * Used when user is faster than background prefetch.
+   * Fetch directo a API para proyectos por tecnología.
+   * Usado cuando el usuario es más rápido que el prefetch en segundo plano.
    *
-   * @param tech - Technology to fetch projects for.
+   * @param tech - Tecnología para la que buscar proyectos.
    */
   const fetchProjects = async (tech: string) => {
     isProjectsLoading.value = true;
 
     try {
-      // Use $fetch instead of useFetch - can be called after component mount
+      // Usar $fetch en lugar de useFetch - se puede llamar tras montar componente
       const data = await $fetch<Project[]>("/api/projects", {
         query: {
           primary_tech: tech,
@@ -322,8 +322,8 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [ACTION] :: INVALIDATE_CACHE
-   * Forces cache invalidation. Used when webhook updates occur.
-   * Next init() call will fetch fresh data.
+   * Fuerza la invalidación de caché. Usado cuando ocurren actualizaciones por webhook.
+   * La siguiente llamada a init() obtendrá datos frescos.
    */
   const invalidateCache = () => {
     lastFetchTimestamp.value = null;
@@ -338,7 +338,7 @@ export const useShowcaseStore = defineStore("showcase", () => {
   // =====================================================================
 
   return {
-    // State (Read-only for components)
+    // Estado (Solo lectura para componentes)
     technologies,
     projects,
     activeTech,
@@ -346,13 +346,13 @@ export const useShowcaseStore = defineStore("showcase", () => {
     isTechLoading,
     isProjectsLoading,
 
-    // Actions (Public API)
+    // Acciones (API pública)
     init,
     selectTech,
     setViewMode,
     invalidateCache,
 
-    // Image tracking utilities
+    // Utilidades de rastreo de imágenes
     isImageLoaded,
     markImageLoaded,
   };

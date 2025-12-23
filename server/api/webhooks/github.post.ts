@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
       statusMessage: "Missing signature or body",
     });
   } else {
-    // Verify HMAC
+    // Verificar HMAC
     const hmac = crypto.createHmac(HASH_ALGO, WEBHOOK_SECRET);
     const digest = `${HASH_ALGO}=` + hmac.update(body).digest("hex");
     if (signature !== digest) {
@@ -100,7 +100,7 @@ export default defineEventHandler(async (event) => {
     const changes = [...commit.added, ...commit.modified];
     if (changes.some((file: string) => file === README_FILE)) {
       readmeChanged = true;
-      break; // One change is enough
+      break; // Un cambio es suficiente
     }
   }
 
@@ -117,7 +117,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const owner = repo.owner.name || repo.owner.login; // GitHub payload can vary
+  const owner = repo.owner.name || repo.owner.login; // Payload de GitHub puede variar
   const repoName = repo.name;
   const branch = payload.ref.replace(REF_PREFIX, "");
 
@@ -125,10 +125,10 @@ export default defineEventHandler(async (event) => {
     `[HOOK]  :: TRIGGER_REC   :: source: ${owner}/${repoName} | branch: ${branch}`
   );
 
-  // Instantiate Octokit
+  // Instanciar Octokit
   const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-  // Ingest and get result with action
+  // Ingerir y obtener resultado con acción
   const result: IngestResult = await ingestProject(
     owner,
     repoName,

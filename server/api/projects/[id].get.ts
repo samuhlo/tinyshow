@@ -16,7 +16,7 @@ import { prisma } from "../../utils/prisma";
 // =====================================================================
 
 const PARAM_ID = "id";
-const CACHE_MAX_AGE = 60 * 60; // 1 hour
+const CACHE_MAX_AGE = 60 * 60; // 1 hora
 const NO_CACHE = 0;
 
 const HTTP_BAD_REQUEST = 400;
@@ -50,7 +50,7 @@ export default defineCachedEventHandler(
 
       return project;
     } catch (error: any) {
-      // If it's already an H3 error, rethrow it
+      // Si ya es un error H3, relanzarlo
       if (error.statusCode) throw error;
 
       console.error(`[API] :: projects/${id} :: Error fetching project`, error);
@@ -62,8 +62,8 @@ export default defineCachedEventHandler(
     }
   },
   {
-    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hour in prod, 0 in dev
-    swr: !import.meta.dev, // Disable SWR in dev
+    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hora en prod, 0 en dev
+    swr: !import.meta.dev, // Deshabilitar SWR en dev
     name: "project-detail",
     getKey: (event) => {
       const id = getRouterParam(event, PARAM_ID);

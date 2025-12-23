@@ -29,14 +29,14 @@ const props = defineProps<Props>();
 
 const { locale } = useI18n();
 
-// Container ref for measuring
+// Referencia del contenedor para mediciones
 const containerRef = ref<HTMLElement | null>(null);
 const containerHeight = ref(0);
 
-// Image loading state
+// Estado de carga de imagen
 const isImageLoading = ref(true);
 
-// Reset loading state when project changes
+// Reiniciar estado de carga cuando cambia el proyecto
 watch(() => props.project.id, () => {
   isImageLoading.value = true;
 });
@@ -103,6 +103,7 @@ const dynamicStyles = computed(() => {
 
 /**
  * [COMPUTED] :: LOCALIZED_TAGLINE
+ * Obtiene el tagline traducido según el idioma actual.
  */
 const localizedTagline = computed(() => {
   const tag = props.project.tagline;
@@ -112,6 +113,7 @@ const localizedTagline = computed(() => {
 
 /**
  * [COMPUTED] :: LOCALIZED_DESCRIPTION
+ * Obtiene la descripción traducida según el idioma actual.
  */
 const localizedDescription = computed(() => {
   const desc = props.project.description;
@@ -125,7 +127,7 @@ const localizedDescription = computed(() => {
  */
 const truncatedDescription = computed(() => {
   const desc = localizedDescription.value;
-  const maxChars = dynamicStyles.value.descriptionLines * 50; // ~50 chars per line
+  const maxChars = dynamicStyles.value.descriptionLines * 50; // ~50 caracteres por línea
   if (desc.length <= maxChars) return desc;
   return desc.slice(0, maxChars).trim() + "...";
 });
@@ -143,7 +145,7 @@ onMounted(() => {
     containerHeight.value = containerRef.value.clientHeight;
   }
   
-  // Re-measure on resize
+  // Re-medir al redimensionar
   if (import.meta.client) {
     window.addEventListener('resize', measureContainer);
   }
@@ -161,7 +163,7 @@ const measureContainer = () => {
   }
 };
 
-// Watch for container changes
+// Observar cambios en el contenedor
 watch(containerRef, () => {
   nextTick(() => {
     measureContainer();
@@ -170,17 +172,17 @@ watch(containerRef, () => {
 </script>
 
 <template>
-  <!-- RESPONSIVE CONTAINER - fills available space, measures itself -->
+  <!-- CONTENEDOR RESPONSIVE - llena espacio, se mide a sí mismo -->
   <div 
     ref="containerRef"
     class="mobile-project-detail bg-dark overflow-hidden h-full flex flex-col "
   >
-    <!-- Image Section (dynamic height) -->
+    <!-- Sección de Imagen (altura dinámica) -->
     <div 
       class="relative overflow-hidden shrink-0 p-3"
       :style="{ height: dynamicStyles.imageHeight }"
     >
-      <!-- Loading Spinner (shows while image loads) -->
+      <!-- Spinner de Carga (visible mientras carga imagen) -->
       <div 
         v-if="isImageLoading && project.img_url"
         class="absolute inset-0 flex items-center justify-center bg-dark/80 z-10"
@@ -188,7 +190,7 @@ watch(containerRef, () => {
         <UiLoadingSpinner size="sm" color="light" />
       </div>
       
-      <!-- Image -->
+      <!-- Imagen -->
       <nuxt-img
         v-if="project.img_url"
         :src="project.img_url"
@@ -200,16 +202,16 @@ watch(containerRef, () => {
       <div v-else class="w-full h-full flex items-center justify-center bg-dark/50">
         <span class="text-mono-xs text-light/30">// NO_PREVIEW</span>
       </div>
-      <!-- Subtle overlay -->
+      <!-- Capa sutil -->
       <div class="absolute inset-0 bg-dark opacity-[0.05] pointer-events-none"></div>
     </div>
 
-    <!-- Content Section (dynamic padding, flex to push buttons down) -->
+    <!-- Sección de Contenido (padding dinámico, flex para empujar botones) -->
     <div 
       class="flex-1 overflow-y-auto flex flex-col"
       :style="{ padding: dynamicStyles.contentPadding }"
     >
-      <!-- Title + Subtitle -->
+      <!-- Título + Subtítulo -->
       <div class="mb-1">
         <h3 
           class="font-display uppercase tracking-tight text-light leading-none"
@@ -225,7 +227,7 @@ watch(containerRef, () => {
         </p>
       </div>
 
-      <!-- Description (dynamic size and clipping) -->
+      <!-- Descripción (tamaño dinámico y recorte) -->
       <p 
         class="font-mono text-light/70 leading-snug my-2"
         :style="{ 
@@ -239,7 +241,7 @@ watch(containerRef, () => {
         {{ truncatedDescription }}
       </p>
 
-      <!-- Tech Pills (dynamic size) -->
+      <!-- Pills de Tecnología (tamaño dinámico) -->
       <div class="flex flex-wrap gap-1 my-2">
         <span
           v-for="tech in project.tech_stack?.slice(0, 3)"
@@ -258,7 +260,7 @@ watch(containerRef, () => {
         </span>
       </div>
 
-      <!-- Origin Info (full, with links, dynamic size) -->
+      <!-- Info de Origen (completo, con enlaces, tamaño dinámico) -->
       <div :style="{ fontSize: dynamicStyles.originSize }">
         <ProjectOrigin
           :origin="project.origin as OriginType"
@@ -266,10 +268,10 @@ watch(containerRef, () => {
         />
       </div>
 
-      <!-- Spacer to push buttons to bottom -->
+      <!-- Espaciador para empujar botones al fondo -->
       <div class="flex-1"></div>
 
-      <!-- Action Links (always at bottom) -->
+      <!-- Enlaces de Acción (siempre al fondo) -->
       <div class="flex items-center gap-4 justify-end pt-2">
         <UiActionLink
           v-if="project.repo_url"
