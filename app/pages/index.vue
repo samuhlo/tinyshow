@@ -79,7 +79,7 @@ const handleSelect = (tech: string) => {
         :class="[
           showcaseStore.viewMode === 'hero'
             ? 'w-full flex justify-center'
-            : 'md:col-span-3 lg:col-span-2 pt-0'
+            : 'md:col-span-3 lg:col-span-2 pt-0 md:sticky md:top-36 md:self-start'
         ]"
       >
         <!-- Loading State -->
@@ -99,7 +99,11 @@ const handleSelect = (tech: string) => {
       <!-- Content Area (Only visible in sidebar mode) -->
       <section
         v-if="showcaseStore.viewMode === 'sidebar'"
-        class="md:col-start-5 md:col-span-8 lg:col-start-5 lg:col-span-8 pt-0"
+        :class="[
+          uiStore.isMobile 
+            ? 'w-full' 
+            : 'md:col-start-5 md:col-span-8 lg:col-start-5 lg:col-span-8 pt-0'
+        ]"
       >
         <ClientOnly>
           <MobileProjectList v-if="uiStore.isMobile" />
