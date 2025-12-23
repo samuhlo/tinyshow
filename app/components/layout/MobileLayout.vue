@@ -42,7 +42,7 @@ onMounted(() => {
     // Desvanecer spinner
     gsap.to('.intro-spinner', {
       opacity: 0,
-      duration: 0.5,
+      duration: 0.2,
       onComplete: () => {
         // Asegurar estado estrictamente fresco para la animación
         uiStore.setLogoAnimated(false);
@@ -55,7 +55,7 @@ onMounted(() => {
         });
       }
     });
-  }, 1000); // Espera de carga inicial
+  }, 0); // Espera de carga inicial
 });
 
 const animateLogoEntry = () => {
@@ -68,7 +68,7 @@ const animateLogoEntry = () => {
   )
   // 3. Esperar al Slot Machine
   // [AJUSTE] Cambiar duración aquí para controlar cuánto espera antes de moverse
-  .to({}, { duration: 0.3 }) 
+  .to({}, { duration: 0.1 }) 
   
   // 4. Mover al Header
   .call(() => {
