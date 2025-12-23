@@ -33,7 +33,7 @@ withDefaults(defineProps<Props>(), {
     :class="[
       theme === THEME_LIGHT
         ? 'border-dark text-dark'
-        : 'border-white text-white',
+        : 'border-light text-light',
     ]"
   >
     {{ text }}

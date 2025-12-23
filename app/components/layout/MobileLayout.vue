@@ -14,6 +14,7 @@ import gsap from 'gsap';
 import AppLogo from '~/components/ui/AppLogo.vue';
 import LoadingSpinner from '~/components/ui/LoadingSpinner.vue';
 import LangSwitcher from '~/components/ui/LangSwitcher.vue';
+import ThemeSwitcher from '~/components/ui/ThemeSwitcher.vue';
 import { useUiStore } from '~/stores/useUiStore';
 
 // =====================================================================
@@ -151,7 +152,8 @@ const revealContent = () => {
          </div>
 
          <!-- Selector de Idioma -->
-         <div class="header-actions opacity-0">
+         <div class="header-actions opacity-0 flex items-center gap-4">
+           <ThemeSwitcher />
            <LangSwitcher />
          </div>
       </div>

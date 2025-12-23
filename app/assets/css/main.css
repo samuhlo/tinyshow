@@ -20,6 +20,17 @@
 }
 
 :root {
+  --color-dark: #141414;
+  --color-light: #f8f8f8;
+  --color-accent: #f95c4b;
+}
+
+:root.dark {
+  --color-dark: #f8f8f8;
+  --color-light: #141414;
+}
+
+:root {
   font-family: var(--font-mono);
   background-color: var(--color-light);
   color: var(--color-dark);
@@ -28,4 +39,8 @@
 ::selection {
   background-color: var(--color-accent);
   color: white;
+}
+
+img {
+  filter: brightness(0.85);
 }

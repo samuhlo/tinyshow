@@ -38,10 +38,10 @@ const textSizeClass = computed(() =>
         :href="origin.course_url" 
         target="_blank" 
         rel="noopener noreferrer"
-        class="group relative cursor-pointer text-light/60 transition-colors duration-200 hover:text-white"
+        class="group relative cursor-pointer text-light/60 transition-colors duration-200 hover:text-light"
       >
         {{ origin.name || 'Unknown Course' }}
-        <span class="absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-white transition-transform duration-300 ease-out group-hover:origin-left group-hover:scale-x-100" />
+        <span class="absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-light transition-transform duration-300 ease-out group-hover:origin-left group-hover:scale-x-100" />
       </a>
       <span v-else class="text-light/60">
         {{ origin.name || 'Unknown Course' }}
@@ -56,10 +56,10 @@ const textSizeClass = computed(() =>
           :href="origin.author_url" 
           target="_blank" 
           rel="noopener noreferrer"
-          class="group relative cursor-pointer text-light/60 transition-colors duration-200 hover:text-white"
+          class="group relative cursor-pointer text-light/60 transition-colors duration-200 hover:text-light"
         >
           {{ origin.author }}
-          <span class="absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-white transition-transform duration-300 ease-out group-hover:origin-left group-hover:scale-x-100" />
+          <span class="absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-light transition-transform duration-300 ease-out group-hover:origin-left group-hover:scale-x-100" />
         </a>
         <span v-else class="text-light/60">
           {{ origin.author }}

@@ -15,13 +15,17 @@
 // [SECTION] :: COMPOSABLES
 // =====================================================================
 
+import { useTheme } from "~/composables/useTheme";
+
 /** Intercambio dinámico del título de la pestaña. */
 useTitleSwap()
 
 const uiStore = useUiStore()
+const { initTheme } = useTheme()
 
 onMounted(() => {
   uiStore.checkDevice()
+  initTheme()
 })
 
 // =====================================================================

@@ -33,17 +33,19 @@ const toggleLocale = () => {
 <template>
   <button
     @click="toggleLocale"
-    class="font-sans text-sm uppercase tracking-widest group cursor-pointer"
+    class="font-sans text-sm uppercase tracking-widest group cursor-pointer flex items-center gap-2"
     aria-label="Toggle Language"
   >
     <span
-      class="inline-block hover:scale-110 hover:text-accent transition-all duration-300"
-      :class="{ 'font-extrabold text-accent': locale === LOCALE_ES }"
+      class="transition-all duration-300 transform"
+      :class="locale !== LOCALE_ES ? 'scale-75' : 'text-accent scale-110 font-bold'"
     >ES</span>
-    <span class="mx-1 ">//</span>
+    
+    <span>//</span>
+    
     <span
-      class="inline-block hover:scale-110 hover:text-accent transition-all duration-300"
-      :class="{ 'font-extrabold text-accent': locale === LOCALE_EN }"
+      class="transition-all duration-300 transform"
+      :class="locale !== LOCALE_EN ? 'scale-75' : 'text-accent scale-110 font-bold'"
     >EN</span>
   </button>
 </template>
