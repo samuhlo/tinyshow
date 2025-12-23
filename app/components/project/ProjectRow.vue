@@ -311,7 +311,7 @@ onUnmounted(() => {
     <div
       v-if="isHovering && project.img_url"
       ref="imageRef"
-      class="fixed z-9999 lg:w-105 lg:h-55 md:w-80 md:h-40 xs:w-64 xs:h-40 rounded-xl overflow-hidden pointer-events-none"
+      class="fixed z-9999 lg:w-105 lg:h-55 md:w-80 md:h-40 xs:w-64 xs:h-40  overflow-hidden pointer-events-none"
       :class="{ 'shadow-2xl': !imageLoading }"
       :style="{
         left: `${imagePosition.x}px`,

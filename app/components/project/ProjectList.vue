@@ -17,11 +17,11 @@ import ProjectDetail from "./ProjectDetail.vue";
 const ANIM_DURATION_WAVE = 0.8;
 const ANIM_STAGGER_WAVE = 0.1;
 const ANIM_INITIAL_Y_OFFSET = 50;
-const ANIM_DELAY = 0;
+
 const ANIM_EASE_OUT = "power3.out";
 
 const FLIP_SYNC_DELAY = 0.3;
-const LOADING_TEXT = "LOADING_DATA...";
+
 
 const showcaseStore = useShowcaseStore();
 
@@ -64,7 +64,6 @@ const handleExpand = (project: Project, imageRect: DOMRect | null) => {
       height: `${imageRect.height}px`,
       zIndex: '9999',
       pointerEvents: 'none',
-      borderRadius: '0.75rem',
       overflow: 'hidden',
     };
     ghostVisible.value = true;

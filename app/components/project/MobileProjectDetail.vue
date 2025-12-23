@@ -112,13 +112,13 @@ const localizedDescription = computed(() => {
         <span
           v-for="tech in project.tech_stack?.slice(0, 3)"
           :key="tech"
-          class="font-mono text-light/80 border border-light/30 rounded px-1.5 py-0.5 size-pill"
+          class="font-mono text-light/80 border border-light  px-1.5 py-0.5 size-pill"
         >
           {{ tech }}
         </span>
         <span
           v-if="project.tech_stack && project.tech_stack.length > 3"
-          class="font-mono text-light/40 px-1 size-pill"
+          class="font-mono text-light/60 px-1 size-pill"
         >
           +{{ project.tech_stack.length - 3 }}
         </span>

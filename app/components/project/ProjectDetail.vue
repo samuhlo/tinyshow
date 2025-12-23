@@ -225,7 +225,7 @@ onMounted(() => {
       />
 
       <!-- Sección de Imagen -->
-      <div class="project-detail-image relative aspect-video overflow-hidden rounded-lg">
+      <div class="project-detail-image relative aspect-video overflow-hidden">
         <div v-if="project.img_url" ref="imageRef" class="w-full h-full">
           <nuxt-img :src="project.img_url" :alt="project.title" class="w-full h-full object-cover" />
           <!-- Capa oscura para uniformidad -->

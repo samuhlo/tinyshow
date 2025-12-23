@@ -29,7 +29,7 @@ const textSizeClass = computed(() =>
 
 <template>
   <div :class="['font-mono opacity-60 flex flex-wrap gap-1', textSizeClass]">
-    <span class="text-light/50 mr-1">// ORIGIN :</span>
+    <span class="text-light/60 mr-1">// ORIGIN :</span>
     
     <template v-if="origin">
       <!-- Nombre del Curso -->
@@ -38,7 +38,7 @@ const textSizeClass = computed(() =>
         :href="origin.course_url" 
         target="_blank" 
         rel="noopener noreferrer"
-        class="group relative cursor-pointer text-light/60 transition-colors duration-200 hover:text-light"
+        class="group relative cursor-pointer text-light/80 transition-colors duration-200 hover:text-light"
       >
         {{ origin.name || 'Unknown Course' }}
         <span class="absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-light transition-transform duration-300 ease-out group-hover:origin-left group-hover:scale-x-100" />
@@ -49,19 +49,19 @@ const textSizeClass = computed(() =>
 
       <!-- Autor (Opcional) -->
       <template v-if="origin.author">
-        <span class="text-light/50 mx-1">by</span>
+        <span class="text-light/60 mx-1">by</span>
         
         <a 
           v-if="origin.author_url" 
           :href="origin.author_url" 
           target="_blank" 
           rel="noopener noreferrer"
-          class="group relative cursor-pointer text-light/60 transition-colors duration-200 hover:text-light"
+          class="group relative cursor-pointer text-light/80 transition-colors duration-200 hover:text-light"
         >
           {{ origin.author }}
           <span class="absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-light transition-transform duration-300 ease-out group-hover:origin-left group-hover:scale-x-100" />
         </a>
-        <span v-else class="text-light/60">
+        <span v-else class="text-light/80">
           {{ origin.author }}
         </span>
       </template>
