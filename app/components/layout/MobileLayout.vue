@@ -119,7 +119,7 @@ const revealContent = () => {
 </script>
 
 <template>
-  <div class="h-screen bg-light text-dark font-mono relative flex flex-col overflow-hidden">
+  <div class="h-dvh bg-light text-dark font-mono relative flex flex-col overflow-hidden">
     
     <!-- [OVERLAY] :: INTRO SPINNER & LOGO -->
     <div v-if="introPhase !== 'complete'" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none bg-light">
@@ -142,7 +142,7 @@ const revealContent = () => {
     <!-- [LAYOUT] :: HEADER -->
     <header 
       ref="headerRef"
-      class="p-4 border-b border-transparent transition-colors duration-500 relative z-40 shrink-0"
+      class="p-4 pb-0 border-b border-transparent transition-colors duration-500 relative z-40 shrink-0"
     >
       <div class="flex items-center justify-between min-h-12"> <!-- min-h ensures consistent height -->
          <!-- Header Logo Placeholder (Final Destination) -->
@@ -160,7 +160,7 @@ const revealContent = () => {
     <!-- [LAYOUT] :: CONTENT -->
     <main 
       ref="contentRef"
-      class="w-full flex-1 p-4 pb-32 opacity-0 overflow-y-auto"
+      class="w-full flex-1 min-h-0 p-4 pt-0 opacity-0 overflow-hidden"
     >
       <slot />
     </main>

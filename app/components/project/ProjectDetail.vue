@@ -58,6 +58,16 @@ const { locale } = useI18n();
 // =====================================================================
 
 /**
+ * [COMPUTED] :: LOCALIZED_TAGLINE
+ * Obtiene el tagline en el idioma actual.
+ */
+const localizedTagline = computed(() => {
+  const tag = props.project.tagline;
+  if (!tag) return "";
+  return tag[locale.value as keyof LocalizedTextType] || tag.en || "";
+});
+
+/**
  * [COMPUTED] :: LOCALIZED_DESCRIPTION
  * Obtiene la descripción en el idioma actual.
  */
@@ -236,9 +246,9 @@ onMounted(() => {
             {{ project.title }}
           </h3>
 
-          <!-- Subtitle -->
+          <!-- Subtitle (Tagline) -->
           <p class="content-item text-mono-xs text-light/60 mb-7">
-            {{ project.primary_tech }} + GSAP Showcase
+            {{ localizedTagline }}
           </p>
 
           <!-- Description -->

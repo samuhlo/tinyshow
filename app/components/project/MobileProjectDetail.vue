@@ -33,6 +33,14 @@ const { locale } = useI18n();
 const containerRef = ref<HTMLElement | null>(null);
 const containerHeight = ref(0);
 
+// Image loading state
+const isImageLoading = ref(true);
+
+// Reset loading state when project changes
+watch(() => props.project.id, () => {
+  isImageLoading.value = true;
+});
+
 // =====================================================================
 // [SECTION] :: DYNAMIC SIZING
 // =====================================================================
@@ -92,6 +100,15 @@ const dynamicStyles = computed(() => {
 // =====================================================================
 // [SECTION] :: COMPUTED TEXT
 // =====================================================================
+
+/**
+ * [COMPUTED] :: LOCALIZED_TAGLINE
+ */
+const localizedTagline = computed(() => {
+  const tag = props.project.tagline;
+  if (!tag) return "";
+  return tag[locale.value as keyof LocalizedTextType] || tag.en || "";
+});
 
 /**
  * [COMPUTED] :: LOCALIZED_DESCRIPTION
@@ -156,18 +173,29 @@ watch(containerRef, () => {
   <!-- RESPONSIVE CONTAINER - fills available space, measures itself -->
   <div 
     ref="containerRef"
-    class="mobile-project-detail bg-dark overflow-hidden h-full flex flex-col"
+    class="mobile-project-detail bg-dark overflow-hidden h-full flex flex-col "
   >
     <!-- Image Section (dynamic height) -->
     <div 
-      class="relative overflow-hidden shrink-0"
+      class="relative overflow-hidden shrink-0 p-3"
       :style="{ height: dynamicStyles.imageHeight }"
     >
+      <!-- Loading Spinner (shows while image loads) -->
+      <div 
+        v-if="isImageLoading && project.img_url"
+        class="absolute inset-0 flex items-center justify-center bg-dark/80 z-10"
+      >
+        <UiLoadingSpinner size="sm" color="light" />
+      </div>
+      
+      <!-- Image -->
       <nuxt-img
         v-if="project.img_url"
         :src="project.img_url"
         :alt="project.title"
         class="w-full h-full object-cover"
+        @load="isImageLoading = false"
+        @error="isImageLoading = false"
       />
       <div v-else class="w-full h-full flex items-center justify-center bg-dark/50">
         <span class="text-mono-xs text-light/30">// NO_PREVIEW</span>
@@ -193,7 +221,7 @@ watch(containerRef, () => {
           class="font-mono text-light/50 mt-0.5"
           :style="{ fontSize: dynamicStyles.taglineSize }"
         >
-          {{ project.primary_tech }} + GSAP Showcase
+          {{ localizedTagline }}
         </p>
       </div>
 

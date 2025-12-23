@@ -19,6 +19,7 @@ import type { Project } from "~~/shared/types";
 interface Props {
   project: Project;
   index: number;
+  position: 'above' | 'below';
 }
 
 const props = defineProps<Props>();
@@ -33,6 +34,17 @@ const emit = defineEmits<{
 
 const formattedIndex = computed(() => {
   return (props.index + 1).toString().padStart(2, "0");
+});
+
+/**
+ * [COMPUTED] :: ARROW_ICON
+ * Shows direction: down arrow when row is above (tap to go down),
+ * up arrow when row is below (tap to go up).
+ */
+const arrowIcon = computed(() => {
+  return props.position === 'above' 
+    ? 'material-symbols:arrow-upward' 
+    : 'material-symbols:arrow-downward';
 });
 
 // =====================================================================
@@ -62,9 +74,9 @@ const handleClick = () => {
       </h3>
     </div>
 
-    <!-- Arrow icon -->
+    <!-- Arrow icon (dynamic based on position) -->
     <div>
-      <Icon name="material-symbols:arrow-forward" class="text-lg text-dark/40" />
+      <Icon :name="arrowIcon" class="text-lg text-dark/40" />
     </div>
   </article>
 </template>

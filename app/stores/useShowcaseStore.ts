@@ -220,7 +220,7 @@ export const useShowcaseStore = defineStore("showcase", () => {
     if (allProjectsCache.value.length > 0) {
       // Filter from cache - instant navigation
       projects.value = allProjectsCache.value.filter(
-        (p) => p.tech_stack?.includes(tech) || p.primary_tech === tech
+        (p) => p.primary_tech === tech
       );
     } else {
       // Fallback: User clicked before prefetch finished

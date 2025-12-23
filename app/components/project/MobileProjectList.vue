@@ -277,20 +277,12 @@ onUnmounted(() => {
       
       <!-- ZONE: Top - Rows Above (occupies top 10%) -->
       <div class="absolute top-0 left-0 right-0 bottom-[90%] bg-light flex flex-col justify-end">
-        <!-- Arrow Up -->
-        <div 
-          v-if="canGoPrevious" 
-          class="flex justify-center py-1 cursor-pointer"
-          @click="goToPrevious"
-        >
-          <Icon name="material-symbols:keyboard-arrow-up" class="text-2xl text-dark/40" />
-        </div>
-        
         <!-- ProjectRow ABOVE -->
         <MobileProjectRow
           v-if="visibleRowAbove"
           :project="visibleRowAbove.project"
           :index="visibleRowAbove.originalIndex"
+          position="above"
           @expand="() => handleRowClick(visibleRowAbove!.project, visibleRowAbove!.originalIndex)"
         />
       </div>
@@ -313,17 +305,9 @@ onUnmounted(() => {
           v-if="visibleRowBelow"
           :project="visibleRowBelow.project"
           :index="visibleRowBelow.originalIndex"
+          position="below"
           @expand="() => handleRowClick(visibleRowBelow!.project, visibleRowBelow!.originalIndex)"
         />
-        
-        <!-- Arrow Down -->
-        <div 
-          v-if="canGoNext" 
-          class="flex justify-center py-1 cursor-pointer"
-          @click="goToNext"
-        >
-          <Icon name="material-symbols:keyboard-arrow-down" class="text-2xl text-dark/40" />
-        </div>
       </div>
       
     </div>
