@@ -61,8 +61,18 @@ const isHovering = ref(false);
 const rowRef = ref<HTMLElement | null>(null);
 const imageRef = ref<HTMLElement | null>(null);
 
-// Image loading state
+// Get store for image tracking
+const showcaseStore = useShowcaseStore();
+
+// Image loading state - initialize from store
 const imageLoading = ref(true);
+
+// Check if image is already loaded when setting up
+watchEffect(() => {
+  if (props.project.img_url) {
+    imageLoading.value = !showcaseStore.isImageLoaded(props.project.img_url);
+  }
+});
 
 // Image position (calculated from row position)
 const imagePosition = ref({ x: 0, y: 0 });
@@ -109,8 +119,10 @@ const handleMouseEnter = async () => {
     activeTimeline = null;
   }
 
-  // Reset loading state for new hover
-  imageLoading.value = true;
+  // Check if image is already loaded from store
+  if (props.project.img_url) {
+    imageLoading.value = !showcaseStore.isImageLoaded(props.project.img_url);
+  }
 
   // Calculate position before showing
   updateImagePosition();
@@ -159,6 +171,17 @@ const handleMouseLeave = () => {
     duration: ANIM_DURATION_EXIT,
     ease: ANIM_EASE_EXIT,
   });
+};
+
+/**
+ * [HANDLE] :: ON_IMAGE_LOAD
+ * Marca la imagen como cargada en el store.
+ */
+const handleImageLoad = () => {
+  imageLoading.value = false;
+  if (props.project.img_url) {
+    showcaseStore.markImageLoaded(props.project.img_url);
+  }
 };
 
 /**
@@ -309,7 +332,7 @@ onUnmounted(() => {
         :src="project.img_url"
         :alt="project.title"
         class="w-full h-full object-cover"
-        @load="imageLoading = false"
+        @load="handleImageLoad"
       />
       <!-- Dark overlay for uniformity (only show when loaded) -->
       <div v-if="!imageLoading" class="absolute inset-0 bg-dark opacity-[0.1] pointer-events-none"></div>
