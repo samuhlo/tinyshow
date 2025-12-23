@@ -36,6 +36,7 @@ const activeIndex = ref(0);
 
 // Rastreo táctil
 const touchStartY = ref(0);
+const touchStartX = ref(0); // Nuevo: para swipe horizontal
 const isTransitioning = ref(false);
 
 // Referencia del contenedor
@@ -179,13 +180,14 @@ const handleTouchStart = (e: TouchEvent) => {
   if (isTransitioning.value) return;
   const firstTouch = e.touches[0];
   if (firstTouch) {
+    touchStartX.value = firstTouch.clientX; // Capturar X
     touchStartY.value = firstTouch.clientY;
   }
 };
 
 /**
  * [HANDLE] :: TOUCH_END
- * Finaliza el gesto y determina si hubo swipe.
+ * Finaliza el gesto y determina si hubo swipe (Vertical u Horizontal).
  */
 const handleTouchEnd = (e: TouchEvent) => {
   if (isTransitioning.value) return;
@@ -193,17 +195,52 @@ const handleTouchEnd = (e: TouchEvent) => {
   const endTouch = e.changedTouches[0];
   if (!endTouch) return;
 
+  const deltaX = endTouch.clientX - touchStartX.value;
   const deltaY = endTouch.clientY - touchStartY.value;
+  const absX = Math.abs(deltaX);
+  const absY = Math.abs(deltaY);
 
-  if (Math.abs(deltaY) < SWIPE_THRESHOLD) return;
+  // Verificar umbral mínimo
+  if (Math.max(absX, absY) < SWIPE_THRESHOLD) return;
 
-  // Swipe ABAJO (positivo) -> ir al ANTERIOR (scroll arriba para ver proyectos anteriores)
-  if (deltaY > 0) {
-    goToPrevious();
-  }
-  // Swipe ARRIBA (negativo) -> ir al SIGUIENTE (scroll abajo para ver proyectos posteriores)
-  else {
-    goToNext();
+  // Determinar eje dominante
+  if (absY > absX) {
+    // --- Gesto VERTICAL (Proyectos) ---
+    // Swipe ABAJO (positivo) -> ir al ANTERIOR (scroll arriba visualmente)
+    if (deltaY > 0) {
+      goToPrevious();
+    }
+    // Swipe ARRIBA (negativo) -> ir al SIGUIENTE (scroll abajo visualmente)
+    else {
+      goToNext();
+    }
+  } else {
+    // --- Gesto HORIZONTAL (Tecnologías) ---
+    // Solo si tenemos acceso a las tecnologías y la actual
+    const techs = showcaseStore.technologies;
+    const currentTech = showcaseStore.activeTech;
+    if (!techs || !currentTech) return;
+
+    const currentIndex = techs.indexOf(currentTech);
+    if (currentIndex === -1) return;
+
+    if (deltaX > 0) {
+      // Swipe DERECHA -> ir a tecnología ANTERIOR (igual que en TechMenu)
+      const prevIndex = currentIndex - 1;
+      const prevTech = techs[prevIndex];
+      
+      if (prevIndex >= 0 && prevTech) {
+        showcaseStore.selectTech(prevTech);
+      }
+    } else {
+      // Swipe IZQUIERDA -> ir a tecnología SIGUIENTE (igual que en TechMenu)
+      const nextIndex = currentIndex + 1;
+      const nextTech = techs[nextIndex];
+      
+      if (nextIndex < techs.length && nextTech) {
+        showcaseStore.selectTech(nextTech);
+      }
+    }
   }
 };
 
