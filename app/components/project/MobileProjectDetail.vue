@@ -3,8 +3,7 @@
  * [COMPONENT] :: MOBILE_PROJECT_DETAIL
  * ----------------------------------------------------------------------
  * Versión RESPONSIVE del ProjectDetail para móvil.
- * TODAS las alturas y tamaños se calculan dinámicamente basándose
- * en la altura del viewport para adaptarse a cualquier dispositivo.
+ * Estilos adaptativos usando Container Query Units (cqh).
  *
  * @module    components/project
  * @architect Samuh Lo
@@ -29,72 +28,12 @@ const props = defineProps<Props>();
 
 const { locale } = useI18n();
 
-// Referencia del contenedor para mediciones
-const containerRef = ref<HTMLElement | null>(null);
-const containerHeight = ref(0);
-
 // Estado de carga de imagen
 const isImageLoading = ref(true);
 
 // Reiniciar estado de carga cuando cambia el proyecto
 watch(() => props.project.id, () => {
   isImageLoading.value = true;
-});
-
-// =====================================================================
-// [SECTION] :: DYNAMIC SIZING
-// =====================================================================
-
-/**
- * [COMPUTED] :: DYNAMIC_STYLES
- * Calcula estilos basados en la altura disponible del contenedor.
- * Esto asegura que el layout se adapte a cualquier tamaño de pantalla.
- */
-const dynamicStyles = computed(() => {
-  const h = containerHeight.value;
-  
-  // Si no tenemos altura, usar defaults seguros
-  if (h === 0) {
-    return {
-      imageHeight: '120px',
-      contentPadding: '12px',
-      titleSize: '18px',
-      taglineSize: '12px',
-      descriptionSize: '11px',
-      originSize: '8px',
-      pillSize: '10px',
-      descriptionLines: 3,
-    };
-  }
-  
-  // Calcular proporciones basadas en altura disponible
-  // Imagen: porcentaje dinámico - más pequeño en pantallas pequeñas
-  const imagePercent = h > 450 ? 0.50 : h > 350 ? 0.40 : 0.30;
-  const imageHeight = Math.min(Math.max(h * imagePercent, 80), 280);
-  
-  // Padding del contenido: proporcional a la altura
-  const contentPadding = Math.min(Math.max(h * 0.025, 8), 16);
-  
-  // Tamaños de fuente: escalan con la altura
-  const titleSize = Math.min(Math.max(h * 0.04, 16), 24);
-  const taglineSize = Math.min(Math.max(h * 0.025, 10), 14);
-  const descriptionSize = Math.min(Math.max(h * 0.022, 10), 13);
-  const pillSize = Math.min(Math.max(h * 0.02, 10), 12);
-  const originSize = Math.min(Math.max(h * 0.018, 9), 11);
-  
-  // Líneas de descripción: sin límite, mostrar toda la descripción
-  const descriptionLines = 99;
-  
-  return {
-    imageHeight: `${imageHeight}px`,
-    contentPadding: `${contentPadding}px`,
-    titleSize: `${titleSize}px`,
-    taglineSize: `${taglineSize}px`,
-    descriptionSize: `${descriptionSize}px`,
-    pillSize: `${pillSize}px`,
-    originSize: `${originSize}px`,
-    descriptionLines,
-  };
 });
 
 // =====================================================================
@@ -120,69 +59,14 @@ const localizedDescription = computed(() => {
   if (!desc) return "";
   return desc[locale.value as keyof LocalizedTextType] || desc.en || "";
 });
-
-/**
- * [COMPUTED] :: TRUNCATED_DESCRIPTION
- * Trunca basándose en líneas disponibles.
- */
-const truncatedDescription = computed(() => {
-  const desc = localizedDescription.value;
-  const maxChars = dynamicStyles.value.descriptionLines * 50; // ~50 caracteres por línea
-  if (desc.length <= maxChars) return desc;
-  return desc.slice(0, maxChars).trim() + "...";
-});
-
-// =====================================================================
-// [SECTION] :: LIFECYCLE
-// =====================================================================
-
-/**
- * [LIFECYCLE] :: MEASURE_CONTAINER
- * Mide la altura del contenedor después de montarse.
- */
-onMounted(() => {
-  if (containerRef.value) {
-    containerHeight.value = containerRef.value.clientHeight;
-  }
-  
-  // Re-medir al redimensionar
-  if (import.meta.client) {
-    window.addEventListener('resize', measureContainer);
-  }
-});
-
-onUnmounted(() => {
-  if (import.meta.client) {
-    window.removeEventListener('resize', measureContainer);
-  }
-});
-
-const measureContainer = () => {
-  if (containerRef.value) {
-    containerHeight.value = containerRef.value.clientHeight;
-  }
-};
-
-// Observar cambios en el contenedor
-watch(containerRef, () => {
-  nextTick(() => {
-    measureContainer();
-  });
-});
 </script>
 
 <template>
-  <!-- CONTENEDOR RESPONSIVE - llena espacio, se mide a sí mismo -->
-  <div 
-    ref="containerRef"
-    class="mobile-project-detail bg-dark overflow-hidden h-full flex flex-col "
-  >
-    <!-- Sección de Imagen (altura dinámica) -->
-    <div 
-      class="relative overflow-hidden shrink-0 p-3"
-      :style="{ height: dynamicStyles.imageHeight }"
-    >
-      <!-- Spinner de Carga (visible mientras carga imagen) -->
+  <!-- CONTENEDOR RESPONSIVE -->
+  <div class="mobile-project-detail bg-dark overflow-hidden h-full flex flex-col cq-container">
+    <!-- Sección de Imagen -->
+    <div class="relative overflow-hidden shrink-0 p-3 section-image">
+      <!-- Spinner de Carga -->
       <div 
         v-if="isImageLoading && project.img_url"
         class="absolute inset-0 flex items-center justify-center bg-dark/80 z-10"
@@ -206,72 +90,52 @@ watch(containerRef, () => {
       <div class="absolute inset-0 bg-dark opacity-[0.05] pointer-events-none"></div>
     </div>
 
-    <!-- Sección de Contenido (padding dinámico, flex para empujar botones) -->
-    <div 
-      class="flex-1 overflow-y-auto flex flex-col"
-      :style="{ padding: dynamicStyles.contentPadding }"
-    >
+    <!-- Sección de Contenido -->
+    <div class="flex-1 overflow-y-auto flex flex-col section-content">
       <!-- Título + Subtítulo -->
       <div class="mb-1">
-        <h3 
-          class="font-display uppercase tracking-tight text-light leading-none"
-          :style="{ fontSize: dynamicStyles.titleSize }"
-        >
+        <h3 class="font-display uppercase tracking-tight text-light leading-none size-title">
           {{ project.title }}
         </h3>
-        <p 
-          class="font-mono text-light/50 mt-0.5"
-          :style="{ fontSize: dynamicStyles.taglineSize }"
-        >
+        <p class="font-mono text-light/50 mt-0.5 size-tagline">
           {{ localizedTagline }}
         </p>
       </div>
 
-      <!-- Descripción (tamaño dinámico y recorte) -->
-      <p 
-        class="font-mono text-light/70 leading-snug my-2"
-        :style="{ 
-          fontSize: dynamicStyles.descriptionSize,
-          display: '-webkit-box',
-          WebkitLineClamp: dynamicStyles.descriptionLines,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden'
-        }"
-      >
-        {{ truncatedDescription }}
+      <!-- Descripción -->
+      <p class="font-mono text-light/70 leading-snug my-2 size-description">
+        {{ localizedDescription }}
       </p>
 
-      <!-- Pills de Tecnología (tamaño dinámico) -->
+      <!-- Pills de Tecnología -->
       <div class="flex flex-wrap gap-1 my-2">
         <span
           v-for="tech in project.tech_stack?.slice(0, 3)"
           :key="tech"
-          class="font-mono text-light/80 border border-light/30 rounded px-1.5 py-0.5"
-          :style="{ fontSize: dynamicStyles.pillSize }"
+          class="font-mono text-light/80 border border-light/30 rounded px-1.5 py-0.5 size-pill"
         >
           {{ tech }}
         </span>
         <span
           v-if="project.tech_stack && project.tech_stack.length > 3"
-          class="font-mono text-light/40 px-1"
-          :style="{ fontSize: dynamicStyles.pillSize }"
+          class="font-mono text-light/40 px-1 size-pill"
         >
           +{{ project.tech_stack.length - 3 }}
         </span>
       </div>
 
-      <!-- Info de Origen (completo, con enlaces, tamaño dinámico) -->
-      <div :style="{ fontSize: dynamicStyles.originSize }">
+      <!-- Info de Origen -->
+      <div class="size-origin">
         <ProjectOrigin
           :origin="project.origin as OriginType"
           size="inherit"
         />
       </div>
 
-      <!-- Espaciador para empujar botones al fondo -->
+      <!-- Espaciador -->
       <div class="flex-1"></div>
 
-      <!-- Enlaces de Acción (siempre al fondo) -->
+      <!-- Enlaces de Acción -->
       <div class="flex items-center gap-4 justify-end pt-2">
         <UiActionLink
           v-if="project.repo_url"
@@ -291,3 +155,50 @@ watch(containerRef, () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.cq-container {
+  container-type: size;
+}
+
+.section-image {
+  height: clamp(80px, 30cqh, 280px);
+  transition: height 0.3s ease;
+}
+
+@container (min-height: 350px) {
+  .section-image {
+    height: clamp(80px, 40cqh, 280px);
+  }
+}
+
+@container (min-height: 450px) {
+  .section-image {
+    height: clamp(80px, 50cqh, 280px);
+  }
+}
+
+.section-content {
+  padding: clamp(8px, 2.5cqh, 16px);
+}
+
+.size-title {
+  font-size: clamp(16px, 4cqh, 24px);
+}
+
+.size-tagline {
+  font-size: clamp(10px, 2.5cqh, 14px);
+}
+
+.size-description {
+  font-size: clamp(10px, 2.2cqh, 13px);
+}
+
+.size-pill {
+  font-size: clamp(10px, 2cqh, 12px);
+}
+
+.size-origin {
+  font-size: clamp(9px, 1.8cqh, 11px);
+}
+</style>
