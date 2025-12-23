@@ -231,14 +231,37 @@ watch(
     isTransitioning.value = false;
   }
 );
+
+/**
+ * [LIFECYCLE] :: LOCK_BODY_SCROLL
+ * Prevents body from scrolling when mobile project list is active.
+ */
+onMounted(() => {
+  if (import.meta.client) {
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '0';
+  }
+});
+
+onUnmounted(() => {
+  if (import.meta.client) {
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+  }
+});
 </script>
 
 <template>
   <div 
     ref="containerRef"
-    class="mobile-project-list fixed inset-x-0 top-16 bottom-28 overflow-y-auto overflow-x-hidden"
-    @touchstart.passive="handleTouchStart"
-    @touchend.passive="handleTouchEnd"
+    class="mobile-project-list fixed inset-x-0 top-16 bottom-28 overflow-hidden bg-light touch-none"
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd"
+    @touchmove.prevent
   >
 
     <!-- Loading State -->
