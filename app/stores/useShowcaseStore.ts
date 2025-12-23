@@ -1,10 +1,11 @@
 /**
  * [STORE] :: SHOWCASE_STORE
  * ----------------------------------------------------------------------
- * Core store for the showcase domain.
+ * Fixed & Optimized for Background Prefetching
+ * ----------------------------------------------------------------------
  * Implements a PREFETCH STRATEGY for optimal performance:
  * - Technologies are loaded on init (blocking).
- * - All projects are prefetched in background (non-blocking).
+ * - All projects are prefetched in background (non-blocking, client-only).
  * - Project images are preloaded into browser cache.
  * - Tech selection filters locally = instant navigation.
  *
@@ -31,35 +32,22 @@ export const useShowcaseStore = defineStore("showcase", () => {
   /**
    * [STATE] :: ALL_PROJECTS_CACHE
    * Complete project dataset prefetched in background.
-   * Source of truth for all project data.
+   * "La nevera llena" - Source of truth for all project data.
    */
   const allProjectsCache = ref<Project[]>([]);
 
   /**
-   * [STATE] :: ACTIVE_TECH
-   * Currently selected technology filter.
-   * When this changes, `projects` computed auto-updates.
+   * [STATE] :: PROJECTS (Reactive Filtered View)
+   * "Lo que servimos en la mesa" - Currently visible projects.
+   * Filtered by active technology.
    */
-  const activeTech = ref<string | null>(null);
+  const projects = ref<Project[]>([]);
 
   /**
-   * [COMPUTED] :: PROJECTS (Filtered View)
-   * Reactively filters projects based on active technology.
-   * Updates automatically when `activeTech` or `allProjectsCache` changes.
-   *
-   * @performance Computed is cached by Vue, only recalculates when deps change.
+   * [STATE] :: ACTIVE_TECH
+   * Currently selected technology filter.
    */
-  const projects = computed(() => {
-    // No filter selected - return all projects
-    if (!activeTech.value) return allProjectsCache.value;
-
-    // Filter by technology
-    return allProjectsCache.value.filter(
-      (p) =>
-        p.tech_stack?.includes(activeTech.value!) ||
-        p.primary_tech === activeTech.value
-    );
-  });
+  const activeTech = ref<string | null>(null);
 
   /**
    * [STATE] :: VIEW_MODE
@@ -89,27 +77,31 @@ export const useShowcaseStore = defineStore("showcase", () => {
    * [ACTION] :: INIT
    * Initializes the store with a two-phase loading strategy:
    * 1. Await technologies (required for UI rendering).
-   * 2. Trigger background prefetch (fire-and-forget).
+   * 2. Trigger background prefetch (fire-and-forget, client-only).
    *
    * @performance Phase 2 runs async without blocking the UI.
    */
   const init = async () => {
-    // Guard: Skip if already initialized
-    if (technologies.value.length > 0) return;
-
     isTechLoading.value = true;
 
     try {
-      // PHASE 1: Load technologies (blocking)
-      const { data: techData } = await useFetch<string[]>(
-        "/api/projects/techs"
-      );
-      if (techData.value) {
-        technologies.value = techData.value;
+      // PHASE 1: Load technologies (only if not already loaded)
+      if (technologies.value.length === 0) {
+        // useFetch is fine here because we need reactivity and context
+        const { data } = await useFetch<string[]>("/api/projects/techs");
+        if (data.value) {
+          technologies.value = data.value;
+        }
       }
 
       // PHASE 2: Prefetch projects in background (non-blocking)
-      prefetchAllProjects();
+      // CRITICAL: Only run on CLIENT to avoid SSR issues
+      // Server's job is to deliver fast HTML, not to prefetch future data
+      // ALSO check if cache is empty - this handles case where SSR loaded techs
+      // but client needs to still prefetch projects
+      if (import.meta.client && allProjectsCache.value.length === 0) {
+        prefetchAllProjects();
+      }
     } catch (e) {
       console.error("[ShowcaseStore] Failed to initialize:", e);
     } finally {
@@ -124,41 +116,44 @@ export const useShowcaseStore = defineStore("showcase", () => {
   /**
    * [ACTION] :: PREFETCH_ALL_PROJECTS
    * Background task that loads the complete project dataset.
-   * Runs asynchronously without blocking the UI thread.
+   * Uses $fetch (pure data, no Vue context needed).
    *
    * @strategy Fire-and-forget. No await in caller.
    * @side_effect Populates `allProjectsCache` + preloads images.
    */
   const prefetchAllProjects = async () => {
     try {
-      // Fetch all projects without technology filter
-      const { data } = await useFetch<Project[]>("/api/projects", {
-        query: {
-          limit: 100, // Adjust based on dataset size
-        },
+      // CRITICAL: Use $fetch, not useFetch
+      // $fetch returns raw data, doesn't need Vue context
+      const data = await $fetch<Project[]>("/api/projects", {
+        query: { limit: 100 },
       });
 
-      if (data.value) {
-        allProjectsCache.value = data.value;
+      if (data) {
+        allProjectsCache.value = data;
 
         // Preload images into browser cache
-        preloadImages(data.value);
+        // Safe to call here since we're already inside import.meta.client check
+        preloadImages(data);
       }
     } catch (e) {
-      console.error("[ShowcaseStore] Prefetch failed:", e);
+      // Silent fail - don't interrupt user experience
+      console.warn("[ShowcaseStore] Background prefetch failed:", e);
     }
   };
 
   /**
    * [UTIL] :: PRELOAD_IMAGES
    * Forces browser to cache project images by creating Image objects.
-   * Images are fetched but not inserted into the DOM.
-   * Tracks successfully loaded images to prevent spinner re-display.
+   * Only runs on client side (Image API not available on server).
    *
    * @param projectList - Projects whose images should be preloaded.
    * @performance Eliminates loading delays when switching technologies.
    */
   const preloadImages = (projectList: Project[]) => {
+    // Double-check we're on client (defensive programming)
+    if (!import.meta.client) return;
+
     projectList.forEach((project) => {
       if (project.img_url && !loadedImages.value.has(project.img_url)) {
         const img = new Image();
@@ -207,21 +202,30 @@ export const useShowcaseStore = defineStore("showcase", () => {
 
   /**
    * [ACTION] :: SELECT_TECH
-   * Selects a technology and updates the visible project list.
-   * Projects computed will auto-update via reactivity.
+   * Selects a technology and filters projects.
+   * Uses cache if available for instant navigation.
    *
    * @param tech - Technology identifier to filter by.
-   * @performance Instant - computed recalculates only when accessed.
+   * @performance Instant if cache is ready, fallback to API if not.
    */
-  const selectTech = (tech: string) => {
+  const selectTech = async (tech: string) => {
     activeTech.value = tech;
 
-    // Auto-switch to sidebar view if needed
+    // Auto-switch to sidebar view
     if (viewMode.value === "hero") {
       viewMode.value = "sidebar";
     }
 
-    // Note: No need to manually filter - `projects` computed handles it
+    // Strategy: Use cache if available (instant), fetch if not
+    if (allProjectsCache.value.length > 0) {
+      // Filter from cache - instant navigation
+      projects.value = allProjectsCache.value.filter(
+        (p) => p.tech_stack?.includes(tech) || p.primary_tech === tech
+      );
+    } else {
+      // Fallback: User clicked before prefetch finished
+      await fetchProjects(tech);
+    }
   };
 
   /**
@@ -241,29 +245,30 @@ export const useShowcaseStore = defineStore("showcase", () => {
   /**
    * [ACTION] :: FETCH_PROJECTS (Fallback)
    * Direct API fetch for projects by technology.
-   * Updates the cache, which triggers projects computed to update.
+   * Used when user is faster than background prefetch.
    *
    * @param tech - Technology to fetch projects for.
-   * @deprecated Primary flow uses prefetch + computed filtering.
    */
   const fetchProjects = async (tech: string) => {
     isProjectsLoading.value = true;
 
     try {
-      const { data } = await useFetch<Project[]>("/api/projects", {
+      // Use $fetch instead of useFetch - can be called after component mount
+      const data = await $fetch<Project[]>("/api/projects", {
         query: {
           primary_tech: tech,
           limit: 50,
         },
       });
 
-      if (data.value) {
-        // Update cache instead of projects directly
-        // Computed will handle filtering
-        allProjectsCache.value = data.value;
+      if (data) {
+        projects.value = data;
+      } else {
+        projects.value = [];
       }
     } catch (e) {
       console.error(`[ShowcaseStore] Failed to fetch projects for ${tech}:`, e);
+      projects.value = [];
     } finally {
       isProjectsLoading.value = false;
     }
