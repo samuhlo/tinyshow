@@ -26,12 +26,10 @@ export const useTheme = () => {
 
     if (cookie.value) {
       isDark.value = cookie.value === "dark";
-    } else if (import.meta.client) {
-      // Fallback al sistema si no hay cookie
-      const systemDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      isDark.value = systemDark;
+    } else {
+      // DEFAULT: LIGHT MODE (Design Decision)
+      // Ignoramos la preferencia del sistema para forzar el diseño original
+      isDark.value = false;
     }
 
     // Aplicar inmediatamente si es cliente para evitar flash (aunque en hydration puede haber mismatch si no tenemos cuidado,
