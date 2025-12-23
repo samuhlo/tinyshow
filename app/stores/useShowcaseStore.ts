@@ -31,22 +31,35 @@ export const useShowcaseStore = defineStore("showcase", () => {
   /**
    * [STATE] :: ALL_PROJECTS_CACHE
    * Complete project dataset prefetched in background.
-   * Used as the source of truth for local filtering.
+   * Source of truth for all project data.
    */
   const allProjectsCache = ref<Project[]>([]);
 
   /**
-   * [STATE] :: PROJECTS (Filtered View)
-   * Currently visible projects based on active technology.
-   * Filtered from `allProjectsCache` for instant updates.
-   */
-  const projects = ref<Project[]>([]);
-
-  /**
    * [STATE] :: ACTIVE_TECH
    * Currently selected technology filter.
+   * When this changes, `projects` computed auto-updates.
    */
   const activeTech = ref<string | null>(null);
+
+  /**
+   * [COMPUTED] :: PROJECTS (Filtered View)
+   * Reactively filters projects based on active technology.
+   * Updates automatically when `activeTech` or `allProjectsCache` changes.
+   *
+   * @performance Computed is cached by Vue, only recalculates when deps change.
+   */
+  const projects = computed(() => {
+    // No filter selected - return all projects
+    if (!activeTech.value) return allProjectsCache.value;
+
+    // Filter by technology
+    return allProjectsCache.value.filter(
+      (p) =>
+        p.tech_stack?.includes(activeTech.value!) ||
+        p.primary_tech === activeTech.value
+    );
+  });
 
   /**
    * [STATE] :: VIEW_MODE
@@ -195,12 +208,12 @@ export const useShowcaseStore = defineStore("showcase", () => {
   /**
    * [ACTION] :: SELECT_TECH
    * Selects a technology and updates the visible project list.
-   * Uses local filtering for instant response (no API call).
+   * Projects computed will auto-update via reactivity.
    *
    * @param tech - Technology identifier to filter by.
-   * @performance O(n) filter on cached data = ~instant.
+   * @performance Instant - computed recalculates only when accessed.
    */
-  const selectTech = async (tech: string) => {
+  const selectTech = (tech: string) => {
     activeTech.value = tech;
 
     // Auto-switch to sidebar view if needed
@@ -208,34 +221,7 @@ export const useShowcaseStore = defineStore("showcase", () => {
       viewMode.value = "sidebar";
     }
 
-    // Filter locally from cache
-    filterProjectsLocally(tech);
-  };
-
-  /**
-   * [ACTION] :: FILTER_PROJECTS_LOCALLY
-   * Filters the cached project dataset by technology.
-   * Falls back to API fetch if cache is empty (edge case: user is very fast).
-   *
-   * @param tech - Technology to filter by.
-   * @fallback Calls `fetchProjects` if cache unavailable.
-   */
-  const filterProjectsLocally = (tech: string) => {
-    isProjectsLoading.value = true;
-
-    // EDGE CASE: Cache not ready yet (user was extremely fast)
-    if (allProjectsCache.value.length === 0) {
-      console.warn("[ShowcaseStore] Cache empty, falling back to API");
-      fetchProjects(tech);
-      return;
-    }
-
-    // Filter cached projects (instant)
-    projects.value = allProjectsCache.value.filter(
-      (p) => p.tech_stack?.includes(tech) || p.primary_tech === tech
-    );
-
-    isProjectsLoading.value = false;
+    // Note: No need to manually filter - `projects` computed handles it
   };
 
   /**
@@ -255,10 +241,10 @@ export const useShowcaseStore = defineStore("showcase", () => {
   /**
    * [ACTION] :: FETCH_PROJECTS (Fallback)
    * Direct API fetch for projects by technology.
-   * Used as fallback when cache is unavailable or for forced refreshes.
+   * Updates the cache, which triggers projects computed to update.
    *
    * @param tech - Technology to fetch projects for.
-   * @deprecated Primary flow uses local filtering.
+   * @deprecated Primary flow uses prefetch + computed filtering.
    */
   const fetchProjects = async (tech: string) => {
     isProjectsLoading.value = true;
@@ -272,13 +258,12 @@ export const useShowcaseStore = defineStore("showcase", () => {
       });
 
       if (data.value) {
-        projects.value = data.value;
-      } else {
-        projects.value = [];
+        // Update cache instead of projects directly
+        // Computed will handle filtering
+        allProjectsCache.value = data.value;
       }
     } catch (e) {
       console.error(`[ShowcaseStore] Failed to fetch projects for ${tech}:`, e);
-      projects.value = [];
     } finally {
       isProjectsLoading.value = false;
     }
