@@ -151,8 +151,8 @@ const revealContent = () => {
            <AppLogo />
          </div>
 
-         <!-- Selector de Idioma -->
-         <div class="header-actions opacity-0 flex items-center gap-4">
+         <!-- Selector de Idioma + Theme -->
+         <div class="header-actions opacity-0 flex flex-col items-end gap-1">
            <ThemeSwitcher />
            <LangSwitcher />
          </div>
