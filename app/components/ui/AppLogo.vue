@@ -19,8 +19,6 @@ const CHARS_ALPHABET = "abcdefghijklmnoprstuvwxyz.,?/;:-=1234567890_+";
 const SLOT_HEIGHT = 50;
 const REEL_LENGTH = 10;
 const ANIMATION_DURATION_MS = 1000;
-const STATE_ANIMATED_KEY = "app-logo-animated";
-const STATE_CHAR_KEY = "app-logo-char";
 const FONT_FAMILY_ICONS = "'Bariol Icons', sans-serif";
 const EASING_CUBIC = "cubic-bezier(0.34,1.56,0.64,1)";
 

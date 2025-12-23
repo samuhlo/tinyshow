@@ -304,7 +304,7 @@ onMounted(() => {
       class="flex flex-col relative"
       :class="[
         viewMode === 'hero'
-          ? 'items-center justify-center gap-6'
+          ? 'items-center justify-center gap-6 pt-4'
           : 'items-start justify-start gap-4 mt-0 pl-6',
       ]"
     >

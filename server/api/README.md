@@ -63,3 +63,23 @@ Array de cadenas: `["Astro", "Next.js", "Nuxt", "React", "Vue"]`
 ```ts
 const { data: technologies } = await useFetch('/api/projects/techs')
 ```
+
+---
+
+### 4. Webhook de GitHub
+**POST** `/api/webhooks/github`
+
+Endpoint reactivo para eventos `push` de GitHub. Valida la firma del payload y desencadena el proceso de ingestión si se detectan cambios en el `README.md`.
+
+**Headers Requeridos:**
+| Header | Descripción |
+| :--- | :--- |
+| `x-hub-signature-256` | Firma HMAC SHA-256 del cuerpo de la solicitud (usando `NUXT_GITHUB_WEBHOOK_SECRET`). |
+| `x-github-event` | Tipo de evento (debe ser `push`). |
+
+**Comportamiento:**
+1. Valida el método HTTP (POST).
+2. Verifica la firma `x-hub-signature-256`.
+3. Comprueba si el evento es `push`.
+4. Busca cambios en `README.md` en los commits recibidos.
+5. Si hay cambios, descarga el repositorio y actualiza/crea el proyecto en la base de datos.

@@ -29,6 +29,17 @@ Sin entrada manual de datos. Actualiza un README, el proyecto se actualiza solo.
 
 ---
 
+## Experiencia Dual
+
+TinyShow muta según el dispositivo. Misma lógica, diferente piel.
+
+- **Desktop**: Navegación lateral expansiva. Animaciones FLIP. Vista de escaparate.
+- **Mobile**: Navegación inferior "downbar". Interacción táctil. Optimizado para el pulgar.
+
+El contenido se adapta, la esencia permanece.
+
+---
+
 ## Stack tecnológico
 
 | Capa | Tecnología |

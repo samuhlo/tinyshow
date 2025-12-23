@@ -4,8 +4,7 @@
 .nuxt
 .nitro
 .cache
-.agents
-.gemini
+
 dist
 
 # Node dependencies

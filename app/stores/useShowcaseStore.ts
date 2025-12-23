@@ -17,6 +17,13 @@
 
 import type { Project } from "~~/shared/types";
 
+// =====================================================================
+// [SECTION] :: CONSTANTS
+// =====================================================================
+
+/** Cache TTL in milliseconds (30 minutes) */
+const CACHE_TTL_MS = 30 * 60 * 1000;
+
 export const useShowcaseStore = defineStore("showcase", () => {
   // =====================================================================
   // [SECTION] :: STATE
@@ -69,6 +76,35 @@ export const useShowcaseStore = defineStore("showcase", () => {
    */
   const loadedImages = ref<Set<string>>(new Set());
 
+  /**
+   * [STATE] :: LAST_FETCH_TIMESTAMP
+   * Timestamp of last successful data fetch.
+   * Used to validate cache TTL.
+   */
+  const lastFetchTimestamp = ref<number | null>(null);
+
+  // =====================================================================
+  // [SECTION] :: CACHE VALIDATION
+  // =====================================================================
+
+  /**
+   * [UTIL] :: IS_CACHE_VALID
+   * Checks if the cached data is still valid based on TTL.
+   *
+   * @returns True if cache is valid and data exists, false otherwise.
+   */
+  const isCacheValid = (): boolean => {
+    // No timestamp = never fetched
+    if (!lastFetchTimestamp.value) return false;
+
+    // No data = cache is empty
+    if (technologies.value.length === 0) return false;
+
+    // Check if TTL has expired
+    const elapsed = Date.now() - lastFetchTimestamp.value;
+    return elapsed < CACHE_TTL_MS;
+  };
+
   // =====================================================================
   // [SECTION] :: INITIALIZATION
   // =====================================================================
@@ -82,16 +118,22 @@ export const useShowcaseStore = defineStore("showcase", () => {
    * @performance Phase 2 runs async without blocking the UI.
    */
   const init = async () => {
+    // FAST PATH: Skip fetch if cache is still valid
+    if (isCacheValid()) {
+      console.log("[ShowcaseStore] Cache valid, skipping fetch");
+      return;
+    }
+
     isTechLoading.value = true;
 
     try {
-      // PHASE 1: Load technologies (only if not already loaded)
-      if (technologies.value.length === 0) {
-        // useFetch is fine here because we need reactivity and context
-        const { data } = await useFetch<string[]>("/api/projects/techs");
-        if (data.value) {
-          technologies.value = data.value;
-        }
+      // PHASE 1: Load technologies
+      // useFetch is fine here because we need reactivity and context
+      const { data } = await useFetch<string[]>("/api/projects/techs");
+      if (data.value) {
+        technologies.value = data.value;
+        // Update timestamp on successful fetch
+        lastFetchTimestamp.value = Date.now();
       }
 
       // PHASE 2: Prefetch projects in background (non-blocking)
@@ -275,6 +317,23 @@ export const useShowcaseStore = defineStore("showcase", () => {
   };
 
   // =====================================================================
+  // [SECTION] :: CACHE INVALIDATION
+  // =====================================================================
+
+  /**
+   * [ACTION] :: INVALIDATE_CACHE
+   * Forces cache invalidation. Used when webhook updates occur.
+   * Next init() call will fetch fresh data.
+   */
+  const invalidateCache = () => {
+    lastFetchTimestamp.value = null;
+    technologies.value = [];
+    allProjectsCache.value = [];
+    projects.value = [];
+    console.log("[ShowcaseStore] Cache invalidated");
+  };
+
+  // =====================================================================
   // [SECTION] :: EXPORTS
   // =====================================================================
 
@@ -291,6 +350,7 @@ export const useShowcaseStore = defineStore("showcase", () => {
     init,
     selectTech,
     setViewMode,
+    invalidateCache,
 
     // Image tracking utilities
     isImageLoaded,
