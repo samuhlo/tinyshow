@@ -1,6 +1,6 @@
 # TINYSHOW
 
-Escaparate de proyectos automatizado. Brutalista. Rápido.
+Escaparate de proyectos automatizado. Rápido.
 
 ---
 

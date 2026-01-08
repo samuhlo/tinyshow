@@ -67,7 +67,7 @@ GUIDELINES:
 3. **tagline**: A brutalist, very short description (max 40 chars). Object with keys: 'en', 'es'.
 4. **description**: Technical but engaging summary. Strictly keep it between 150 and 200 characters for aesthetic consistency. Object with keys: 'en', 'es'.
 5. **tech_stack**: Array of specific technologies mentioned (e.g. 'Nuxt 3', 'Tailwind', 'GSAP').
-6. **primary_tech**: The dominant technology. Rule: Framework > Language. Examples: 'Astro' over 'TypeScript', 'Nuxt' over 'Vue', 'Next' over 'React'.
+6. **primary_tech**: The dominant technology. Rule: Framework > Language. NEVER include version numbers (e.g. use 'Vue' not 'Vue 3'). Examples: 'Astro', 'Nuxt', 'React'.
 7. **repo_url**: Use '${repoUrl}' if provided, otherwise infer.
 8: **img_url**: If a relevant screenshot or header image is found in markdown standard syntax, use it. IMPORTANT: If the path is relative (e.g. './img.png' or 'public/img.png'), you MUST convert it to an absolute raw GitHub URL (e.g. 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}'). Use '${repoUrl}' to infer the owner and repo. Assume 'main' branch if not specified.
 9: **origin**: Analyze if the README mentions "Course", "Bootcamp", "Tutorial", "Based on", "Inspirado en", "Midudev", "Alura", etc. If yes, set is_course: true and extract:
