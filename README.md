@@ -1,6 +1,6 @@
 # TINYSHOW
 
-Escaparate de proyectos automatizado. Rápido.
+Escaparate de proyectos automatizado. Rápido y bonito.
 
 ---
 
