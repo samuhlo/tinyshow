@@ -11,12 +11,6 @@
 
 import { Octokit } from "octokit";
 import crypto from "crypto";
-import {
-  ingestProject,
-  saveProject,
-  deleteProject,
-  type IngestResult,
-} from "../../utils/ingest";
 import { invalidateAllProjectCaches } from "../../utils/cache";
 
 // =====================================================================

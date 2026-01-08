@@ -17,7 +17,7 @@ import type { Project, LocalizedTextType, OriginType } from "~~/shared/types";
 // =====================================================================
 
 const DEFAULT_LIMIT = 50;
-const CACHE_MAX_AGE = 60 * 60; // 1 hora
+const CACHE_MAX_AGE = 60 * 5; // 5 minutos (Balance entre velocidad y frescura)
 const NO_CACHE = 0;
 
 export default defineCachedEventHandler(
@@ -71,14 +71,16 @@ export default defineCachedEventHandler(
     }
   },
   {
-    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE, // 1 hora en prod, 0 en dev
-    swr: !import.meta.dev, // Deshabilitar SWR en dev
+    maxAge: import.meta.dev ? NO_CACHE : CACHE_MAX_AGE,
+    swr: !import.meta.dev,
     name: "projects-list",
     getKey: (event) => {
       const query = getQuery(event);
       const tech = query.primary_tech || "all";
       const limit = query.limit || DEFAULT_LIMIT.toString();
-      return `projects:${tech}:${limit}`;
+      // DEV: Force distinct key to prevent "ghost" cache from file system
+      const suffix = import.meta.dev ? `:${Date.now()}` : "";
+      return `projects:${tech}:${limit}${suffix}`;
     },
   }
 );
