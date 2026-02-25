@@ -73,7 +73,7 @@ onMounted(() => {
     // Subida suave con cambio a accent + bold
     .to(el, {
       y: -20,
-      color: "#f95c4b",
+      color: "var(--color-accent)",
       fontWeight: 800,
       duration: 0.6,
       ease: "sine.out",
@@ -91,7 +91,7 @@ onMounted(() => {
     })
     // Volver al color dark y peso normal
     .to(el, {
-      color: "#141414",
+      color: "var(--color-dark)",
       fontWeight: 400,
       duration: 0.5,
       ease: "sine.inOut",
