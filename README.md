@@ -1,176 +1,146 @@
-# TINYSHOW
+<div align="center">
+  <br />
+  <h1><code>./TINYSHOW.sh</code></h1>
 
-Escaparate de proyectos automatizado. Rápido y bonito.
+**Una máquina de mostrar proyectos que se alimenta sola.**
+<br />
 
----
+[![Live](https://img.shields.io/badge/LIVE_DEMO-FFCA40?style=for-the-badge&logo=vercel&logoColor=black)](https://tinyshow.vercel.app/)
+[![Status](https://img.shields.io/badge/STATUS-PRODUCTION-0C0011?style=for-the-badge)](https://github.com/samuhlo/tinyshow)
 
-![tinyshow preview](public/captures/captura_portada.webp)
+  <br />
+</div>
 
----
+___
 
-## Qué es
+## // 00_ THE_MISSION
 
-TinyShow es un motor de visualización de proyectos que se alimenta directamente de tus repositorios de GitHub.
+Un escaparate de proyectos que no necesita que le des de comer. Cada vez que actualizas el README de un repositorio, TinyShow lo detecta, lo analiza con IA, extrae metadatos, genera contenido localizado en inglés y español, y actualiza la interfaz automáticamente. Sin copiar-pegar. Sin mantenimiento manual. Solo escribes código y publicas.
 
-Escanea los README de tus repos, extrae la información relevante usando IA (DeepSeek), y genera fichas de proyecto con traducciones automáticas a inglés y español.
+> *Vandal Note: La idea nacio de querer mostrar los proyectos secundarios que voy haciendo. Proyectos que me sirven para aprender, probar cosas, testear tecnologias ... Pero me daba pereza tener que estar subiendo a mano cada vez que tenia alguno que quisiera mostrar, si creaba un portfolio normal. Asi que por pereza cree esto*
 
-Sin entrada manual de datos. Actualiza un README, el proyecto se actualiza solo.
+___
 
----
+## // 01_ THE_BLUEPRINT
 
-## Cómo funciona
+| LAYER      | TECH          | IMPLEMENTATION DETAIL                                 |
+| :--------- | :------------ | :---------------------------------------------------- |
+| **Core**   | `Nuxt 4`      | SSR + Composition API + TypeScript                   |
+| **UI**     | `Vue 3`       | Script Setup + Components                             |
+| **State**  | `Pinia`       | Setup Stores + Prefetch Strategy (Cache Warming)     |
+| **Styles** | `Tailwind 4`  | Custom design system + CSS Variables                  |
+| **Motion** | `GSAP`        | ScrollTrigger + FLIP animations                      |
+| **Data**   | `Prisma`      | ORM con PostgreSQL (Neon) + JSONB                     |
+| **AI**     | `DeepSeek`    | Extracción de metadatos + Localización EN/ES         |
+| **Git**    | `Octokit`     | GitHub API + Webhooks con validación HMAC            |
+| **i18n**   | `@nuxt/i18n`  | EN/ES con detección de idioma por navegador          |
+| **Valid**  | `Zod`         | Schema validation desde IA hasta la base de datos    |
 
-1. Se ejecuta el seed (para poblar la base de datos) o se recibe un webhook de GitHub
-2. Se obtiene el contenido del README del repositorio
-3. DeepSeek extrae: título, descripción, stack tecnológico, enlaces
-4. Se genera contenido localizado (EN/ES)
-5. Se almacena en PostgreSQL via Prisma
-6. La interfaz renderiza los proyectos filtrados por tecnología
+___
 
----
+## // 02_ CONTROLLED_CHAOS
 
-## Experiencia Dual
+- **Ingestión Automática:** Un webhook recibe eventos de GitHub, valida la firma HMAC-SHA256, detecta cambios en README.md, y dispara el pipeline de IA. No hay intervención humana.
 
-TinyShow muta según el dispositivo. Misma lógica, diferente piel.
+- **Estrategia "Nevera Llena":** El store carga tecnologías primero (bloqueante, necesario para UI) y luego precarga TODOS los proyectos en segundo plano con precarga de imágenes nativa del navegador. El resultado: navegación instantánea entre tecnologías, sin spinners.
 
-- **Desktop**: Navegación lateral expansiva. Animaciones FLIP. Vista de escaparate.
-- **Mobile**: Navegación inferior "downbar". Interacción táctil. Optimizado para el pulgar.
+- **Experiencia Dual:** Misma lógica, diferente piel. Desktop: navegación lateral expansiva con animaciones FLIP. Mobile: "downbar" inferior optimizada para el pulgar. El contenido se adapta, la esencia permanece.
 
-El contenido se adapta, la esencia permanece.
+___
 
----
+## // 03_ CORE_LOGIC
 
-## Stack tecnológico
+El pipeline de ingestión completa: desde el webhook hasta la base de datos.
 
-| Capa | Tecnología |
-|------|------------|
-| Framework | Nuxt 4 |
-| UI | Vue 3 + Composition API |
-| Estado | Pinia |
-| Estilos | Tailwind CSS 4 |
-| Animaciones | GSAP |
-| Base de datos | Neon (PostgreSQL) |
-| ORM | Prisma |
-| IA | DeepSeek API |
-| Integración | GitHub API + Webhooks |
-| Validación | Zod |
-| i18n | @nuxtjs/i18n |
+```typescript
+// server/utils/ingest.ts
+// INGEST_PROJECT :: El corazón del sistema automático
 
----
+export async function ingestProject(
+  owner: string,
+  repo: string,
+  octokit: Octokit,
+  branch: string = "main",
+  strictModeOverride?: boolean
+): Promise<IngestResult> {
+  const projectId = repo;
 
-## Instalación
+  // 1. Obtener README desde GitHub API
+  const { data: readme } = await octokit.request(ENDPOINT_README, {
+    owner, repo, ref: branch,
+    mediaType: { format: "raw" },
+  });
 
-```bash
-# Clonar repositorio
-git clone https://github.com/tu-usuario/tinyshow.git
-cd tinyshow
+  // 2. Verificar marcador HIDDEN (ahorra tokens de IA)
+  if (readmeContent.includes("<!-- tinyshow:hidden -->")) {
+    return { action: "delete", project: null, projectId };
+  }
 
-# Instalar dependencias
-pnpm install
+  // 3. DeepSeek extrae título, tagline, descripción, stack, imagen...
+  const projectData = await extractProjectData(readmeContent, htmlUrl);
 
-# Configurar variables de entorno
-cp .env.template .env
+  // 4. Validar assets requeridos (demo_url + img_url en modo strict)
+  if (!projectData.demo_url && strictMode) {
+    return { action: "delete", project: null, projectId };
+  }
 
-# Ejecutar migraciones de Prisma
-pnpm prisma migrate deploy
+  // 5. Upsert en PostgreSQL
+  await prisma.project.upsert({
+    where: { id: projectData.id },
+    update: { ... },
+    create: { ... },
+  });
 
-# Generar cliente de Prisma
-pnpm prisma generate
-
-# Poblar base de datos
-pnpm seed
-
-# Iniciar servidor de desarrollo
-pnpm dev
+  return { action: "save", project: projectData, projectId };
+}
 ```
 
----
+La IA no solo extrae datos — genera el contenido localized con taglines de max 40 caracteres y descripciones de 150-200 chars. Todo validado con Zod antes de entrar en la base de datos.
 
-## Variables de entorno
+___
 
-```
-NEON_DATABASE_URL           # URL de conexión a Neon PostgreSQL
-NUXT_DEEPSEEK_API_KEY       # Clave API de DeepSeek
-GITHUB_SEED_TOKEN           # Token de acceso personal de GitHub
-GITHUB_USERNAME             # Nombre de usuario de GitHub
-NUXT_GITHUB_WEBHOOK_SECRET  # Secreto para validar webhooks de GitHub
-NUXT_STRICT_MODE            # true para modo estricto (no permite proyectos sin imagen ni demo url)
-```
+<div align="center">
+<br />
 
----
+<code>DESIGNED & CODED BY <a href='https://github.com/samuhlo'>samuhlo</a></code>
 
-## Scripts disponibles
+<small>Lugo, Galicia</small>
 
-| Comando | Descripción |
-|---------|-------------|
-| `pnpm dev` | Servidor de desarrollo |
-| `pnpm build` | Compilación para producción |
-| `pnpm preview` | Previsualización del build |
-| `pnpm seed` | Poblar base de datos con todos los repos |
-| `pnpm seed-single` | Poblar con un repositorio específico |
-| `pnpm test-webhook` | Simular webhook de GitHub |
+</div>
 
----
+<!--
+PORTFOLIO:METADATA — DO NOT EDIT MANUALLY
+Auto-generated by README Agent. Used by Portfolio backend.
+====================================================================
 
-## Estructura del proyecto
+title: TinyShow
 
-```
-tinyshow/
-├── app/                 # Código fuente de Nuxt
-│   ├── components/      # Componentes Vue
-│   │   ├── home/        # Componentes de la página principal
-│   │   ├── project/     # Componentes de proyectos
-│   │   ├── layout/      # Header, Footer
-│   │   └── ui/          # Componentes UI reutilizables
-│   ├── composables/     # Composables reutilizables
-│   ├── layouts/         # Layouts de la app
-│   ├── pages/           # Páginas/rutas
-│   ├── plugins/         # Plugins de Nuxt
-│   ├── stores/          # Stores de Pinia
-│   ├── utils/           # Utilidades
-│   └── assets/          # CSS global
-├── server/              # Backend
-│   ├── api/             # Endpoints de API y webhooks
-│   └── utils/           # Utilidades del servidor
-├── prisma/              # Esquema y migraciones
-├── seed/                # Scripts de seeding
-├── shared/              # Tipos y esquemas compartidos
-├── i18n/                # Archivos de traducción
-└── public/              # Assets estáticos
-```
+tagline_en: Self-updating project showcase
+tagline_es: Escaparate de proyectos automatizado
 
----
+description_en: A portfolio showcase that feeds itself. Updates automatically via GitHub webhooks and AI-powered README analysis.
+description_es: Un escaparate de proyectos que se actualiza solo. Webhooks de GitHub + IA que analiza README y extrae metadatos.
 
-## Modelo de datos
+tech_stack: Nuxt 4, Vue 3, Pinia, Tailwind CSS 4, GSAP, Prisma, PostgreSQL, DeepSeek, Zod, i18n
 
-Cada proyecto contiene:
+primary_tech: Nuxt
 
-- **id**: Identificador único (nombre del repo)
-- **title**: Título del proyecto
-- **tagline**: Frase corta (EN/ES)
-- **description**: Descripción detallada (EN/ES)
-- **tech_stack**: Array de tecnologías
-- **primary_tech**: Tecnología principal para filtrado
-- **repo_url**: Enlace al repositorio
-- **demo_url**: Enlace a demo (opcional)
-- **img_url**: Imagen del proyecto (opcional)
-- **origin**: Metadatos de origen si es de un curso
+main_img_url: https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/tinyshow_main.webp
 
----
+<!-- images_url: -->
+https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_1.webp
+https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_3.webp
+https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_4.webp
+https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_5.webp
+<!-- -->
 
-## Webhooks
+repo_url: https://github.com/samuhlo/tinyshow
 
-TinyShow puede recibir webhooks de GitHub para actualizar proyectos automáticamente. Cuando se hace push a un README:
+live_url: https://tinyshow.vercel.app
 
-1. GitHub envía evento push al endpoint `/api/webhooks/github`
-2. Se valida la firma del webhook
-3. Se detecta si el README fue modificado
-4. Se re-procesa el repositorio afectado
+year: 2025
 
-**NOTA:** Si no quieres que aparezca un proyecto agrega al README un comentario oculto con "<!- - tinyshow:hidden -->".
+post_url: 
+blog_url: 
 
----
-
-## Licencia
-
-MIT
+====================================================================-->
