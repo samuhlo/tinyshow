@@ -11,6 +11,8 @@
   <br />
 </div>
 
+![TinyShow Preview](https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/tinyshow_main.webp)
+
 ___
 
 ## // 00_ THE_MISSION
@@ -127,12 +129,12 @@ primary_tech: Nuxt
 
 main_img_url: https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/tinyshow_main.webp
 
-<!-- images_url: -->
+images_url :
 https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_1.webp
 https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_3.webp
 https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_4.webp
 https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_5.webp
-<!-- -->
+
 
 repo_url: https://github.com/samuhlo/tinyshow
 
