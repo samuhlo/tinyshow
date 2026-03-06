@@ -114,6 +114,7 @@ ___
 PORTFOLIO:METADATA
 accent_color: #f95c4b
 hover_text_card: automated showcase
+year : 2025
 
 images_url:
 https://raw.githubusercontent.com/samuhlo/tinyshow/main/public/images/captures/tinyshow_1.webp
