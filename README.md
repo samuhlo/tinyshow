@@ -112,9 +112,9 @@ ___
 
 <!--
 PORTFOLIO:METADATA
-accent_color: #f77666
-hover_text_card: automated showcase 2021
-year : 2021
+accent_color: #f95c4b
+hover_text_card: automated showcase
+year : 2025
 
 Esto es una prueba para el webhoook
 
